@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# File to run the freqmine benchmark
+
+echo "Start ..."
+cd /parsec/install/bin.ckpts
+/sbin/m5 dumpstats
+/sbin/m5 resetstats
+/sbin/m5 checkpoint
+./freqmine /parsec/install/inputs/freqmine/T10I4D100K_1k.dat 3
+echo "Done :D"
+/sbin/m5 exit
+/sbin/m5 exit

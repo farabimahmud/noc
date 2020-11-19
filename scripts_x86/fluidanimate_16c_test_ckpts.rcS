@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# File to run the fluidanimate benchmark
+
+echo "Start ..."
+cd /parsec/install/bin.ckpts
+/sbin/m5 dumpstats
+/sbin/m5 resetstats
+/sbin/m5 checkpoint
+./fluidanimate 16 1 /parsec/install/inputs/fluidanimate/in_5K.fluid /parsec/install/inputs/fluidanimate/out.fluid
+echo "Done :D"
+/sbin/m5 exit
+/sbin/m5 exit

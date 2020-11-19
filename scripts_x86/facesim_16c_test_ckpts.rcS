@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# File to run the facesim benchmark
+
+echo "Start ..."
+cd /parsec/install/bin.ckpts
+/sbin/m5 dumpstats
+/sbin/m5 resetstats
+/sbin/m5 checkpoint
+./facesim -h
+echo "Done :D"
+/sbin/m5 exit
+/sbin/m5 exit
