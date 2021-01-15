@@ -101,7 +101,16 @@ class flit
     void set_pid(uint64_t x){
         m_pid = x;
     }
+
+    void set_optimized(bool x){
+        optimized = x;
+    }
+
+    bool get_optimized(){
+        return optimized;
+    }
   protected:
+    bool optimized;
     uint64_t m_pid;
     int m_id;
     int m_vnet;

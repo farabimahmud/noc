@@ -51,3 +51,4 @@ class RubyNetwork(ClockedObject):
 
     slave = VectorSlavePort("CPU slave port")
     master = VectorMasterPort("CPU master port")
+    optimization_rate = Param.Float(0.5, "Optimization rate")

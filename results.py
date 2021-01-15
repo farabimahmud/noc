@@ -17,9 +17,9 @@ benches = [
 
 
 
-week_update = "/home/grads/f/farabi/noc/m5out/restore/week-nov-19/"
-directory = 'week-nov-19'
-stat_files = glob.glob("/home/grads/f/farabi/noc/m5out/restore/week-nov-19/*/stats.txt")
+week_update = "/home/grads/f/farabi/noc/m5out/restore/week-nov-26/"
+directory = 'week-nov-26'
+stat_files = glob.glob("/home/grads/f/farabi/noc/m5out/restore/week-nov-26/*/stats.txt")
 feature_name =  "packet_network_latency_dist |"
 for filename in stat_files:
     with open(filename, "r") as f:

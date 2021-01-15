@@ -79,7 +79,8 @@ class NetworkInterface : public ClockedObject, public Consumer
         return m_id;
 
     }
-
+    
+    bool readOptimizedQueue();
   private:
     GarnetNetwork *m_net_ptr;
     const NodeID m_id;

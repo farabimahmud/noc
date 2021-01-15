@@ -128,6 +128,8 @@ class Router : public BasicRouter, public Consumer
 
     uint32_t functionalWrite(Packet *);
 
+    std::deque<flit*> optimized_queue;
+
   private:
     Cycles m_latency;
     int m_virtual_networks, m_vc_per_vnet, m_num_vcs;

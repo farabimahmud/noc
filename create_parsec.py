@@ -7,7 +7,7 @@ import os
 import math
 
 schemes = [
-         'jitter_all',
+         'optimized',
         # 'bypass_none'
         #'optimized',
         #'SpectreSafeInvisibleSpec',
@@ -38,7 +38,7 @@ l2_victim_sizes = [16]
 # victim_sizes=[(4,4)]
 #test_case = 'vc-conservative-spec-try3-upto-100m'
 #test_case = 'vc-unsafe-parsec-arm-l1-100m'
-test_case = 'week-nov-19'
+test_case = 'week-nov-26'
 
 m5_root = '/home/grads/f/farabi/noc/m5out'
 

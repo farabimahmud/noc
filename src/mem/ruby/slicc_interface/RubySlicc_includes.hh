@@ -31,6 +31,7 @@
 
 #include "mem/ruby/slicc_interface/RubySlicc_ComponentMapping.hh"
 #include "mem/ruby/slicc_interface/RubySlicc_Util.hh"
+#include "debug/Naive.hh"
 
 #endif // __MEM_RUBY_SLICC_INTERFACE_RUBYSLICC_INCLUDES_HH__
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./build/X86_MESI_Two_Level/gem5.opt \
-    --debug-flag=Naive \
+    --debug-flag=Naive,RubyNetwork,RubySlicc \
     --debug-file=debug.out \
     configs/example/se.py \
     --num-cpus=16 \
@@ -14,6 +14,5 @@
     --num-l2caches=16 \
     --caches \
     -c a.out \
-    --bypass=jitter_all \
-    --flit_jitter_threshold=40 \
-
+    --bypass=optimized \
+    --optimization_rate=0 \

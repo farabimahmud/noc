@@ -83,6 +83,9 @@ def define_options(parser):
                       help="'bypass_none normal'")
     parser.add_option("--flit_jitter_threshold", type="int", default=20,
                       help="Minimum flit jitter threshold, default 20")
+    parser.add_option("--optimization_rate", type="int", default=50,
+                      help="""Rate at which optimized queue will"
+                       be used, default 50""")
 
 
 def create_network(options, ruby):
@@ -133,8 +136,9 @@ def init_network(options, network, InterfaceClass):
             network.bypass_x = True 
         elif options.bypass == "optimized":
             network.optimized = True
-
-        
+            network.optimization_rate = max(0,min(100,
+                    int(options.optimization_rate)))
+      
 
     if options.network == "simple":
         network.setup_buffers()

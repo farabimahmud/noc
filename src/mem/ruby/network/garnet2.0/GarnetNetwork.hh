@@ -45,12 +45,14 @@ class Router;
 class NetDest;
 class NetworkLink;
 class CreditLink;
+class flit;
 
 class GarnetNetwork : public Network
 {
   public:
     static int PACKETID;
     bool jitter_all, optimized, bypass_all, bypass_x;  
+    uint32_t optimization_rate;
     typedef GarnetNetworkParams Params;
     GarnetNetwork(const Params *p);
     ~GarnetNetwork() = default;
@@ -148,6 +150,15 @@ class GarnetNetwork : public Network
     sample_latency(Cycles x){
         m_packet_network_latency_dist.sample(x, 1);
     }
+
+    bool 
+    checkCongestion(int src_router, int dest_router, uint64_t pid);
+    bool checkFree(int src_router, int dest_router, uint64_t pid);
+
+    bool insertFlitInOptimized(int r_id, flit* t_flit);
+
+    std::vector<Router *> m_routers;   // All Routers in Network
+
   protected:
     // Configuration
     int m_num_rows;
@@ -201,7 +212,6 @@ class GarnetNetwork : public Network
     GarnetNetwork& operator=(const GarnetNetwork& obj);
 
     std::vector<VNET_type > m_vnet_type;
-    std::vector<Router *> m_routers;   // All Routers in Network
     std::vector<NetworkLink *> m_networklinks; // All flit links in the network
     std::vector<CreditLink *> m_creditlinks; // All credit links in the network
     std::vector<NetworkInterface *> m_nis;   // All NI's in Network

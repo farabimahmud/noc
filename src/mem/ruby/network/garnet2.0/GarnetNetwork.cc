@@ -42,6 +42,7 @@
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/system/RubySystem.hh"
+#include "debug/Naive.hh"
 
 using namespace std;
 int GarnetNetwork::PACKETID = 0;
@@ -96,6 +97,10 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     optimized = p->optimized;
     bypass_all = p->bypass_all;
     bypass_x = p->bypass_x;
+
+    if (p->optimized){
+        optimization_rate = p->optimization_rate;
+    }
 }
 
 void
@@ -458,13 +463,41 @@ GarnetNetwork::functionalWrite(Packet *pkt)
     return num_functional_writes;
 }
 
-NetworkInterface* GarnetNetwork::get_ni_from_id(int id){
-    for (auto ni:m_nis){
-        if (ni->get_id() == id){
-            return ni;
-        }
-    }
-    return NULL;
+bool
+GarnetNetwork::checkCongestion(int src_router, int dest_router, uint64_t pid){
+    return !checkFree(src_router, dest_router, pid);
 }
 
 
+bool
+GarnetNetwork::checkFree(int src_router, int dest_router, uint64_t pid){
+    if (m_routers[dest_router]->optimized_queue.empty()){
+        return true;
+    }
+    else{
+        flit * t_flit = m_routers[dest_router]->optimized_queue.front();
+        if (t_flit->get_pid() == pid){
+            return true;
+        }
+        return false;
+    }
+}
+
+bool 
+GarnetNetwork::insertFlitInOptimized(int r_id, flit * t_flit){
+    m_routers[r_id]->optimized_queue.push_back(t_flit);
+    return true;
+}
+
+NetworkInterface * 
+GarnetNetwork::get_ni_from_id(int id){
+    for (int i =0; i< m_nis.size(); i++){
+        if (m_nis[i]->get_id() == id){
+            return m_nis[i];
+        }
+    }
+    DPRINTF(Naive, "Can not find Destination NI\n",
+            id);
+    assert(0);
+    return NULL;
+}

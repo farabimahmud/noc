@@ -41,6 +41,7 @@
 #include "mem/ruby/network/garnet2.0/Credit.hh"
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
+#include "mem/ruby/network/garnet2.0/Router.hh"
 
 using namespace std;
 
@@ -192,6 +193,68 @@ NetworkInterface::readJitterQueue(){
 }
 
 
+bool 
+NetworkInterface::readOptimizedQueue(){
+    Tick curTime = clockEdge();
+    Cycles currentCycle = curCycle();
+    std::deque<flit*> oq = m_net_ptr->m_routers[m_router_id]->optimized_queue;
+
+    for (auto f: oq){
+        DPRINTF(Naive, "Currently at OQ %d-%d\n",f->get_pid(), f->get_id());
+    }
+    if (oq.size() > 0){
+        
+        flit * t_flit = oq.front();
+        DPRINTF(Naive, "time %d, current %d\n",
+                t_flit->get_time(), currentCycle);
+        if (t_flit->get_time() < currentCycle){
+            if (!t_flit->get_optimized()){
+                DPRINTF(Naive, "This should not be printed\n");
+                return false;
+            }
+            int vc = t_flit->get_vc();  
+            int vnet = t_flit->get_vnet();
+            if (!outNode_ptr[vnet]){
+                DPRINTF(Naive, "Outnode Not Ready\n");
+                scheduleEventAbsolute(clockEdge(Cycles(2)));
+                return false;
+            }
+
+            t_flit->set_dequeue_time(currentCycle);
+   
+            bool flag = t_flit->get_type() == TAIL_ || 
+                t_flit->get_type() == HEAD_TAIL_;
+            // sendCredit(t_flit, flag);
+            if (flag){
+                outVcState[vc].setState(IDLE_, currentCycle);
+                DPRINTF(Naive, "flit %d-%d causing issues\n", 
+                        t_flit->get_pid(), t_flit->get_id());
+                DPRINTF(Naive, "Message Buffer%s\n", *outNode_ptr[vnet]);
+                // outNode_ptr[vnet]->areNSlotsAvailable(1, curTime);
+                outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+                      cyclesToTicks(Cycles(1)));
+                DPRINTF(Naive, "No Fault here\n");           
+                int src_ni_id = t_flit->get_route().src_ni;
+                NetworkInterface * src_ni = m_net_ptr->get_ni_from_id(src_ni_id);
+                src_ni->outVcState[vc].setState(IDLE_, currentCycle);
+            }
+            incrementStats(t_flit);           
+            DPRINTF(Naive, "[OQ] flit %d-%d is consumed\n", 
+                        t_flit->get_pid(),
+                        t_flit->get_id());
+            delete t_flit;            
+            m_net_ptr->m_routers[m_router_id]->optimized_queue.pop_front();
+            oq = m_net_ptr->m_routers[m_router_id]->optimized_queue;
+            if (oq.size() > 0){
+                DPRINTF(Naive, "still some flits in OQ\n");
+                scheduleEventAbsolute(clockEdge(Cycles(2)));
+            }
+            return true;        
+        }
+    }
+    return false;
+}
+
 /*
  * The NI wakeup checks whether there are any ready messages in the protocol
  * buffer. If yes, it picks that up, flitisizes it into a number of flits and
@@ -210,7 +273,8 @@ NetworkInterface::wakeup()
 
     MsgPtr msg_ptr;
     Tick curTime = clockEdge();
-
+    bool oq_flag = false;
+   
     // Checking for messages coming from the protocol
     // can pick up a message/cycle for each virtual net
     for (int vnet = 0; vnet < inNode_ptr.size(); ++vnet) {
@@ -226,10 +290,17 @@ NetworkInterface::wakeup()
             }
         }
     }
- 
+
+    if (m_net_ptr->optimized){
+       oq_flag = readOptimizedQueue();
+    }
+    if (oq_flag) DPRINTF(Naive, "[OQ] is read\n");
+
+
     if (m_net_ptr->jitter_all && jitter_queue.size() > 0 ){
         readJitterQueue(); 
     }
+
     scheduleOutputLink();
     checkReschedule();
 
@@ -260,6 +331,10 @@ NetworkInterface::wakeup()
             else if (!messageEnqueuedThisCycle &&
                 outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
                 // Space is available. Enqueue to protocol buffer.
+                if (m_id ==12){
+                    DPRINTF(Naive, "[ERROR] 12 %s\n", *t_flit);
+                }
+
                 outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                                            cyclesToTicks(Cycles(1)));
                 // Simply send a credit back since we are not buffering
@@ -433,20 +508,41 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         // initialize hops_traversed to -1
         // so that the first router increments it to 0
         route.hops_traversed = -1;
-
+        uint32_t random_value = rand() % 100;
         m_net_ptr->increment_injected_packets(vnet);
         for (int i = 0; i < num_flits; i++) {
             m_net_ptr->increment_injected_flits(vnet);
             flit *fl = new flit(i, vc, vnet, route, num_flits, new_msg_ptr,
                 curCycle());
             fl->set_pid(GarnetNetwork::PACKETID);
-            
+            fl->set_optimized(false);
             fl->set_src_delay(curCycle() - ticksToCycles(msg_ptr->getTime()));
-            niOutVcs[vc].insert(fl);
-            DPRINTF(Naive, "Created flit %s at NI\n",
-                    *fl);
-        }
+            
+            if (m_net_ptr->optimized && random_value <= m_net_ptr->optimization_rate){
+              if (m_net_ptr->checkFree(m_router_id, route.dest_router,
+                            GarnetNetwork::PACKETID)){
+                 
+                 fl->set_optimized(true); 
+                 m_net_ptr->insertFlitInOptimized(route.dest_router, fl);
+                 NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
 
+                 dest_ni->scheduleEvent(Cycles(2+i));
+                 DPRINTF(Naive, "[OQ] Created flit %s at OQ of Router %d\n", 
+                         *fl, 
+                         route.dest_router);
+              } else{
+                 DPRINTF(Naive, "[OQ] Not Free so Created flit %s \n", 
+                         *fl);
+                 niOutVcs[vc].insert(fl);
+              }
+            }
+            else{
+
+                niOutVcs[vc].insert(fl);
+                DPRINTF(Naive, "Created flit %s at NI\n",
+                    *fl);
+            }
+        }
         m_ni_out_vcs_enqueue_time[vc] = curCycle();
         outVcState[vc].setState(ACTIVE_, curCycle());
         GarnetNetwork::PACKETID++;

@@ -327,6 +327,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     if (responseL2Network_in.isReady(clockEdge())) {
       peek(responseL2Network_in, ResponseMsg) {
         // test wether it's from a local L1 or an off chip source
+        DPRINTF(Naive, "MachineID %#x\n", machineID);
         assert(in_msg.Destination.isElement(machineID));
         Entry cache_entry := getCacheEntry(in_msg.addr);
         TBE tbe := TBEs[in_msg.addr];

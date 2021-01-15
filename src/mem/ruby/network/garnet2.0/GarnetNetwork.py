@@ -53,6 +53,7 @@ class GarnetNetwork(RubyNetwork):
     jitter_all = Param.Bool(False, "Enable Jitter for all")
     bypass_x = Param.Bool(False, "Enable bypass for the x axis only")
     optimized = Param.Bool(False, "Enable optimized bypass")
+    optimization_rate = Param.UInt32(50, "rate of optimization, default 50")
 
 
 class GarnetNetworkInterface(ClockedObject):
