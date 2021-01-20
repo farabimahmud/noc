@@ -37,6 +37,7 @@
 #include "base/cast.hh"
 #include "debug/RubyNetwork.hh"
 #include "debug/Naive.hh"
+#include "debug/SK.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/Credit.hh"
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
@@ -166,6 +167,7 @@ NetworkInterface::readJitterQueue(){
             int vc = t_flit->get_vc();  
             int vnet = t_flit->get_vnet();
             outVcState[vc].setState(IDLE_, currentCycle);
+            DPRINTF(SK, "[1] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
             outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                         cyclesToTicks(Cycles(1)));
             sendCredit(t_flit, true);
@@ -231,6 +233,7 @@ NetworkInterface::readOptimizedQueue(){
                         t_flit->get_pid(), t_flit->get_id());
                 DPRINTF(Naive, "Message Buffer%s\n", *outNode_ptr[vnet]);
                 // outNode_ptr[vnet]->areNSlotsAvailable(1, curTime);
+                DPRINTF(SK, "[2] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
                 outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                       cyclesToTicks(Cycles(1)));
                 DPRINTF(Naive, "No Fault here\n");           
@@ -285,6 +288,7 @@ NetworkInterface::wakeup()
 
         if (b->isReady(curTime)) { // Is there a message waiting
             msg_ptr = b->peekMsgPtr();
+            DPRINTF(SK, "[1] peek %s\n", *(msg_ptr));
             if (flitisizeMessage(msg_ptr, vnet)) {
                 b->dequeue(curTime);
             }
@@ -335,6 +339,7 @@ NetworkInterface::wakeup()
                     DPRINTF(Naive, "[ERROR] 12 %s\n", *t_flit);
                 }
 
+                DPRINTF(SK, "[3] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
                 outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                                            cyclesToTicks(Cycles(1)));
                 // Simply send a credit back since we are not buffering
@@ -415,6 +420,7 @@ NetworkInterface::checkStallQueue()
 
             // If we can now eject to the protocol buffer, send back credits
             if (outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
+                DPRINTF(SK, "[4] enqueue msg: %s\n", *(stallFlit->get_msg_ptr()));
                 outNode_ptr[vnet]->enqueue(stallFlit->get_msg_ptr(), curTime,
                                            cyclesToTicks(Cycles(1)));
 
@@ -517,7 +523,11 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             fl->set_pid(GarnetNetwork::PACKETID);
             fl->set_optimized(false);
             fl->set_src_delay(curCycle() - ticksToCycles(msg_ptr->getTime()));
-            
+           
+            DPRINTF(SK, "optimized: %d random_value: %d, rate: %d\n",
+                    m_net_ptr->optimized,
+                    random_value,
+                    m_net_ptr->optimization_rate);
             if (m_net_ptr->optimized && random_value <= m_net_ptr->optimization_rate){
               if (m_net_ptr->checkFree(m_router_id, route.dest_router,
                             GarnetNetwork::PACKETID)){

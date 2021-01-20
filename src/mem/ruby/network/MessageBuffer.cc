@@ -47,6 +47,7 @@
 #include "base/random.hh"
 #include "base/stl_helpers.hh"
 #include "debug/RubyQueue.hh"
+#include "debug/SK.hh"
 #include "mem/ruby/system/RubySystem.hh"
 
 using namespace std;
@@ -226,6 +227,9 @@ MessageBuffer::enqueue(MsgPtr message, Tick current_time, Tick delta)
     m_buf_msgs++;
 
     DPRINTF(RubyQueue, "Enqueue arrival_time: %lld, Message: %s\n",
+            arrival_time, *(message.get()));
+    
+    DPRINTF(SK, "Enqueue arrival_time: %lld, Message: %s\n",
             arrival_time, *(message.get()));
 
     // Schedule the wakeup

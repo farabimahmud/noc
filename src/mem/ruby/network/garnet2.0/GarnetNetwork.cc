@@ -43,6 +43,7 @@
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/system/RubySystem.hh"
 #include "debug/Naive.hh"
+#include "debug/SK.hh"
 
 using namespace std;
 int GarnetNetwork::PACKETID = 0;
@@ -86,11 +87,13 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     }
 
     // record the network interfaces
+    int tmp_i = 0;
     for (vector<ClockedObject*>::const_iterator i = p->netifs.begin();
          i != p->netifs.end(); ++i) {
         NetworkInterface *ni = safe_cast<NetworkInterface *>(*i);
         m_nis.push_back(ni);
         ni->init_net_ptr(this);
+        DPRINTF(SK, "creating %d nis: %s\n", tmp_i++, *ni);
     }
 
     jitter_all = p->jitter_all;

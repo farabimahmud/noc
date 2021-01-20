@@ -41,6 +41,7 @@
 #include "mem/ruby/network/Network.hh"
 
 #include "base/logging.hh"
+#include "debug/SK.hh"
 #include "mem/ruby/common/MachineID.hh"
 #include "mem/ruby/network/BasicLink.hh"
 #include "mem/ruby/system/RubySystem.hh"
@@ -193,6 +194,10 @@ Network::setFromNetQueue(NodeID id, bool ordered, int network_num,
         m_fromNetQueues[id].push_back(nullptr);
     }
     m_fromNetQueues[id][network_num] = b;
+    DPRINTF(SK, "setFromNetQueue: id: %d, net_num: %d, msg buff: %s\n",
+            id,
+            network_num,
+            *b);
 }
 
 NodeID
