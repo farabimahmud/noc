@@ -74,6 +74,7 @@ class NetworkInterface : public ClockedObject, public Consumer
 
     Cycles flit_jitter_threshold;
     std::deque<flit*> jitter_queue;    
+    std::deque<flit*> optimized_queue;
     bool readJitterQueue();
     int get_id(){
         return m_id;

@@ -492,7 +492,15 @@ GarnetNetwork::insertFlitInOptimized(int r_id, flit * t_flit){
     return true;
 }
 
-NetworkInterface * 
+
+bool
+GarnetNetwork::insertFlitInOptimizedNI(int ni_id, flit * t_flit){
+    m_nis[ni_id]->optimized_queue.push_back(t_flit);
+    return true;
+}
+
+
+NetworkInterface *
 GarnetNetwork::get_ni_from_id(int id){
     for (int i =0; i< m_nis.size(); i++){
         if (m_nis[i]->get_id() == id){

@@ -3,21 +3,93 @@
 
 
 
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/0-x86-blackscholes.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/0-x86-blackscholes.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/1-x86-canneal.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/1-x86-canneal.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/2-x86-dedup.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/2-x86-dedup.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/3-x86-facesim.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/3-x86-facesim.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/4-x86-fluidanimate.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/4-x86-fluidanimate.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/5-x86-freqmine.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/5-x86-freqmine.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/6-x86-streamcluster.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/6-x86-streamcluster.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/7-x86-swaptions.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/7-x86-swaptions.sh
-chmod +x /home/grads/f/farabi/noc/parsec_scripts/8-x86-x264.sh && 
-sbatch  /home/grads/f/farabi/noc/parsec_scripts/8-x86-x264.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/0-x86-blackscholes-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/0-x86-blackscholes-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/1-x86-canneal-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/1-x86-canneal-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/2-x86-dedup-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/2-x86-dedup-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/3-x86-facesim-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/3-x86-facesim-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/4-x86-fluidanimate-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/4-x86-fluidanimate-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/5-x86-freqmine-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/5-x86-freqmine-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/6-x86-streamcluster-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/6-x86-streamcluster-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/7-x86-swaptions-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/7-x86-swaptions-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/8-x86-x264-0.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/8-x86-x264-0.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/9-x86-blackscholes-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/9-x86-blackscholes-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/10-x86-canneal-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/10-x86-canneal-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/11-x86-dedup-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/11-x86-dedup-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/12-x86-facesim-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/12-x86-facesim-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/13-x86-fluidanimate-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/13-x86-fluidanimate-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/14-x86-freqmine-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/14-x86-freqmine-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/15-x86-streamcluster-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/15-x86-streamcluster-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/16-x86-swaptions-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/16-x86-swaptions-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/17-x86-x264-25.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/17-x86-x264-25.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/18-x86-blackscholes-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/18-x86-blackscholes-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/19-x86-canneal-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/19-x86-canneal-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/20-x86-dedup-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/20-x86-dedup-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/21-x86-facesim-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/21-x86-facesim-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/22-x86-fluidanimate-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/22-x86-fluidanimate-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/23-x86-freqmine-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/23-x86-freqmine-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/24-x86-streamcluster-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/24-x86-streamcluster-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/25-x86-swaptions-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/25-x86-swaptions-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/26-x86-x264-50.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/26-x86-x264-50.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/27-x86-blackscholes-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/27-x86-blackscholes-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/28-x86-canneal-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/28-x86-canneal-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/29-x86-dedup-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/29-x86-dedup-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/30-x86-facesim-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/30-x86-facesim-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/31-x86-fluidanimate-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/31-x86-fluidanimate-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/32-x86-freqmine-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/32-x86-freqmine-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/33-x86-streamcluster-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/33-x86-streamcluster-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/34-x86-swaptions-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/34-x86-swaptions-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/35-x86-x264-75.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/35-x86-x264-75.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/36-x86-blackscholes-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/36-x86-blackscholes-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/37-x86-canneal-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/37-x86-canneal-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/38-x86-dedup-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/38-x86-dedup-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/39-x86-facesim-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/39-x86-facesim-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/40-x86-fluidanimate-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/40-x86-fluidanimate-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/41-x86-freqmine-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/41-x86-freqmine-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/42-x86-streamcluster-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/42-x86-streamcluster-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/43-x86-swaptions-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/43-x86-swaptions-100.sh
+chmod +x /home/grads/f/farabi/noc/parsec_scripts/44-x86-x264-100.sh && 
+sbatch  /home/grads/f/farabi/noc/parsec_scripts/44-x86-x264-100.sh

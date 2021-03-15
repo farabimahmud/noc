@@ -27,18 +27,13 @@ num_cpus = num_threads = [
 
 data_size = 'simmedium'
 runtype = 'restore'  #'restore' 'ckpts'
-#has_victim = True
- 
-#l1_victim_sizes = [(1,512),]
-#l1_victim_sizes = [1, 2, 4, 8, 16, 32]
-#l2_victim_sizes = [1, 2, 4, 8, 16, 32, 64, 128]
 l1_victim_sizes = [16]
 l2_victim_sizes = [16]
 #victim_sizes = l2_victim_sizes 
 # victim_sizes=[(4,4)]
 #test_case = 'vc-conservative-spec-try3-upto-100m'
 #test_case = 'vc-unsafe-parsec-arm-l1-100m'
-test_case = 'week-nov-26'
+test_case = 'week-jan-26-100m'
 
 m5_root = '/home/grads/f/farabi/noc/m5out'
 
@@ -57,12 +52,19 @@ benches = [
             ]
 os.environ["GEM5_PATH"] = "/home/grads/f/farabi/noc/"
 parsec_dir = "/home/grads/f/farabi/parsec/"
+rates = [0,25, 50, 75, 100]
 
+def create_command(params):
 
-def create_command(bench,
-        num_cpu, num_thread,
-        data_size, scheme,
-        isa, runtype):
+    bench = params['bench']
+    num_cpu = params['num_cpu']
+    num_thread = params['num_cpu']
+    scheme = params['scheme']
+    data_size = params['data_size']
+    isa = params['isa']
+    runtype = params['runtype']
+    rate = params['rate']
+
     gem5_options = []
     script_options = []
 
@@ -83,41 +85,18 @@ def create_command(bench,
         script_options.append(('--disk-image',
             os.environ['M5_PATH'] + \
                     '/disks/x86root.img'))
-#    elif isa == 'arm':
-#        os.environ['M5_PATH'] = '/home/grads/f/farabi/nuca/gem5-kernel/arm_parsec'
-#        gem5_options.append(('bin-path',
-#            '/home/grads/f/farabi/nuca/build/ARM_MESI_Two_Level/gem5.opt'))
-#
-#        script_options.append(('--script',
-#            ('/home/grads/f/farabi/fs/gem5/scripts/%s_%s_%s.rcS' % (bench, data_size, num_thread))))
-#
-#        script_options.append(('--kernel',
-#            os.environ['M5_PATH'] + \
-#                    '/binaries/vmlinux.aarch64.20140821'))
-#
-#        script_options.append(('--disk-image',
-#            os.environ['M5_PATH'] + \
-#                    '/disks/parsec-aarch64-ubuntu-trusty-headless.img'))
-#
-#        script_options.append(('--dtb-file',
-#            os.environ['M5_PATH'] + \
-#                    '/binaries/vexpress.aarch64.20140821.dtb'))
-#        script_options.append(('--machine-type',
-#            'VExpress_EMM64'))
     else:
         print ("unknown isa" + isa)
         exit()
 
     if runtype == 'restore':
         gem5_options.append(('--outdir',
-            ('%s/restore/%s/%s-%s-%s-%s-%s' % \
+            ('%s/restore/%s/%s-%s-%s-%s-%s-%d' % \
                 (m5_root, test_case, bench, \
-                num_cpu, data_size, isa, scheme))))
-        outdir = '%s/restore/%s/%s/%s-%s-%s-%s-%s' % \
+                num_cpu, data_size, isa, scheme, rate))))
+        outdir = '%s/restore/%s/%s/%s-%s-%s-%s-%s-%d' % \
                 (m5_root,isa, test_case, bench, \
-                num_cpu, data_size, isa, scheme)
-    #create_dir_command = 'mkdir -p %s' % (outdir)
-    #print(create_dir_command) 
+                num_cpu, data_size, isa, scheme, rate)
         script_options.append(('--cpu-type', 'DerivO3CPU'))
         script_options.append(('--checkpoint-dir',
             ('/home/grads/f/farabi/nuca/m5out/ckpts/%s-%s-%s-%s' % ( bench, \
@@ -126,10 +105,10 @@ def create_command(bench,
 
     elif runtype == 'ckpts':
         gem5_options.append(('--outdir',
-            ('%s/ckpts/%s-%s-%s-%s' % (m5_root, bench, \
-                    num_cpu, data_size, isa))))
-        outdir = '%s/ckpts/%s-%s-%s-%s' % \
-                (m5_root, bench, num_cpu, data_size, isa)
+            ('%s/ckpts/%s-%s-%s-%s-%d' % (m5_root, bench, \
+                    num_cpu, data_size, isa,rate))))
+        outdir = '%s/ckpts/%s-%s-%s-%s-%d' % \
+                (m5_root, bench, num_cpu, data_size, isa, rate)
         script_options.append(('--cpu-type',
             'AtomicSimpleCPU'))
 #        script_options.append(('--take-checkpoints',
@@ -198,10 +177,11 @@ def create_command(bench,
         # InvisiSpec
         script_options.append(('--bypass', scheme))
         script_options.append(('--flit_jitter_threshold', 40 ))
+        script_options.append(('--optimization_rate', rate))
         #script_options.append(('--needsTSO', '1'))
-        script_options.append(('--maxinsts', '1000000'))
+        script_options.append(('--maxinsts', '100000000'))
 
-
+    print(outdir)
     return gem5_options, script_options, outdir
 
 counter = 0
@@ -219,50 +199,60 @@ if not os.path.exists(script_dir):
     print(script_dir, "created")
     os.makedirs(script_dir)
 
+for rate in rates:
+    for bench in benches:
+        for scheme in schemes:
+            for isa in isas:
+                for num_cpu in num_cpus:
+                    params = {}
+                    params['bench'] = bench
+                    params['num_cpu'] = num_cpu
+                    params['data_size'] = data_size
+                    params['scheme'] = scheme
+                    params['isa'] = isa
+                    params['runtype'] = runtype
+                    params['rate'] = rate
+                    gem5_opts, script_opts, outdir = create_command(params)
 
-for bench in benches:
-    for scheme in schemes:
-        for isa in isas:
-            for num_cpu in num_cpus:
-                gem5_opts, script_opts, outdir=  create_command(bench,\
-                             num_cpu, num_cpu, data_size,\
-                             scheme, isa, runtype);
-                command = ''
-                debug_command = ''
-                for opts in [gem5_opts, script_opts]:
-                     for opt, val in opts:
-                     # manage single value options
-                          if opt in ['bin-path', 'config']:
-                              command += val + ' '
-                              debug_command += val + '\n'
-                          elif opt in ['--ruby', '--has-victim', \
-                                       '--redirect-stdout', \
-                                       '--redirect-stderr']:
-                              command += opt + ' '
-                              debug_command += opt + '\n'
-                          else:
-                              command += '%s=%s ' % (opt, val)
-                              debug_command += '%s=%s\n' % (opt, val)
-    
-                          # create folder if this
-                          # options specifies folder path
-                          if opt in ['--outdir', '--checkpoint-dir']:
-                              try:
-                                  os.makedirs(val)
-                              except OSError:
-                                  # print("OSError") 
-                                  pass
-                create_dir_command = 'mkdir -p %s' % (outdir)
-                filename = "%s/%d-%s-%s.sh" % (script_dir,counter, isa, bench) 
-                with open(filename, "w") as f:
-                    print('#!/bin/bash', file=f)
-                    print("\n", file=f)
-                    print(create_dir_command, file=f)
-                    print(command, file=f )
-                    #print command
-                    #print ('\n')
-                with open(jobs_filename, 'a' ) as f:
-                    print('chmod +x /home/grads/f/farabi/noc/%s && '%(filename), file=f)
-                    print('sbatch  /home/grads/f/farabi/noc/%s'%(filename), file=f)
- 
-                    counter+=1
+                    command = ''
+                    debug_command = ''
+                    for opts in [gem5_opts, script_opts]:
+                         for opt, val in opts:
+                         # manage single value options
+                              if opt in ['bin-path', 'config']:
+                                  command += val + ' '
+                                  debug_command += val + '\n'
+                              elif opt in ['--ruby', '--has-victim', \
+                                           '--redirect-stdout', \
+                                           '--redirect-stderr']:
+                                  command += opt + ' '
+                                  debug_command += opt + '\n'
+                              else:
+                                  command += '%s=%s ' % (opt, val)
+                                  debug_command += '%s=%s\n' % (opt, val)
+
+                              # create folder if this
+                              # options specifies folder path
+                              if opt in ['--outdir', '--checkpoint-dir']:
+                                  try:
+                                      os.makedirs(val)
+                                  except OSError:
+                                      # print("OSError")
+                                      pass
+                    create_dir_command = 'mkdir -p %s' % (outdir)
+                    filename = "%s/%d-%s-%s-%d.sh" % (script_dir, counter, isa,
+                            bench, rate)
+                    with open(filename, "w") as f:
+                        print('#!/bin/bash', file=f)
+                        print("\n", file=f)
+                        print(create_dir_command, file=f)
+                        print(command, file=f )
+                        #print command
+                        #print ('\n')
+                    with open(jobs_filename, 'a' ) as f:
+                        print('chmod +x /home/grads/f/farabi/noc/%s && '%(
+                            filename), file=f)
+                        print('sbatch  /home/grads/f/farabi/noc/%s'%(
+                            filename), file=f)
+
+                        counter+=1

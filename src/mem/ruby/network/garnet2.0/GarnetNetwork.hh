@@ -156,6 +156,7 @@ class GarnetNetwork : public Network
     bool checkFree(int src_router, int dest_router, uint64_t pid);
 
     bool insertFlitInOptimized(int r_id, flit* t_flit);
+    bool insertFlitInOptimizedNI(int ni_id, flit* t_flit);
 
     std::vector<Router *> m_routers;   // All Routers in Network
 

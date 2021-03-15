@@ -146,7 +146,10 @@ NetworkInterface::incrementStats(flit *t_flit)
         m_net_ptr->increment_packet_network_latency(network_delay, vnet);
         m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
         m_net_ptr->sample_latency(network_delay);
+        DPRINTF(Naive, "%d,%d,%d\n",t_flit->get_route().src_router,
+                t_flit->get_route().dest_router, network_delay);
     }
+
 
     // Hops
     m_net_ptr->increment_total_hops(t_flit->get_route().hops_traversed);
@@ -199,8 +202,8 @@ bool
 NetworkInterface::readOptimizedQueue(){
     Tick curTime = clockEdge();
     Cycles currentCycle = curCycle();
-    std::deque<flit*> oq = m_net_ptr->m_routers[m_router_id]->optimized_queue;
-
+    // std::deque<flit*> oq = m_net_ptr->m_nis[id]->optimized_queue;
+    std::deque <flit*> oq = optimized_queue;
     for (auto f: oq){
         DPRINTF(Naive, "Currently at OQ %d-%d\n",f->get_pid(), f->get_id());
     }
@@ -246,8 +249,8 @@ NetworkInterface::readOptimizedQueue(){
                         t_flit->get_pid(),
                         t_flit->get_id());
             delete t_flit;            
-            m_net_ptr->m_routers[m_router_id]->optimized_queue.pop_front();
-            oq = m_net_ptr->m_routers[m_router_id]->optimized_queue;
+            optimized_queue.pop_front();
+            oq = optimized_queue;
             if (oq.size() > 0){
                 DPRINTF(Naive, "still some flits in OQ\n");
                 scheduleEventAbsolute(clockEdge(Cycles(2)));
@@ -533,7 +536,7 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
                             GarnetNetwork::PACKETID)){
                  
                  fl->set_optimized(true); 
-                 m_net_ptr->insertFlitInOptimized(route.dest_router, fl);
+                 m_net_ptr->insertFlitInOptimizedNI(route.dest_ni, fl);
                  NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
 
                  dest_ni->scheduleEvent(Cycles(2+i));
