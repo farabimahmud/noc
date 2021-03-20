@@ -251,7 +251,7 @@ class Packet : public Printable
   public:
     typedef uint32_t FlagsType;
     typedef ::Flags<FlagsType> Flags;
-
+    bool isAttackPacket = false;
   private:
 
     enum : FlagsType {

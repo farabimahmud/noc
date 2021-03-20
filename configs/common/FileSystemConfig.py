@@ -37,7 +37,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import print_function
-
+from functools import reduce
 import m5
 from m5.objects import *
 from m5.util.convert import *

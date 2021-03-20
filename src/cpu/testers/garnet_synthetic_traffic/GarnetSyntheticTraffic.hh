@@ -121,7 +121,6 @@ class GarnetSyntheticTraffic : public ClockedObject
     int numPacketsSent;
     int singleSender;
     int singleDest;
-
     std::string trafficType; // string
     TrafficType traffic; // enum from string
     double injRate;
@@ -141,6 +140,13 @@ class GarnetSyntheticTraffic : public ClockedObject
     void doRetry();
 
     friend class MemCompleteEvent;
+
+    bool isAttackNode;
+    bool isAttackEnabled;
+    float attackRate;
+
+    void generateAttackPkt();
+
 };
 
 #endif // __CPU_GARNET_SYNTHETIC_TRAFFIC_HH__

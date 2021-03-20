@@ -36,3 +36,4 @@ SimObject('GarnetSyntheticTraffic.py')
 Source('GarnetSyntheticTraffic.cc')
 
 DebugFlag('GarnetSyntheticTraffic')
+DebugFlag('AttackPacketGenerator')

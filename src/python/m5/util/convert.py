@@ -128,7 +128,7 @@ def toBinaryFloat(value, target_type='float', units=None):
     return toFloat(value, target_type, units, binary_prefixes)
 
 def toInteger(value, target_type='integer', units=None, prefixes=[]):
-    intifier = lambda x: int(x, 0)
+    intifier = lambda x: int(float(x))
     return toNum(value, target_type, units, prefixes, intifier)
 
 def toMetricInteger(value, target_type='integer', units=None):

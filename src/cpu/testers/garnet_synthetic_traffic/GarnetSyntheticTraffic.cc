@@ -37,6 +37,7 @@
 #include "base/logging.hh"
 #include "base/random.hh"
 #include "base/statistics.hh"
+#include "debug/AttackPacketGenerator.hh"
 #include "debug/GarnetSyntheticTraffic.hh"
 #include "mem/packet.hh"
 #include "mem/port.hh"
@@ -105,6 +106,15 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
     id = TESTER_NETWORK++;
     DPRINTF(GarnetSyntheticTraffic,"Config Created: Name = %s , and id = %d\n",
             name(), id);
+    isAttackNode = false;
+    isAttackEnabled = p->attack_enabled;
+    attackRate = p->attack_rate;
+    if (p->attack_enabled && p->attack_node == id){
+        isAttackNode = true;
+        DPRINTF(AttackPacketGenerator, "%d is set as Attack Node\n", id);
+        DPRINTF(AttackPacketGenerator, "Attack Rate is %f\n", attackRate);
+    }
+
 }
 
 Port &
@@ -156,18 +166,32 @@ GarnetSyntheticTraffic::tick()
     else
         sendAllowedThisCycle = false;
 
+    // if this is attacker node, we need to try sending packets to victim nodes
+
     // always generatePkt unless fixedPkts or singleSender is enabled
+    bool sentPacket = false;
     if (sendAllowedThisCycle) {
         bool senderEnable = true;
-
+        DPRINTF(AttackPacketGenerator,
+        "Send Allowd this cycle at %d\n", id);
         if (numPacketsMax >= 0 && numPacketsSent >= numPacketsMax)
             senderEnable = false;
 
         if (singleSender >= 0 && id != singleSender)
             senderEnable = false;
 
-        if (senderEnable)
+        if (senderEnable){
             generatePkt();
+            sentPacket = true;
+        }
+
+    }
+
+    if (isAttackNode && isAttackEnabled && !sentPacket){
+        double coin = random_mt.random<unsigned>(0, 100);
+        if (coin < attackRate*100){
+            generateAttackPkt();
+        }
     }
 
     // Schedule wakeup
@@ -179,6 +203,94 @@ GarnetSyntheticTraffic::tick()
     }
 }
 
+
+void
+GarnetSyntheticTraffic::generateAttackPkt(){
+    int num_destinations = numDestinations;
+    unsigned destination = id;
+    destination = random_mt.random<unsigned>(0, num_destinations - 1);
+
+    Addr paddr =  destination;
+    paddr <<= blockSizeBits;
+    unsigned access_size = 1; // Does not affect Ruby simulation
+    // DPRINTF(AttackPacketGenerator, "Attack Packet Generated at "
+    // "src %d to dest %d\n", id, destination);
+
+    // Modeling different coherence msg types over different msg classes.
+    //
+    // GarnetSyntheticTraffic assumes the Garnet_standalone coherence protocol
+    // which models three message classes/virtual networks.
+    // These are: request, forward, response.
+    // requests and forwards are "control" packets (typically 8 bytes),
+    // while responses are "data" packets (typically 72 bytes).
+    //
+    // Life of a packet from the tester into the network:
+    // (1) This function generatePkt() generates packets of one of the
+    //     following 3 types (randomly) : ReadReq, INST_FETCH, WriteReq
+    // (2) mem/ruby/system/RubyPort.cc converts these to RubyRequestType_LD,
+    //     RubyRequestType_IFETCH, RubyRequestType_ST respectively
+    // (3) mem/ruby/system/Sequencer.cc sends these to the cache controllers
+    //     in the coherence protocol.
+    // (4) Network_test-cache.sm tags RubyRequestType:LD,
+    //     RubyRequestType:IFETCH and RubyRequestType:ST as
+    //     Request, Forward, and Response events respectively;
+    //     and injects them into virtual networks 0, 1 and 2 respectively.
+    //     It immediately calls back the sequencer.
+    // (5) The packet traverses the network (simple/garnet) and reaches its
+    //     destination (Directory), and network stats are updated.
+    // (6) Network_test-dir.sm simply drops the packet.
+    //
+    MemCmd::Command requestType;
+
+    RequestPtr req = nullptr;
+    Request::Flags flags;
+
+    // Inject in specific Vnet
+    // Vnet 0 and 1 are for control packets (1-flit)
+    // Vnet 2 is for data packets (5-flit)
+    int injReqType = injVnet;
+
+    if (injReqType < 0 || injReqType > 2)
+    {
+        // randomly inject in any vnet
+        injReqType = random_mt.random(0, 2);
+    }
+
+    if (injReqType == 0) {
+        // generate packet for virtual network 0
+        requestType = MemCmd::ReadReq;
+        req = std::make_shared<Request>(paddr, access_size, flags, masterId);
+    } else if (injReqType == 1) {
+        // generate packet for virtual network 1
+        requestType = MemCmd::ReadReq;
+
+        flags.set(Request::INST_FETCH);
+        req = std::make_shared<Request>(
+            0x0, access_size, flags, masterId, 0x0, 0);
+        req->setPaddr(paddr);
+    } else {  // if (injReqType == 2)
+        // generate packet for virtual network 2
+        requestType = MemCmd::WriteReq;
+        req = std::make_shared<Request>(paddr, access_size, flags, masterId);
+    }
+
+    req->setContext(id);
+
+    //No need to do functional simulation
+    //We just do timing simulation of the network
+
+    DPRINTF(AttackPacketGenerator,
+            "Generated Attack packet with at src %d destination %d,"
+            " embedded in address %x\n",
+            id, destination, req->getPaddr());
+
+    PacketPtr pkt = new Packet(req, requestType);
+    pkt->dataDynamic(new uint8_t[req->getSize()]);
+    pkt->senderState = NULL;
+    pkt->isAttackPacket = true;
+    sendPkt(pkt);
+
+}
 void
 GarnetSyntheticTraffic::generatePkt()
 {
@@ -190,6 +302,7 @@ GarnetSyntheticTraffic::generatePkt()
     int source = id;
     int src_x = id%radix;
     int src_y = id/radix;
+
 
     if (singleDest >= 0)
     {
@@ -246,7 +359,8 @@ GarnetSyntheticTraffic::generatePkt()
     Addr paddr =  destination;
     paddr <<= blockSizeBits;
     unsigned access_size = 1; // Does not affect Ruby simulation
-
+    DPRINTF(AttackPacketGenerator, "Packet Generated at src %d to dest %d\n",
+    id, destination);
     // Modeling different coherence msg types over different msg classes.
     //
     // GarnetSyntheticTraffic assumes the Garnet_standalone coherence protocol
