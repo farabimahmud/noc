@@ -54,6 +54,9 @@ class GarnetNetwork(RubyNetwork):
     bypass_x = Param.Bool(False, "Enable bypass for the x axis only")
     optimized = Param.Bool(False, "Enable optimized bypass")
     optimization_rate = Param.UInt32(50, "rate of optimization, default 50")
+    attack_enabled = Param.Bool(False, "whether attack is enabled in"
+            "this network,default is false")
+    attack_node = Param.Int(-1, "ID of attack node, default -1 no attack node")
 
 
 class GarnetNetworkInterface(ClockedObject):

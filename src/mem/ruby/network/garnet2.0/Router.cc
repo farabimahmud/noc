@@ -171,6 +171,14 @@ Router::getPortDirectionName(PortDirection direction)
 void
 Router::regStats()
 {
+    // Added for Attack stats
+
+    packet_network_latency_dist
+        .init(0,50,2)
+        .name(name() +".network_latency_dist")
+        .flags(Stats::oneline)
+        ;
+
     BasicRouter::regStats();
 
     m_buffer_reads

@@ -148,6 +148,15 @@ NetworkInterface::incrementStats(flit *t_flit)
         m_net_ptr->sample_latency(network_delay);
         DPRINTF(Naive, "%d,%d,%d\n",t_flit->get_route().src_router,
                 t_flit->get_route().dest_router, network_delay);
+
+        /****
+         * ADD statistics gathering for attack node
+         */
+
+        Router * dest_router =
+            m_net_ptr->m_routers[t_flit->get_route().dest_router];
+
+        dest_router->sample_latency(network_delay);
     }
 
 

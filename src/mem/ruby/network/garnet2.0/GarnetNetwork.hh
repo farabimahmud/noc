@@ -53,6 +53,11 @@ class GarnetNetwork : public Network
     static int PACKETID;
     bool jitter_all, optimized, bypass_all, bypass_x;  
     uint32_t optimization_rate;
+
+    // ATTACK parameters
+    bool attack_enabled;
+    int attack_node;
+
     typedef GarnetNetworkParams Params;
     GarnetNetwork(const Params *p);
     ~GarnetNetwork() = default;

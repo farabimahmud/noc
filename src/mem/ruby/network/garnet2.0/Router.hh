@@ -56,6 +56,14 @@ class FaultModel;
 class Router : public BasicRouter, public Consumer
 {
   public:
+
+    // added for collecting ATTACK stats
+
+    void sample_latency(Cycles x){
+        packet_network_latency_dist.sample(x,1);
+    }
+
+    Stats::Distribution packet_network_latency_dist;
     typedef GarnetRouterParams Params;
     Router(const Params *p);
 

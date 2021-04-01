@@ -106,6 +106,9 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
     id = TESTER_NETWORK++;
     DPRINTF(GarnetSyntheticTraffic,"Config Created: Name = %s , and id = %d\n",
             name(), id);
+
+    // ADDED for having extra attack node
+
     isAttackNode = false;
     isAttackEnabled = p->attack_enabled;
     attackRate = p->attack_rate;

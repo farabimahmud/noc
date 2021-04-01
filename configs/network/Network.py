@@ -138,7 +138,10 @@ def init_network(options, network, InterfaceClass):
             network.optimized = True
             network.optimization_rate = max(0,min(100,
                     int(options.optimization_rate)))
-      
+        network.attack_enabled = options.attack_enabled
+        network.attack_node = options.attack_node
+
+
 
     if options.network == "simple":
         network.setup_buffers()

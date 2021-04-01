@@ -33,6 +33,9 @@
 #include <cassert>
 
 #include "base/cast.hh"
+#include "debug/AttackPacketGenerator.hh"
+#include "debug/Naive.hh"
+#include "debug/SK.hh"
 #include "mem/ruby/common/NetDest.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
@@ -42,8 +45,6 @@
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/system/RubySystem.hh"
-#include "debug/Naive.hh"
-#include "debug/SK.hh"
 
 using namespace std;
 int GarnetNetwork::PACKETID = 0;
@@ -103,6 +104,15 @@ GarnetNetwork::GarnetNetwork(const Params *p)
 
     if (p->optimized){
         optimization_rate = p->optimization_rate;
+    }
+
+    // attack node information
+    attack_enabled = p->attack_enabled;
+    if (attack_enabled){
+        attack_node = p->attack_node;
+
+        DPRINTF(AttackPacketGenerator, "[GN] Attack Node is set to %d\n",
+                attack_node);
     }
 }
 
