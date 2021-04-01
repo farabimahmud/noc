@@ -81,8 +81,8 @@ def define_options(parser):
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
                           'bypass_x','optimized'],
                       help="'bypass_none normal'")
-    parser.add_option("--flit_jitter_threshold", type="int", default=20,
-                      help="Minimum flit jitter threshold, default 20")
+    parser.add_option("--flit_jitter_threshold", type="int", default=40,
+                      help="Minimum flit jitter threshold, default 40")
     parser.add_option("--optimization_rate", type="int", default=50,
                       help="""Rate at which optimized queue will"
                        be used, default 50""")

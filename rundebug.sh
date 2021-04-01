@@ -12,7 +12,10 @@
     --synthetic=uniform_random \
     --injectionrate=0.1 \
     --attack-node=0 \
-    --attack-rate=0.1\
+    --attack-rate=0.2 \
     --attack-enabled \
+    --bypass=bypass_none \
+    --flit_jitter_threshold=40 \
 #     --num-packets-max=1 \
+
 
