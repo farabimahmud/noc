@@ -71,6 +71,7 @@ class GarnetSyntheticTraffic : public ClockedObject
      */
     void printAddr(Addr a);
 
+
   protected:
     EventFunctionWrapper tickEvent;
 
@@ -114,7 +115,7 @@ class GarnetSyntheticTraffic : public ClockedObject
     unsigned blockSizeBits;
 
     Tick noResponseCycles;
-
+    int numCPUs;
     int numDestinations;
     Tick simCycles;
     int numPacketsMax;
@@ -146,6 +147,10 @@ class GarnetSyntheticTraffic : public ClockedObject
     float attackRate;
 
     void generateAttackPkt();
+
+    bool hasFixedTarget;
+    int fixedTargetNearNode;
+    int fixedTargetFarNode;
 
 };
 

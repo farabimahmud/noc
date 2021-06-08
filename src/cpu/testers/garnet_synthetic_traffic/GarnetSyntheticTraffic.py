@@ -59,3 +59,11 @@ class GarnetSyntheticTraffic(ClockedObject):
         Default is false, i.e. attack not enabled")
     attack_rate = Param.Float(0.1, "Rate of attack. Injection rate for \
         attack packets")
+
+    fixed_target_enabled = Param.Bool(False, "Whether fixed target pair is \
+        enabled for this simulation or not. Default is Not Enabled")
+    fixed_target_near = Param.Int(-1, "Fixed Target Nearest Node")
+    fixed_target_far = Param.Int(-1,"Fixed Target Farthest Node")
+    randomly_selected_targets = Param.Bool(False, "Whether target nodes are \
+        randomly selected from the existing list of nodes")
+    num_cpus = Param.Int(1, "Number of CPUs")

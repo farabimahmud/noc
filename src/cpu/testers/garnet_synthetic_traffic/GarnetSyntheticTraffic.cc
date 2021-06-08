@@ -38,6 +38,7 @@
 #include "base/random.hh"
 #include "base/statistics.hh"
 #include "debug/AttackPacketGenerator.hh"
+#include "debug/Naive.hh"
 #include "debug/GarnetSyntheticTraffic.hh"
 #include "mem/packet.hh"
 #include "mem/port.hh"
@@ -96,6 +97,7 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
     // set up counters
     noResponseCycles = 0;
     schedule(tickEvent, 0);
+    numCPUs = p->num_cpus;
 
     initTrafficType();
     if (trafficStringToEnum.count(trafficType) == 0) {
@@ -117,7 +119,34 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
         DPRINTF(AttackPacketGenerator, "%d is set as Attack Node\n", id);
         DPRINTF(AttackPacketGenerator, "Attack Rate is %f\n", attackRate);
     }
+    
+    if (p->fixed_target_enabled && p->attack_enabled && p->attack_node==id){
+        if (p->randomly_selected_targets){
+            fixedTargetNearNode = random_mt.random<unsigned>(0, (int) numCPUs );
+            unsigned temp = random_mt.random<unsigned>(0, (int) numCPUs );
+            while(temp == fixedTargetNearNode) {
+                temp = random_mt.random<unsigned>(0, (int) numCPUs );
+            }
+            fixedTargetFarNode = temp;
 
+            if (fixedTargetNearNode > fixedTargetFarNode){
+                fixedTargetFarNode = fixedTargetNearNode;
+                fixedTargetNearNode = temp;
+                
+            }
+            DPRINTF(AttackPacketGenerator, "Randomly Selected Attack Nodes"
+            "are far %d near %d\n", 
+            fixedTargetFarNode, fixedTargetNearNode);
+
+        }else{
+            fixedTargetNearNode = p->fixed_target_near;
+            fixedTargetFarNode = p->fixed_target_far;
+            DPRINTF(AttackPacketGenerator, "Attack Nodes are far %d near %d\n", 
+            fixedTargetFarNode, fixedTargetNearNode);
+
+        }
+    }
+   
 }
 
 Port &
@@ -212,7 +241,17 @@ GarnetSyntheticTraffic::generateAttackPkt(){
     int num_destinations = numDestinations;
     unsigned destination = id;
     destination = random_mt.random<unsigned>(0, num_destinations - 1);
-
+    if (hasFixedTarget){
+        assert( 0 <= fixedTargetNearNode && fixedTargetNearNode < num_destinations);
+        assert( 0 <= fixedTargetFarNode &&  fixedTargetFarNode < num_destinations);
+        destination = random_mt.random<unsigned>(0,1); 
+        if (destination == 0){
+            destination = fixedTargetNearNode;
+        }
+        else{
+            destination = fixedTargetFarNode;
+        }
+    }
     Addr paddr =  destination;
     paddr <<= blockSizeBits;
     unsigned access_size = 1; // Does not affect Ruby simulation
@@ -282,15 +321,19 @@ GarnetSyntheticTraffic::generateAttackPkt(){
     //No need to do functional simulation
     //We just do timing simulation of the network
 
-    DPRINTF(AttackPacketGenerator,
-            "Generated Attack packet with at src %d destination %d,"
-            " embedded in address %x\n",
-            id, destination, req->getPaddr());
+
+    req->isAttackRequest=true;
 
     PacketPtr pkt = new Packet(req, requestType);
     pkt->dataDynamic(new uint8_t[req->getSize()]);
     pkt->senderState = NULL;
     pkt->isAttackPacket = true;
+    DPRINTF(AttackPacketGenerator,
+            "[CPU:GAP] Generated Attack packet addr %#x req addr %#x"
+            " from src %d destination %d," 
+            " embedded in address %x\n",
+            pkt, req, id, destination, req->getPaddr());
+
     sendPkt(pkt);
 
 }

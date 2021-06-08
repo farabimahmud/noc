@@ -42,6 +42,8 @@
 #include "mem/ruby/network/garnet2.0/Credit.hh"
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
+#include "mem/ruby/slicc_interface/RubyRequest.hh"
+#include "mem/ruby/slicc_interface/RequestMsg.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 
 using namespace std;
@@ -65,6 +67,9 @@ NetworkInterface::NetworkInterface(const Params *p)
 
     m_stall_count.resize(m_virtual_networks);
     flit_jitter_threshold = Cycles(p->flit_jitter_threshold);
+    // DPRINTF(Naive, "flit jitter threshold %d\n", flit_jitter_threshold);
+
+    jq = new flitBufferRTC();
 }
 
 void
@@ -138,30 +143,101 @@ NetworkInterface::incrementStats(flit *t_flit)
     Cycles dest_queueing_delay = (curCycle() - t_flit->get_dequeue_time());
     Cycles queueing_delay = src_queueing_delay + dest_queueing_delay;
 
+    unsigned src_router_id = t_flit->get_route().src_router; 
+    unsigned dest_router_id = t_flit->get_route().dest_router;
+    Router* src_router = m_net_ptr->m_routers[src_router_id];
+    Router* dest_router = m_net_ptr->m_routers[dest_router_id];
+
     m_net_ptr->increment_flit_network_latency(network_delay, vnet);
     m_net_ptr->increment_flit_queueing_latency(queueing_delay, vnet);
+
+ 
 
     if (t_flit->get_type() == TAIL_ || t_flit->get_type() == HEAD_TAIL_) {
         m_net_ptr->increment_received_packets(vnet);
         m_net_ptr->increment_packet_network_latency(network_delay, vnet);
         m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
         m_net_ptr->sample_latency(network_delay);
-        DPRINTF(Naive, "%d,%d,%d\n",t_flit->get_route().src_router,
-                t_flit->get_route().dest_router, network_delay);
+        DPRINTF(Naive, "SR %d, DR %d, ND %d\n", src_router_id, dest_router_id,
+                network_delay);
+
+        // update expected delay table
+        if(m_net_ptr->dynamic_delay){
+            src_router->setExpectedDelay(dest_router_id,
+                queueing_delay+network_delay);
+            
+        }
 
         /****
          * ADD statistics gathering for attack node
          */
+        // if( src_router->get_id()==m_net_ptr->attack_node){
+        //     DPRINTF(Naive, "Sampled data for %s\n", *t_flit);
+        //     dest_router->sample_latency(queueing_delay + network_delay);
+        //     // src_router->printExpectedDelay(std::cout);
+        // }
+        Cycles lat = queueing_delay + network_delay;
+        if ((lat < flit_jitter_threshold) && 
+            t_flit->is_optimized()) 
+            DPRINTF(Naive, "problem data for flit %s\n", *t_flit);
 
-        Router * dest_router =
-            m_net_ptr->m_routers[t_flit->get_route().dest_router];
 
-        dest_router->sample_latency(network_delay);
+        if(src_router_id ==m_net_ptr->attack_node) {
+            
+            dest_router->sample_latency(lat);
+
+            if(t_flit->isAttackFlit) {
+                dest_router->sample_attack_latency(lat);
+            }
+            else {
+                dest_router->sample_regular_latency(lat);                
+            }
+        }
     }
 
 
     // Hops
     m_net_ptr->increment_total_hops(t_flit->get_route().hops_traversed);
+}
+
+
+bool 
+NetworkInterface::readJQ(){
+    bool read_from_JQ = false;
+    Cycles currentCycle = curCycle();
+    Tick curTime = clockEdge();
+    if (jq->isReady(currentCycle)){
+        DPRINTF(Naive, "[NI:readJQ] entered JQ\n");
+        flit * t_flit = jq->getTopFlit();
+        flit_type t_flit_type = t_flit->get_type();
+        assert(t_flit_type == HEAD_TAIL_ || t_flit_type == TAIL_);
+        int vc = t_flit->get_vc();
+        int vnet = t_flit->get_vnet();
+        outVcState[vc].setState(IDLE_, currentCycle);
+        outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+            cyclesToTicks(Cycles(1)));
+        sendCredit(t_flit, true);
+        incrementStats(t_flit);
+
+        DPRINTF(Naive, "[NI:readJQ] Reading from new JQ %s\n", *t_flit);
+        
+        delete t_flit;
+
+        read_from_JQ = true;
+        // if there are new flits, schedule NI to wake up
+        if (!jq->isEmpty()){
+            flit * next_flit = jq->peekTopFlit(); 
+            
+            Cycles ready_to_commit = next_flit->ready_to_commit;
+            if(ready_to_commit - curCycle() > 0){ 
+                scheduleEventAbsolute(clockEdge(ready_to_commit-curCycle()));
+            }else{
+                scheduleEventAbsolute(clockEdge(Cycles(1)));                    
+            }            
+        }
+    }
+    return read_from_JQ;
+
 }
 
 bool 
@@ -174,15 +250,24 @@ NetworkInterface::readJitterQueue(){
     if (jitter_queue.size() > 0){
         flit * t_flit = jitter_queue.front();
         Cycles delay = currentCycle  - t_flit->get_enqueue_time();
-        if (delay >= flit_jitter_threshold){
+       
+        if (delay >= t_flit->get_jitter_amount() || 
+        !(t_flit->get_type()==TAIL_ || t_flit->get_type()==HEAD_TAIL_)){
             t_flit->set_dequeue_time(currentCycle);
             int vc = t_flit->get_vc();  
             int vnet = t_flit->get_vnet();
-            outVcState[vc].setState(IDLE_, currentCycle);
-            DPRINTF(SK, "[1] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
-            outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+
+            if (t_flit->get_type()==TAIL_ || 
+            t_flit->get_type()==HEAD_TAIL_){
+                outVcState[vc].setState(IDLE_, currentCycle);
+                DPRINTF(SK, "[1] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
+                outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                         cyclesToTicks(Cycles(1)));
-            sendCredit(t_flit, true);
+                sendCredit(t_flit, true);
+            }else{
+                sendCredit(t_flit,false);
+            }
+
 //                int src_ni_id = t_flit->get_route().src_ni;
 //                NetworkInterface * src_ni =
 //                  m_net_ptr->get_ni_from_id(src_ni_id);
@@ -200,7 +285,7 @@ NetworkInterface::readJitterQueue(){
             return true;
         }else{
             DPRINTF(Naive, "%s is in JQ delay %d\n", *t_flit, delay);
-            scheduleEventAbsolute(clockEdge(flit_jitter_threshold- delay));
+            scheduleEventAbsolute(clockEdge(t_flit->get_jitter_amount()- delay));
         }   
     }
     return false;
@@ -222,7 +307,16 @@ NetworkInterface::readOptimizedQueue(){
         DPRINTF(Naive, "time %d, current %d\n",
                 t_flit->get_time(), currentCycle);
         if (t_flit->get_time() < currentCycle){
-            if (!t_flit->get_optimized()){
+            Cycles delay = currentCycle  - t_flit->get_enqueue_time();
+            bool flag = t_flit->get_type() == TAIL_ || 
+                t_flit->get_type() == HEAD_TAIL_;
+            Cycles expected_jitter = t_flit->get_jitter_amount();
+            if  (m_net_ptr->dynamic_delay && flag && (delay < expected_jitter )){
+                t_flit->set_jittered(true);
+                scheduleEventAbsolute(clockEdge(Cycles(expected_jitter-delay)));
+                return false;
+            }
+            if (!t_flit->is_optimized()){
                 DPRINTF(Naive, "This should not be printed\n");
                 return false;
             }
@@ -236,8 +330,7 @@ NetworkInterface::readOptimizedQueue(){
 
             t_flit->set_dequeue_time(currentCycle);
    
-            bool flag = t_flit->get_type() == TAIL_ || 
-                t_flit->get_type() == HEAD_TAIL_;
+
             // sendCredit(t_flit, flag);
             if (flag){
                 outVcState[vc].setState(IDLE_, currentCycle);
@@ -289,32 +382,47 @@ NetworkInterface::wakeup()
     MsgPtr msg_ptr;
     Tick curTime = clockEdge();
     bool oq_flag = false;
-   
+    
     // Checking for messages coming from the protocol
     // can pick up a message/cycle for each virtual net
     for (int vnet = 0; vnet < inNode_ptr.size(); ++vnet) {
         MessageBuffer *b = inNode_ptr[vnet];
+
         if (b == nullptr) {
             continue;
         }
 
         if (b->isReady(curTime)) { // Is there a message waiting
+            DPRINTF(Naive, "NI forwardQueue address %#x\n", b);
+
             msg_ptr = b->peekMsgPtr();
-            DPRINTF(SK, "[1] peek %s\n", *(msg_ptr));
+            
+            DPRINTF(Naive, "[1] peek %s %#x %s  packet \n", *(msg_ptr), 
+                    &(msg_ptr->m_attackMessage),
+                    msg_ptr->m_attackMessage?"Attack":"Regular");
+            
             if (flitisizeMessage(msg_ptr, vnet)) {
                 b->dequeue(curTime);
             }
         }
     }
 
-    if (m_net_ptr->optimized){
+    if (m_net_ptr->optimized || m_net_ptr->dynamic_delay){
        oq_flag = readOptimizedQueue();
     }
     if (oq_flag) DPRINTF(Naive, "[OQ] is read\n");
 
 
-    if (m_net_ptr->jitter_all && jitter_queue.size() > 0 ){
-        readJitterQueue(); 
+    // if ( (m_net_ptr->dynamic_delay || m_net_ptr->jitter_all) 
+    // && jitter_queue.size() > 0 ){
+    //     readJitterQueue(); 
+    // }
+
+    if (m_net_ptr->dynamic_delay || m_net_ptr->jitter_all){
+        bool read_from_jq = readJQ();
+        if(read_from_jq){
+            DPRINTF(Naive, "[NI:Wakeup] Read flit from JQ\n");
+        }
     }
 
     scheduleOutputLink();
@@ -337,20 +445,33 @@ NetworkInterface::wakeup()
         // Otherwise, exchange non-tail flits for credits.
         if (t_flit->get_type() == TAIL_ || 
                 t_flit->get_type() == HEAD_TAIL_) {
-            // Cycles elapsed = curCycle() - t_flit->get_enqueue_time();     
-            if (m_net_ptr->jitter_all && 
+            // Cycles elapsed = curCycle() - t_flit->get_enqueue_time();
+            // Cycles ready_to_commit = t_flit->ready_to_commit;
+
+            if ( m_net_ptr->dynamic_delay &&
+             t_flit->is_jittered() && t_flit->get_route().dest_ni == m_id ){
+                DPRINTF(Naive, "[Dynamic Delay] %s flit is delayed\n",
+                *t_flit);
+                jq->insert(t_flit);
+            }
+            else if (m_net_ptr->jitter_all && 
+                    t_flit->getAttackFlit() && 
                     t_flit->get_route().dest_ni == m_id){          
-                      
-                jitter_queue.push_back(t_flit);
-                scheduleEventAbsolute(clockEdge(Cycles(1)));                
+                
+                Cycles latency = curCycle() - t_flit->get_enqueue_time();
+                if (latency < flit_jitter_threshold){
+                    Cycles remaining = flit_jitter_threshold - latency;
+                    t_flit->ready_to_commit = t_flit->get_enqueue_time() + 
+                            flit_jitter_threshold; 
+                    jq->insert(t_flit); 
+                    scheduleEventAbsolute(clockEdge(Cycles(remaining)));     
+                    DPRINTF(Naive, "%s will wait %d cycles\n", 
+                            *t_flit, remaining);             
+                }         
             }
             else if (!messageEnqueuedThisCycle &&
                 outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
                 // Space is available. Enqueue to protocol buffer.
-                if (m_id ==12){
-                    DPRINTF(Naive, "[ERROR] 12 %s\n", *t_flit);
-                }
-
                 DPRINTF(SK, "[3] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
                 outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                                            cyclesToTicks(Cycles(1)));
@@ -471,6 +592,15 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
     Message *net_msg_ptr = msg_ptr.get();
     NetDest net_msg_dest = net_msg_ptr->getDestination();
 
+    bool isAttackMessage = net_msg_ptr->m_attackMessage;
+    
+    DPRINTF(Naive, "[NI:flitisize] msg %s at %#x is %s Packet\n",
+        *net_msg_ptr, net_msg_ptr,
+        isAttackMessage ? "Attack" :"Regular");
+    DPRINTF(Naive, "isAttackMessage: %d, %#x\n", net_msg_ptr->m_attackMessage, &(net_msg_ptr->m_attackMessage));
+
+
+
     // gets all the destinations associated with this message.
     vector<NodeID> dest_nodes = net_msg_dest.getAllDest();
 
@@ -527,6 +657,14 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         // so that the first router increments it to 0
         route.hops_traversed = -1;
         uint32_t random_value = rand() % 100;
+
+        // check if this packet is attack packet
+        bool isAttackFarFlit =  (route.dest_router == 
+                m_net_ptr->fixedTargetFarNode);
+        bool isAttackNearFlit = (route.dest_router == 
+                m_net_ptr->fixedTargetNearNode);
+        DPRINTF(Naive, "[AttackFlit] Far %d Near %d\n", isAttackFarFlit,
+                        isAttackNearFlit);
         m_net_ptr->increment_injected_packets(vnet);
         for (int i = 0; i < num_flits; i++) {
             m_net_ptr->increment_injected_flits(vnet);
@@ -535,11 +673,17 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             fl->set_pid(GarnetNetwork::PACKETID);
             fl->set_optimized(false);
             fl->set_src_delay(curCycle() - ticksToCycles(msg_ptr->getTime()));
-           
+            fl->isAttackFlit = isAttackMessage;
+            fl->set_jitter_amount(flit_jitter_threshold);
             DPRINTF(SK, "optimized: %d random_value: %d, rate: %d\n",
                     m_net_ptr->optimized,
                     random_value,
                     m_net_ptr->optimization_rate);
+
+            if (m_net_ptr->jitter_all){
+                fl->set_jittered(true);                
+            }
+        
             if (m_net_ptr->optimized && random_value <= m_net_ptr->optimization_rate){
               if (m_net_ptr->checkFree(m_router_id, route.dest_router,
                             GarnetNetwork::PACKETID)){
@@ -558,7 +702,41 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
                  niOutVcs[vc].insert(fl);
               }
             }
+            else if(m_net_ptr->dynamic_delay ){
+                Cycles far_node_delay = m_net_ptr->m_routers[m_router_id]->getExpectedDelay(m_net_ptr->fixedTargetFarNode);
+                Cycles near_node_delay = m_net_ptr->m_routers[m_router_id]->getExpectedDelay(m_net_ptr->fixedTargetNearNode);
+                Cycles threshold_delay = Cycles((far_node_delay+near_node_delay) /2);
+                fl->set_jitter_amount(threshold_delay);
+                DPRINTF(Naive, "Jitter set as %d for %s\n", threshold_delay, *fl);
+
+                if (isAttackMessage){
+                    if(route.src_router == m_net_ptr->attack_node 
+                        && route.dest_router == m_net_ptr->fixedTargetNearNode){
+                        fl->set_jittered(true);
+                        niOutVcs[vc].insert(fl);
+                        DPRINTF(Naive, "Created flit %s at NI\n",
+                            *fl);                        
+                    }
+                    else if (route.src_router == m_net_ptr->attack_node 
+                        && route.dest_router == m_net_ptr->fixedTargetFarNode){
+                        fl->set_optimized(true); 
+                        m_net_ptr->insertFlitInOptimizedNI(route.dest_ni, fl);
+                        NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
+
+                        dest_ni->scheduleEvent(Cycles(2+i));
+                        DPRINTF(Naive, "[OQ] Created flit %s at OQ of Router %d\n", 
+                                *fl, 
+                                route.dest_router);
+                    }
+                } else{
+                    niOutVcs[vc].insert(fl);
+                    DPRINTF(Naive, "Created flit %s at NI\n",
+                        *fl);
+                }                 
+            }
+
             else{
+
 
                 niOutVcs[vc].insert(fl);
                 DPRINTF(Naive, "Created flit %s at NI\n",

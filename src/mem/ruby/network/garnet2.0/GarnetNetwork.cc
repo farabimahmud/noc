@@ -114,6 +114,24 @@ GarnetNetwork::GarnetNetwork(const Params *p)
         DPRINTF(AttackPacketGenerator, "[GN] Attack Node is set to %d\n",
                 attack_node);
     }
+    min_cycles = p->min_cycles;
+    max_cycles = p->max_cycles;
+    dynamic_delay = p->dynamic_delay; 
+    hasFixedTarget = p->fixed_target_enabled;
+    if (attack_enabled && hasFixedTarget ){
+        fixedTargetNearNode = p->fixed_target_near;
+        fixedTargetFarNode = p->fixed_target_far;
+        DPRINTF(AttackPacketGenerator, "assigned fixed taget near %d "
+        "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
+    }
+    else if(p->randomly_selected_targets){
+      DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
+      fixedTargetNearNode = 1; 
+      fixedTargetFarNode = 51;
+    }
+
+    // initialize expected_delay if scheme is dynamic
+
 }
 
 void
@@ -157,6 +175,13 @@ GarnetNetwork::init()
             assert(router_id == router->get_id());
             router->printAggregateFaultProbability(cout);
             router->printFaultVector(cout);
+        }
+    }
+
+    // Reset router entries if dynamic delay is enabled
+    if(dynamic_delay){
+        for (int i=0; i<m_routers.size(); i++){
+            m_routers[i]->resetExpectedDelay();
         }
     }
 }
@@ -522,3 +547,5 @@ GarnetNetwork::get_ni_from_id(int id){
     assert(0);
     return NULL;
 }
+
+

@@ -54,7 +54,9 @@ class Message
           m_LastEnqueueTime(other.m_LastEnqueueTime),
           m_DelayedTicks(other.m_DelayedTicks),
           m_msg_counter(other.m_msg_counter)
-    { }
+    {
+        m_attackMessage = other.m_attackMessage;
+    }
 
     virtual ~Message() { }
 
@@ -102,8 +104,19 @@ class Message
     void setIncomingLink(int link) { incoming_link = link; }
     int getVnet() const { return vnet; }
     void setVnet(int net) { vnet = net; }
+    
+    // void setAttackMessage(bool x){
+    //   m_attackMessage = x;
+    // }
+
+    // bool getAttackMessage(){
+    //   return m_attackMessage;
+    // }
+    bool m_attackMessage =false;
 
   private:
+    // attack packet?
+
     Tick m_time;
     Tick m_LastEnqueueTime; // my last enqueue time
     Tick m_DelayedTicks; // my delayed cycles

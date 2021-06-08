@@ -79,14 +79,13 @@ def define_options(parser):
             default=False, help="Enable Bypass Queue")
     parser.add_option("--bypass", type="choice", default="bypass_all",
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
-                          'bypass_x','optimized'],
+                          'bypass_x','optimized','dynamic_delay'],
                       help="'bypass_none normal'")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
     parser.add_option("--optimization_rate", type="int", default=50,
                       help="""Rate at which optimized queue will"
                        be used, default 50""")
-
 
 def create_network(options, ruby):
 
@@ -138,8 +137,15 @@ def init_network(options, network, InterfaceClass):
             network.optimized = True
             network.optimization_rate = max(0,min(100,
                     int(options.optimization_rate)))
+        elif options.bypass == "dynamic_delay":
+            network.dynamic_delay = True
         network.attack_enabled = options.attack_enabled
         network.attack_node = options.attack_node
+
+        network.fixed_target_enabled = options.fixed_target_enabled
+        network.fixed_target_near = options.fixed_target_near
+        network.fixed_target_far  = options.fixed_target_far
+        network.randomly_selected_targets = options.randomly_selected_targets
 
 
 

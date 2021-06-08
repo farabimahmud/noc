@@ -113,9 +113,10 @@ structure (NetDest, external = "yes", non_obj="yes") {
 
 structure (Sequencer, external = "yes") {
   void readCallback(Addr, DataBlock);
-  void readCallback(Addr, DataBlock, bool);
-  void readCallback(Addr, DataBlock, bool, MachineType);
-  void readCallback(Addr, DataBlock, bool, MachineType,
+  void readCallback(Addr, bool, DataBlock);
+  void readCallback(Addr, bool, DataBlock, bool);  
+  void readCallback(Addr, bool, DataBlock, bool, MachineType);
+  void readCallback(Addr, DataBlock, bool, bool, MachineType,
                     Cycles, Cycles, Cycles);
 
   void writeCallback(Addr, DataBlock);
@@ -187,6 +188,7 @@ structure(RubyRequest, desc="...", interface="Message", external="yes") {
   HSAScope scope,            desc="HSA scope";
   HSASegment segment,        desc="HSA segment";
   PacketPtr pkt,             desc="Packet associated with this request";
+  bool attackMessage,        desc="Whether this is attack message or not Rubyslicctypes";
 }
 
 structure(AbstractCacheEntry, primitive="yes", external = "yes") {

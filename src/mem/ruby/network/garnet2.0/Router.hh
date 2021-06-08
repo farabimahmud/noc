@@ -63,7 +63,25 @@ class Router : public BasicRouter, public Consumer
         packet_network_latency_dist.sample(x,1);
     }
 
+    void sample_attack_latency(Cycles x){
+        attack_packet_network_latency_dist.sample(x,1);
+    }
+
+    void sample_regular_latency(Cycles x){
+        regular_packet_network_latency_dist.sample(x,1);
+    }
+
+
+
+    std::vector<Cycles> expected_delay;
+    void resetExpectedDelay();
+    void printExpectedDelay(std::ostream& out);
+    void setExpectedDelay(int dest, Cycles value);
+    Cycles getExpectedDelay(int dest);
+
     Stats::Distribution packet_network_latency_dist;
+    Stats::Distribution attack_packet_network_latency_dist;
+    Stats::Distribution regular_packet_network_latency_dist;
     typedef GarnetRouterParams Params;
     Router(const Params *p);
 

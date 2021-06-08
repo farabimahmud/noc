@@ -86,6 +86,14 @@ machine(MachineType:L1Cache, "Garnet_standalone L1 Cache")
       return Event:Forward;
     } else if (type == RubyRequestType:ST) {
       return Event:Response;
+
+//    } else if (type == RubyRequestType:LDA) {
+//      return Event:Request;
+//    } else if (type == RubyRequestType:IFETCHA) {
+//      return Event:Forward;
+//    } else if (type == RubyRequestType:STA) {
+//      return Event:Response;
+
     } else {
       error("Invalid RubyRequestType");
     }
@@ -129,8 +137,11 @@ machine(MachineType:L1Cache, "Garnet_standalone L1 Cache")
   in_port(mandatoryQueue_in, RubyRequest, mandatoryQueue, desc="...") {
     if (mandatoryQueue_in.isReady(clockEdge())) {
       peek(mandatoryQueue_in, RubyRequest) {
+        DPRINTF(Naive, " [GARNET:CACHE:MQ] attack message is %d\n", 
+            in_msg.attackMessage);
         trigger(mandatory_request_type_to_event(in_msg.Type),
-                in_msg.LineAddress, getCacheEntry(in_msg.LineAddress));
+                in_msg.LineAddress, getCacheEntry(in_msg.LineAddress),
+                );
       }
     }
   }
@@ -141,37 +152,55 @@ machine(MachineType:L1Cache, "Garnet_standalone L1 Cache")
   // map_Address_to_Directory is used to retrieve it.
 
   action(a_issueRequest, "a", desc="Issue a request") {
-    enqueue(requestNetwork_out, RequestMsg, issue_latency) {
-      out_msg.addr := address;
-      out_msg.Type := CoherenceRequestType:MSG;
-      out_msg.Requestor := machineID;
-      out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
+    peek(mandatoryQueue_in, RubyRequest){
+      enqueue(requestNetwork_out, RequestMsg, issue_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:MSG;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
+        // To send broadcasts in vnet0 (to emulate broadcast-based protocols),
+        // replace the above line by the following:
+        // out_msg.Destination := broadcast(MachineType:Directory);        
+        out_msg.MessageSize := MessageSizeType:Control;
+        out_msg.attackMessage := in_msg.attackMessage;
 
-      // To send broadcasts in vnet0 (to emulate broadcast-based protocols),
-      // replace the above line by the following:
-      // out_msg.Destination := broadcast(MachineType:Directory);
-
-      out_msg.MessageSize := MessageSizeType:Control;
+        DPRINTF(Naive, "[GARNET:a_issueRequest] %#x msg attack=%d\n",
+          out_msg,
+          out_msg.attackMessage
+        );
+     }
     }
   }
 
   action(b_issueForward, "b", desc="Issue a forward") {
-    enqueue(forwardNetwork_out, RequestMsg, issue_latency) {
-      out_msg.addr := address;
-      out_msg.Type := CoherenceRequestType:MSG;
-      out_msg.Requestor := machineID;
-      out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
-      out_msg.MessageSize := MessageSizeType:Control;
+    peek(mandatoryQueue_in, RubyRequest){    
+      enqueue(forwardNetwork_out, RequestMsg, issue_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:MSG;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
+        out_msg.MessageSize := MessageSizeType:Control;
+        out_msg.attackMessage := in_msg.attackMessage;
+        DPRINTF(Naive, "[GARNET:issueForward] %s\n", out_msg);
+      }
     }
   }
 
+
   action(c_issueResponse, "c", desc="Issue a response") {
-    enqueue(responseNetwork_out, RequestMsg, issue_latency) {
-      out_msg.addr := address;
-      out_msg.Type := CoherenceRequestType:MSG;
-      out_msg.Requestor := machineID;
-      out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
-      out_msg.MessageSize := MessageSizeType:Data;
+    peek(mandatoryQueue_in, RubyRequest){
+      enqueue(responseNetwork_out, RequestMsg, issue_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:MSG;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToMachine(address, MachineType:Directory));
+        out_msg.MessageSize := MessageSizeType:Data;
+        out_msg.attackMessage := in_msg.attackMessage;
+        
+        DPRINTF(Naive, "[issueResponse] %s msg attack=%d\n", 
+            out_msg,
+            out_msg.attackMessage);
+      }
     }
   }
 
@@ -180,7 +209,10 @@ machine(MachineType:L1Cache, "Garnet_standalone L1 Cache")
   }
 
   action(r_load_hit, "r", desc="Notify sequencer the load completed.") {
-    sequencer.readCallback(address, dummyData);
+    peek(mandatoryQueue_in, RubyRequest){
+      sequencer.readCallback(address, in_msg.attackMessage, dummyData);
+      DPRINTF(Naive, "[GARNET:load_hit]%s\n", in_msg);
+    }
   }
 
   action(s_store_hit, "s", desc="Notify sequencer that store completed.") {

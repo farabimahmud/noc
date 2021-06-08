@@ -58,6 +58,17 @@ class GarnetNetwork : public Network
     bool attack_enabled;
     int attack_node;
 
+    // Window size
+    int min_cycles;
+    int max_cycles;
+    bool dynamic_delay;
+
+    // Attack Targets
+    bool hasFixedTarget;
+    int fixedTargetNearNode;
+    int fixedTargetFarNode;
+
+
     typedef GarnetNetworkParams Params;
     GarnetNetwork(const Params *p);
     ~GarnetNetwork() = default;

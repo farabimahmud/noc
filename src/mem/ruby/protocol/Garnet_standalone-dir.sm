@@ -88,6 +88,8 @@ machine(MachineType:Directory, "Garnet_standalone Directory")
     if (requestQueue_in.isReady(clockEdge())) {
       peek(requestQueue_in, RequestMsg) {
         if (in_msg.Type == CoherenceRequestType:MSG) {
+          DPRINTF(Naive, " [GARNET:DIR:ReqQ] attack message is %d\n",
+            in_msg.attackMessage);
           trigger(Event:Receive_Request, in_msg.addr);
         } else {
           error("Invalid message");
@@ -99,6 +101,8 @@ machine(MachineType:Directory, "Garnet_standalone Directory")
     if (forwardQueue_in.isReady(clockEdge())) {
       peek(forwardQueue_in, RequestMsg) {
         if (in_msg.Type == CoherenceRequestType:MSG) {
+          DPRINTF(Naive, " [GARNET:DIR:FQ] attack message is %d\n",
+            in_msg.attackMessage);
           trigger(Event:Receive_Forward, in_msg.addr);
         } else {
           error("Invalid message");
@@ -110,6 +114,8 @@ machine(MachineType:Directory, "Garnet_standalone Directory")
     if (responseQueue_in.isReady(clockEdge())) {
       peek(responseQueue_in, RequestMsg) {
         if (in_msg.Type == CoherenceRequestType:MSG) {
+          DPRINTF(Naive, " [GARNET:DIR:RespQ] attack message is %d\n",
+            in_msg.attackMessage);
           trigger(Event:Receive_Response, in_msg.addr);
         } else {
           error("Invalid message");

@@ -42,6 +42,7 @@
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/OutVcState.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
+#include "mem/ruby/network/garnet2.0/flitBufferRTC.hh"
 #include "params/GarnetNetworkInterface.hh"
 
 class MessageBuffer;
@@ -74,8 +75,10 @@ class NetworkInterface : public ClockedObject, public Consumer
 
     Cycles flit_jitter_threshold;
     std::deque<flit*> jitter_queue;    
+    flitBufferRTC * jq; 
     std::deque<flit*> optimized_queue;
     bool readJitterQueue();
+    bool readJQ();
     int get_id(){
         return m_id;
 

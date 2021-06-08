@@ -58,8 +58,45 @@ Router::init()
 
     switchAllocator.init();
     crossbarSwitch.init();
+    
 }
 
+void
+Router::resetExpectedDelay(){
+    int numRouters = m_network_ptr->getNumRouters();    
+    int num_cols = m_network_ptr->getNumCols();
+    DPRINTF(Naive, "number of cols is %d\n",num_cols);
+    int my_id = m_id;
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    expected_delay.resize(numRouters);
+    for (int i=0; i<numRouters; i++){
+        // assuming MESI_XY protocol, assign initial expected
+        // delay to be equal to number of hops
+        
+        int dest_id = i;
+        int dest_x = dest_id % num_cols;
+        int dest_y = dest_id / num_cols;
+
+        int x_hops = abs(dest_x - my_x);
+        int y_hops = abs(dest_y - my_y);
+
+        expected_delay[i] = Cycles(x_hops + y_hops);
+    }
+}
+
+void
+Router::setExpectedDelay(int dest, Cycles value){
+    Cycles previous = expected_delay[dest];
+    expected_delay[dest] = Cycles((previous + value)/2);
+
+}
+Cycles
+Router::getExpectedDelay(int dest){
+    assert(expected_delay.size()>dest);
+    return expected_delay[dest];    
+}
 void
 Router::wakeup()
 {
@@ -178,6 +215,18 @@ Router::regStats()
         .name(name() +".network_latency_dist")
         .flags(Stats::oneline)
         ;
+    
+    attack_packet_network_latency_dist
+        .init(0,50,2)
+        .name(name() +".attack_network_latency_dist")
+        .flags(Stats::oneline)
+        ;
+   
+    regular_packet_network_latency_dist
+        .init(0,50,2)
+        .name(name() +".regular_network_latency_dist")
+        .flags(Stats::oneline)
+        ;
 
     BasicRouter::regStats();
 
@@ -286,4 +335,18 @@ Router *
 GarnetRouterParams::create()
 {
     return new Router(this);
+}
+
+
+void
+Router::printExpectedDelay(std::ostream& out)
+{
+    int sz = expected_delay.size();
+    out << "[ EXP_DELAY at Router " ;
+    out << m_id << ": ";
+    for(int i=0;i<sz; i++){
+        out << i << ": " << expected_delay[i] << ", ";
+    }
+    out << " ]\n";
+    out << flush;
 }

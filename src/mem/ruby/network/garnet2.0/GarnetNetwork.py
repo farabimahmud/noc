@@ -57,7 +57,17 @@ class GarnetNetwork(RubyNetwork):
     attack_enabled = Param.Bool(False, "whether attack is enabled in"
             "this network,default is false")
     attack_node = Param.Int(-1, "ID of attack node, default -1 no attack node")
+    min_cycles = Param.Int(4, "Minimum number of cycles we would allow")
+    max_cycles = Param.Int(10, "Maximum number of cycles we would allow")
+    dynamic_delay = Param.Bool(False, "Whether the optimization is dynamically \
+        adjusted, default is False")
 
+    fixed_target_enabled = Param.Bool(False, "Whether fixed target pair is \
+        enabled for this simulation or not. Default is Not Enabled")
+    fixed_target_near = Param.Int(-1, "Fixed Target Nearest Node")
+    fixed_target_far = Param.Int(-1,"Fixed Target Farthest Node")
+    randomly_selected_targets = Param.Bool(False, "Randomly selected target \
+            default is False")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

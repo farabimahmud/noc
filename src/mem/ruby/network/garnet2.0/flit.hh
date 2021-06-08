@@ -94,6 +94,15 @@ class flit
         }
     }
 
+    static bool
+    ready_to_commit_earlier(flit *f1, flit *f2){
+        if (f1->ready_to_commit == f2->ready_to_commit){
+            return (f1->get_id() > f2->get_id());
+        } else{
+            return (f1->ready_to_commit > f2->ready_to_commit);
+        }                    
+    }
+
     bool functionalWrite(Packet *pkt);
     uint64_t get_pid(){
         return m_pid;
@@ -106,9 +115,34 @@ class flit
         optimized = x;
     }
 
-    bool get_optimized(){
+    bool is_optimized(){
         return optimized;
     }
+
+    void set_jittered(bool x){
+        jitter = x;
+    }
+    bool is_jittered(){
+        return jitter; 
+    }
+
+    void set_jitter_amount(Cycles j){
+        jitter_amount = j;
+    }
+
+    Cycles get_jitter_amount(){
+        return jitter_amount;
+    }
+
+    void setAttackFlit(bool x);
+    bool getAttackFlit();
+
+    bool isAttackFlit; 
+    bool jitter;
+    Cycles jitter_amount;
+    Cycles ready_to_commit;
+
+
   protected:
     bool optimized;
     uint64_t m_pid;

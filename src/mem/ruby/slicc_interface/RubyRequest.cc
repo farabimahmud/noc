@@ -57,6 +57,8 @@ RubyRequest::print(ostream& out) const
   out << "AccessMode = " << m_AccessMode << " ";
   out << "Size = " << m_Size << " ";
   out << "Prefetch = " << m_Prefetch << " ";
+  out << "attackMsg = " << m_attackMessage << " ";
+  out << "&attackMsg = " << &m_attackMessage << " ";
 //  out << "Time = " << getTime() << " ";
   out << "]";
 }

@@ -45,6 +45,7 @@
 #include "base/logging.hh"
 #include "base/str.hh"
 #include "cpu/testers/rubytest/RubyTester.hh"
+#include "debug/Naive.hh"
 #include "debug/LLSC.hh"
 #include "debug/MemoryAccess.hh"
 #include "debug/ProtocolTrace.hh"
@@ -427,6 +428,7 @@ Sequencer::writeCallback(Addr address, DataBlock& data,
     }
 }
 
+/**
 void
 Sequencer::readCallback(Addr address, DataBlock& data,
                         bool externalHit, const MachineType mach,
@@ -481,6 +483,69 @@ Sequencer::readCallback(Addr address, DataBlock& data,
         m_RequestTable.erase(address);
     }
 }
+
+**/
+
+void
+Sequencer::readCallback(Addr address, bool attackMessage,
+                        DataBlock& data,
+                        bool externalHit, 
+                        const MachineType mach,
+                        Cycles initialRequestTime,
+                        Cycles forwardRequestTime,
+                        Cycles firstResponseTime)
+{
+
+    DPRINTF(Naive, "[Sequencer:readCallback] %s packet\n",
+        attackMessage? "Attack" : "Regular");
+    //
+    // Free up read requests until we hit the first Write request
+    // or end of the corresponding list.
+    //
+    assert(address == makeLineAddress(address));
+    assert(m_RequestTable.find(address) != m_RequestTable.end());
+    auto &seq_req_list = m_RequestTable[address];
+
+    // Perform hitCallback on every cpu request made to this cache block while
+    // ruby request was outstanding. Since only 1 ruby request was made,
+    // profile the ruby latency once.
+    bool ruby_request = true;
+    int aliased_loads = 0;
+    while (!seq_req_list.empty()) {
+        SequencerRequest &seq_req = seq_req_list.front();
+        if (ruby_request) {
+            assert((seq_req.m_type == RubyRequestType_LD) ||
+                   (seq_req.m_type == RubyRequestType_Load_Linked) ||
+                   (seq_req.m_type == RubyRequestType_IFETCH));
+        } else {
+            aliased_loads++;
+        }
+        if ((seq_req.m_type != RubyRequestType_LD) &&
+            (seq_req.m_type != RubyRequestType_Load_Linked) &&
+            (seq_req.m_type != RubyRequestType_IFETCH)) {
+            // Write request: reissue request to the cache hierarchy
+            issueRequest(seq_req.pkt, seq_req.m_second_type);
+            break;
+        }
+        if (ruby_request) {
+            recordMissLatency(&seq_req, true, mach, externalHit,
+                              initialRequestTime, forwardRequestTime,
+                              firstResponseTime);
+        }
+        markRemoved();
+        ruby_request = false;
+        hitCallback(&seq_req, data, true, mach, externalHit,
+                    initialRequestTime, forwardRequestTime,
+                    firstResponseTime);
+        seq_req_list.pop_front();
+    }
+
+    // free all outstanding requests corresponding to this address
+    if (seq_req_list.empty()) {
+        m_RequestTable.erase(address);
+    }
+}
+
 
 void
 Sequencer::hitCallback(SequencerRequest* srequest, DataBlock& data,
@@ -555,6 +620,8 @@ Sequencer::hitCallback(SequencerRequest* srequest, DataBlock& data,
         delete pkt;
         rs->m_cache_recorder->enqueueNextFlushRequest();
     } else {
+
+        DPRINTF(Naive, "ruby hit callback for pkt %#x\n", pkt);
         ruby_hit_callback(pkt);
         testDrainComplete();
     }
@@ -691,6 +758,8 @@ Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
         pc = pkt->req->getPC();
     }
 
+
+
     // check if the packet has data as for example prefetch and flush
     // requests do not
     std::shared_ptr<RubyRequest> msg =
@@ -701,16 +770,34 @@ Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
                                       RubyAccessMode_Supervisor, pkt,
                                       PrefetchBit_No, proc_id, core_id);
 
+
     DPRINTFR(ProtocolTrace, "%15s %3s %10s%20s %6s>%-6s %#x %s\n",
             curTick(), m_version, "Seq", "Begin", "", "",
             printAddress(msg->getPhysicalAddress()),
             RubyRequestType_to_string(secondary_type));
+
+    // Attack Packet Code 
+    bool isAttackRequest = pkt->isAttackPacket;
+    msg->m_attackMessage = isAttackRequest;
+
+    if (isAttackRequest){
+        DPRINTF(Naive, 
+        "[Sequencer:IssueReq] Packet at %#x is Attack Packet\n",
+        pkt);        
+    }else{
+        DPRINTF(Naive, 
+        "[Sequencer:IssueReq] Packet at %#x is Regular Packet\n",
+        pkt);
+    }
 
     Tick latency = cyclesToTicks(
                         m_controller->mandatoryQueueLatency(secondary_type));
     assert(latency > 0);
 
     assert(m_mandatory_q_ptr != NULL);
+
+    DPRINTF(Naive, "[Sequencer:issueReq] Inserting into MQ %#x"
+    " Message %#x : %s\n", m_mandatory_q_ptr, msg, *msg);
     m_mandatory_q_ptr->enqueue(msg, clockEdge(), latency);
 }
 

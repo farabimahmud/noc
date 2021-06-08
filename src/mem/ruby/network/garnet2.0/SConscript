@@ -47,6 +47,7 @@ Source('SwitchAllocator.cc')
 Source('CrossbarSwitch.cc')
 Source('VirtualChannel.cc')
 Source('flitBuffer.cc')
+Source('flitBufferRTC.cc')
 Source('flit.cc')
 Source('Credit.cc')
 

@@ -82,7 +82,7 @@ parser.add_option("--inj-vnet", type="int", default=-1,
                   help="Only inject in this vnet (0, 1 or 2).\
                         0 and 1 are 1-flit, 2 is 5-flit.\
                         Set to -1 to inject randomly in all vnets.")
-
+# Following Options for selecting one node to generate Attack Packet
 parser.add_option("--attack-node", type="int", default=0,
                   help="The node that is being attacked at this point \
                         Default value node 0")
@@ -91,6 +91,16 @@ parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
                         takes floating point value between 0 to 1 \
                         default value is 0.1")
 parser.add_option("--attack-enabled", action="store_true")
+
+# Following options for selecting two nodes to receive attack packet
+parser.add_option("--fixed-target-enabled", action="store_true")
+parser.add_option("--fixed-target-near",type=int, default=-1,
+                  help="Fixed Target for destinations, near node")
+parser.add_option("--fixed-target-far", type=int, default=-1,
+                  help="Fixed Target for destinations, far node")
+
+parser.add_option("--randomly-selected-targets",action="store_true")
+
 #
 # Add the ruby specific and protocol specific options
 #
@@ -110,18 +120,23 @@ if options.inj_vnet > 2:
 
 
 cpus = [ GarnetSyntheticTraffic(
-                     num_packets_max=options.num_packets_max,
-                     single_sender=options.single_sender_id,
-                     single_dest=options.single_dest_id,
-                     sim_cycles=options.sim_cycles,
-                     traffic_type=options.synthetic,
-                     inj_rate=options.injectionrate,
-                     inj_vnet=options.inj_vnet,
-                     precision=options.precision,
-                     num_dest=options.num_dirs,
-                     attack_node = options.attack_node,
-                     attack_enabled = options.attack_enabled,
-                     attack_rate = options.attack_rate,
+     num_packets_max=options.num_packets_max,
+     single_sender=options.single_sender_id,
+     single_dest=options.single_dest_id,
+     sim_cycles=options.sim_cycles,
+     traffic_type=options.synthetic,
+     inj_rate=options.injectionrate,
+     inj_vnet=options.inj_vnet,
+     precision=options.precision,
+     num_dest=options.num_dirs,
+     attack_node = options.attack_node,
+     attack_enabled = options.attack_enabled,
+     attack_rate = options.attack_rate,
+     fixed_target_enabled = options.fixed_target_enabled,
+     fixed_target_near = options.fixed_target_near,
+     fixed_target_far = options.fixed_target_far,
+     randomly_selected_targets = options.randomly_selected_targets,
+     num_cpus = options.num_cpus,
                      ) \
          for i in range(options.num_cpus) ]
 

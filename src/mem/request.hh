@@ -249,7 +249,6 @@ class Request
 
     using LocalAccessor =
         std::function<Cycles(ThreadContext *tc, Packet *pkt)>;
-
   private:
     typedef uint16_t PrivateFlagsType;
     typedef ::Flags<PrivateFlagsType> PrivateFlags;
@@ -361,7 +360,9 @@ class Request
     LocalAccessor _localAccessor;
 
   public:
+    // whether the request is generated as Attack packet
 
+    bool isAttackRequest = false;
     /**
      * Minimal constructor. No fields are initialized. (Note that
      *  _flags and privateFlags are cleared by Flags default
