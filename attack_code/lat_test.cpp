@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
 
     for (int i = 0; i < 512; i++) {
         //fprintf(output_file, "%d, %ld", i, t[i], (t[i] < 45)? "": "");
-        fprintf(output_file, "%d, %d, %ld\n", i, cpuid, t[i]>200?200:t[i]);
+        fprintf(output_file, "%d, %d, %ld\n", i, cpuid, t[i]>50?50:t[i]);
     }
     fclose(output_file);
 
