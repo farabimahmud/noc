@@ -24,4 +24,14 @@ case $? in
 esac
 
 echo "Executing the latency test with ASLR disabled";
-setarch $(uname -m) -R ./lat_test.o;
+
+rm -rfv "latency.log";
+
+n_cpus=32;
+
+for ((i=0; i<$n_cpus; i++ ))
+do
+   echo "Executing taskset -c $i setarch $(uname -m) -R ./lat_test.o $i";
+   taskset -c $i setarch $(uname -m) -R ./lat_test.o $i;
+done
+

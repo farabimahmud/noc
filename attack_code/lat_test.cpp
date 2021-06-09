@@ -31,25 +31,30 @@ uint8_t arr2[512 * 64];  // idx 0 * 64 -> node 2
                          // idx 126 * 64-> node 0
 uint8_t secret = 123;
 
-int main()
+int main(int argc, char * argv[])
 {
+    int cpuid = -1;
+
+    if (argc == 2){
+        cpuid  = atoi(argv[1]);
+    }
 
     unsigned long t[512];
     uint8_t x;
     unsigned int junk;
     char filename[] = "latency.log";
-    FILE* output_file = fopen(filename,"w");
+    FILE* output_file = fopen(filename,"a");
 
-    fprintf(output_file, "first loop\n");
+    //fprintf(output_file, "first loop\n");
     for (int i = 0; i < 512; i++) {
-        fprintf(output_file,"&arr2[%03d*64] = %#x\n", i, &(arr2[i * 64]));
+        // fprintf(output_file,"&arr2[%03d*64] = %#x\n", i, &(arr2[i * 64]));
         junk ^= arr2[i * 64];
         _mm_clflush(&arr2[i * 64]);
     }
 
     _mm_mfence();
     
-    fprintf(output_file, "begin second loop\n");
+    //fprintf(output_file, "begin second loop\n");
 
     // 125, 126
     for (int i = 0; i < 512; i++) {
@@ -58,10 +63,11 @@ int main()
         unsigned long time2 = __rdtscp(&junk);
         t[i] = time2 - time1;
     }
-    fprintf(output_file, "end second loop\n");
+    // fprintf(output_file, "end second loop\n");
 
     for (int i = 0; i < 512; i++) {
-        fprintf(output_file, "%d: %ld, %s\n", i, t[i], (t[i] < 45)? "": "");
+        //fprintf(output_file, "%d, %ld", i, t[i], (t[i] < 45)? "": "");
+        fprintf(output_file, "%d, %d, %ld\n", i, cpuid, t[i]);
     }
     fclose(output_file);
 
