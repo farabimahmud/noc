@@ -12,8 +12,7 @@
     --mesh-rows=8  \
     --synthetic=uniform_random \
     --injectionrate=0.01 \
-    --bypass=jitter_all \
-    --flit_jitter_threshold=40 \
+    --bypass=bypass_none \
     --attack-enabled \
     --attack-node=0 \
     --attack-rate=0.1 \

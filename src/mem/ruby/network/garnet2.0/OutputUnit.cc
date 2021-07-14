@@ -46,6 +46,7 @@ OutputUnit::OutputUnit(int id, PortDirection direction, Router *router)
     for (int i = 0; i < m_num_vcs; i++) {
         outVcState.emplace_back(i, m_router->get_net_ptr());
     }
+    bypass_flag = false;
 }
 
 void

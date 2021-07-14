@@ -304,7 +304,7 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
     }
 
     // cannot send if no outvc or no credit.
-    if (!has_outvc || !has_credit)
+    if (!has_outvc || !has_credit || output_unit->bypass_flag )
         return false;
 
 

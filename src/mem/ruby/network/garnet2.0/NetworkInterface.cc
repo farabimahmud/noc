@@ -345,6 +345,8 @@ NetworkInterface::readOptimizedQueue(){
                 int src_ni_id = t_flit->get_route().src_ni;
                 NetworkInterface * src_ni = m_net_ptr->get_ni_from_id(src_ni_id);
                 src_ni->outVcState[vc].setState(IDLE_, currentCycle);
+                resetBypassFlags(t_flit);
+
             }
             incrementStats(t_flit);           
             DPRINTF(Naive, "[OQ] flit %d-%d is consumed\n", 
@@ -691,7 +693,7 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
                  fl->set_optimized(true); 
                  m_net_ptr->insertFlitInOptimizedNI(route.dest_ni, fl);
                  NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
-
+                 setBypassFlags(fl);
                  dest_ni->scheduleEvent(Cycles(2+i));
                  DPRINTF(Naive, "[OQ] Created flit %s at OQ of Router %d\n", 
                          *fl, 
@@ -748,6 +750,16 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         GarnetNetwork::PACKETID++;
     }
     return true ;
+}
+
+
+void setBypassFlags(flit * t_flit){
+    // TODO
+
+}
+
+void resetBypassFlags(flit * t_flit){
+    // TODO
 }
 
 // Looking for a free output vc

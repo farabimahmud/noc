@@ -61,6 +61,7 @@ class OutputUnit : public Consumer
     int select_free_vc(int vnet);
 
     inline PortDirection get_direction() { return m_direction; }
+    bool bypass_flag;
 
     int
     get_credit_count(int vc)
