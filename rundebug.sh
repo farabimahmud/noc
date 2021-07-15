@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./build/NULL/gem5.debug \
-    --debug-flags=Naive,RubyPort \
+    --debug-flags=Vanilla \
     --debug-file=debug.out \
     configs/example/garnet_synth_traffic.py  \
     --num-cpus=64 \

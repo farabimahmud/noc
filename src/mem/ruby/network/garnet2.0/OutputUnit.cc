@@ -44,10 +44,37 @@ OutputUnit::OutputUnit(int id, PortDirection direction, Router *router)
     const int m_num_vcs = m_router->get_num_vcs();
     outVcState.reserve(m_num_vcs);
     for (int i = 0; i < m_num_vcs; i++) {
-        outVcState.emplace_back(i, m_router->get_net_ptr());
+        outVcState.push_back(new OutVcState(i, m_router->get_net_ptr()));
+        // outVcState.emplace_back(i, m_router->get_net_ptr());
     }
     bypass_flag = false;
 }
+
+
+    int
+    OutputUnit::get_credit_count(int vc)
+    {
+        return outVcState[vc]->get_credit_count();
+    }
+
+    inline int
+    OutputUnit::get_outlink_id()
+    {
+        return m_out_link->get_id();
+    }
+
+    inline void
+    OutputUnit::set_vc_state(VC_state_type state, int vc, Cycles curTime)
+    {
+      outVcState[vc]->setState(state, curTime);
+    }
+
+    inline bool
+    OutputUnit::is_vc_idle(int vc, Cycles curTime)
+    {
+        return (outVcState[vc]->isInState(IDLE_, curTime));
+    }
+
 
 void
 OutputUnit::decrement_credit(int out_vc)
@@ -56,7 +83,7 @@ OutputUnit::decrement_credit(int out_vc)
             "outvc %d at time: %lld\n",
             m_router->get_id(), m_id, out_vc, m_router->curCycle());
 
-    outVcState[out_vc].decrement_credit();
+    outVcState[out_vc]->decrement_credit();
 }
 
 void
@@ -66,7 +93,7 @@ OutputUnit::increment_credit(int out_vc)
             "outvc %d at time: %lld\n",
             m_router->get_id(), m_id, out_vc, m_router->curCycle());
 
-    outVcState[out_vc].increment_credit();
+    outVcState[out_vc]->increment_credit();
 }
 
 // Check if the output VC (i.e., input VC at next router)
@@ -75,8 +102,8 @@ OutputUnit::increment_credit(int out_vc)
 bool
 OutputUnit::has_credit(int out_vc)
 {
-    assert(outVcState[out_vc].isInState(ACTIVE_, m_router->curCycle()));
-    return outVcState[out_vc].has_credit();
+    assert(outVcState[out_vc]->isInState(ACTIVE_, m_router->curCycle()));
+    return outVcState[out_vc]->has_credit();
 }
 
 
@@ -100,7 +127,7 @@ OutputUnit::select_free_vc(int vnet)
     int vc_base = vnet*m_vc_per_vnet;
     for (int vc = vc_base; vc < vc_base + m_vc_per_vnet; vc++) {
         if (is_vc_idle(vc, m_router->curCycle())) {
-            outVcState[vc].setState(ACTIVE_, m_router->curCycle());
+            outVcState[vc]->setState(ACTIVE_, m_router->curCycle());
             return vc;
         }
     }

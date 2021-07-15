@@ -753,12 +753,14 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
 }
 
 
-void setBypassFlags(flit * t_flit){
+void
+NetworkInterface::setBypassFlags(flit * t_flit){
     // TODO
 
 }
 
-void resetBypassFlags(flit * t_flit){
+void
+NetworkInterface::resetBypassFlags(flit * t_flit){
     // TODO
 }
 

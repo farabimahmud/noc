@@ -350,3 +350,8 @@ Router::printExpectedDelay(std::ostream& out)
     out << " ]\n";
     out << flush;
 }
+
+OutputUnit* 
+Router::OutputUnit_compute_XY(int src_id, int dest_id, PortDirection dirn){
+   return getOutputUnit(routingUnit.outportComputeXY(src_id, dest_id, dirn));
+}

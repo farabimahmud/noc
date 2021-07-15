@@ -36,6 +36,7 @@
 #include "debug/AttackPacketGenerator.hh"
 #include "debug/Naive.hh"
 #include "debug/SK.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/common/NetDest.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
@@ -53,6 +54,7 @@ int GarnetNetwork::PACKETID = 0;
  * Default parameters (GarnetNetwork.py) can be overwritten from command line
  * (see configs/network/Network.py)
  */
+
 
 GarnetNetwork::GarnetNetwork(const Params *p)
     : Network(p)
@@ -96,7 +98,6 @@ GarnetNetwork::GarnetNetwork(const Params *p)
         ni->init_net_ptr(this);
         DPRINTF(SK, "creating %d nis: %s\n", tmp_i++, *ni);
     }
-
     jitter_all = p->jitter_all;
     optimized = p->optimized;
     bypass_all = p->bypass_all;
@@ -184,6 +185,9 @@ GarnetNetwork::init()
             m_routers[i]->resetExpectedDelay();
         }
     }
+
+    createOutputUnitTable(m_nis.size());
+
 }
 
 /*
@@ -548,4 +552,52 @@ GarnetNetwork::get_ni_from_id(int id){
     return NULL;
 }
 
+
+
+void
+GarnetNetwork::createOutputUnitTable(int num_nis){
+    DPRINTF(Vanilla, "creating %dx%d matrix of OutputUnit*\n", num_nis, num_nis);
+    output_unit_table.resize(num_nis);
+    for (int i =0; i< num_nis; i++){
+        output_unit_table[i].resize(num_nis);
+        for (int j =0; j < num_nis; j++){
+            NetworkInterface * src_ni = m_nis[i];
+            NetworkInterface * dest_ni = m_nis[j]; 
+            
+ //           int num_rows = getNumRows();
+            int num_cols = getNumCols();
+            int src_id = src_ni->get_router_id();
+            int src_x = src_id % num_cols; 
+            int src_y = src_id / num_cols;
+
+            int dest_id = dest_ni->get_router_id();
+            int dest_x = dest_id % num_cols;
+            int dest_y = dest_id / num_cols;
+
+            int x_hops = abs(dest_x - src_x);
+            int y_hops = abs(dest_y - src_y);
+
+//            bool x_dirn = (dest_x >= src_x);
+//             bool y_dirn = (dest_y >= src_y);
+
+            if (x_hops == 0 && y_hops == 0){
+                std::vector<OutputUnit*> ou_vector;
+                ou_vector.clear();
+
+                output_unit_table[i][j] = ou_vector; 
+                
+            } else{
+               Router * src_router = m_routers[src_id];
+               PortDirection initial = "Local"; 
+               OutputUnit* first_output_unit = src_router->OutputUnit_compute_XY(src_id, dest_id, initial);
+               output_unit_table[i][j].push_back(first_output_unit);
+               DPRINTF(Vanilla, "src %d dest %d first OU %#X\n", i,j, first_output_unit);
+
+            }
+
+
+        }   
+    }
+
+}
 

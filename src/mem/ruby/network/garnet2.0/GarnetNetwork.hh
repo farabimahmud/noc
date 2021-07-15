@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "mem/ruby/network/Network.hh"
+#include "mem/ruby/network/garnet2.0/OutputUnit.hh"
 #include "mem/ruby/network/fault_model/FaultModel.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "params/GarnetNetwork.hh"
@@ -46,6 +47,8 @@ class NetDest;
 class NetworkLink;
 class CreditLink;
 class flit;
+class OutputUnit; 
+class OutVcState; 
 
 class GarnetNetwork : public Network
 {
@@ -68,6 +71,8 @@ class GarnetNetwork : public Network
     int fixedTargetNearNode;
     int fixedTargetFarNode;
 
+    void createOutputUnitTable(int num_nis);
+    std::vector<std::vector<std::vector<OutputUnit*>>> output_unit_table;
 
     typedef GarnetNetworkParams Params;
     GarnetNetwork(const Params *p);

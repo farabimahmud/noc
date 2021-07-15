@@ -127,7 +127,8 @@ DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
 
     // determine the rows per bank by looking at the total capacity
     uint64_t capacity = ULL(1) << ceilLog2(AbstractMemory::size());
-
+    
+    /**
     // determine the dram actual capacity from the DRAM config in Mbytes
     uint64_t deviceCapacity = deviceSize / (1024 * 1024) * devicesPerRank *
         ranksPerChannel;
@@ -136,8 +137,8 @@ DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
     if (deviceCapacity != capacity / (1024 * 1024))
         warn("DRAM device capacity (%d Mbytes) does not match the "
              "address range assigned (%d Mbytes)\n", deviceCapacity,
-             capacity / (1024 * 1024));
-
+              capacity / (1024 * 1024));
+    **/
     DPRINTF(DRAM, "Memory capacity %lld (%lld) bytes\n", capacity,
             AbstractMemory::size());
 
