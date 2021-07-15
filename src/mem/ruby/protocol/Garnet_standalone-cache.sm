@@ -197,7 +197,7 @@ machine(MachineType:L1Cache, "Garnet_standalone L1 Cache")
         out_msg.MessageSize := MessageSizeType:Data;
         out_msg.attackMessage := in_msg.attackMessage;
         
-        DPRINTF(Naive, "[issueResponse] %s msg attack=%d\n", 
+        DPRINTF(Naive, "[GARNET:issueResponse] %s msg attack=%d\n", 
             out_msg,
             out_msg.attackMessage);
       }

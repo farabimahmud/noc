@@ -34,6 +34,8 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
+#include <string>
 
 #include "mem/ruby/common/Consumer.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
@@ -85,6 +87,11 @@ class NetworkInterface : public ClockedObject, public Consumer
     }
     
     bool readOptimizedQueue();
+
+    std::set<int> monitoring_list;
+
+    std::string get_monitoring_list();
+
   private:
     GarnetNetwork *m_net_ptr;
     const NodeID m_id;
@@ -111,6 +118,11 @@ class NetworkInterface : public ClockedObject, public Consumer
     // The flit buffers which will serve the Consumer
     std::vector<flitBuffer>  niOutVcs;
     std::vector<Cycles> m_ni_out_vcs_enqueue_time;
+
+    // Separate Virtual Channel for Bypass packets
+    flitBuffer niOutBypassVC;
+    Cycles m_ni_out_bypass_vc_enq_time;
+    OutVcState* bypassVcState;
 
     // The Message buffers that takes messages from the protocol
     std::vector<MessageBuffer *> inNode_ptr;

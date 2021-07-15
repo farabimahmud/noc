@@ -114,7 +114,7 @@ MakeInclude('slicc_interface/Message.hh')
 MakeInclude('slicc_interface/RubyRequest.hh')
 
 # added for externalizing protocols
-MakeInclude('slicc_interface/RequestMsg.hh')
+# MakeInclude('slicc_interface/RequestMsg.hh')
 
 # External types
 MakeInclude('common/Address.hh')

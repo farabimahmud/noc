@@ -195,7 +195,7 @@ class GitRepo(AbstractRepo):
 
     def file_from_index(self, name):
         return subprocess.check_output(
-            [ self.git, "show", ":%s" % (name, ) ]).decode()
+            [ self.git, "show", ":%s" % (name, ) ]).decode('utf-8')
 
     def file_from_head(self, name):
         return subprocess.check_output(

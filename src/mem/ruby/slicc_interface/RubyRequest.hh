@@ -60,7 +60,7 @@ class RubyRequest : public Message
     int m_wfid;
     HSAScope m_scope;
     HSASegment m_segment;
-    // bool m_attackMessage;
+    bool m_attackMessage;
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
         uint64_t _pc, RubyRequestType _type, RubyAccessMode _access_mode,
@@ -82,6 +82,7 @@ class RubyRequest : public Message
           m_segment(_segment)
     {
         m_LineAddress = makeLineAddress(m_PhysicalAddress);
+        m_attackMessage = false;
     }
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
@@ -109,6 +110,7 @@ class RubyRequest : public Message
           m_segment(_segment)
     {
         m_LineAddress = makeLineAddress(m_PhysicalAddress);
+        m_attackMessage = false;
     }
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
@@ -137,6 +139,8 @@ class RubyRequest : public Message
           m_segment(_segment)
     {
         m_LineAddress = makeLineAddress(m_PhysicalAddress);
+        m_attackMessage = false;
+
     }
 
 

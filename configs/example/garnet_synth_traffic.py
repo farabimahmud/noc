@@ -99,7 +99,6 @@ parser.add_option("--fixed-target-near",type=int, default=-1,
 parser.add_option("--fixed-target-far", type=int, default=-1,
                   help="Fixed Target for destinations, far node")
 
-parser.add_option("--randomly-selected-targets",action="store_true")
 
 #
 # Add the ruby specific and protocol specific options
@@ -132,10 +131,6 @@ cpus = [ GarnetSyntheticTraffic(
      attack_node = options.attack_node,
      attack_enabled = options.attack_enabled,
      attack_rate = options.attack_rate,
-     fixed_target_enabled = options.fixed_target_enabled,
-     fixed_target_near = options.fixed_target_near,
-     fixed_target_far = options.fixed_target_far,
-     randomly_selected_targets = options.randomly_selected_targets,
      num_cpus = options.num_cpus,
                      ) \
          for i in range(options.num_cpus) ]

@@ -52,6 +52,7 @@ class GarnetNetwork(RubyNetwork):
     bypass_none = Param.Bool(True, "Disable bypass for all aka baseline")
     jitter_all = Param.Bool(False, "Enable Jitter for all")
     bypass_x = Param.Bool(False, "Enable bypass for the x axis only")
+    bypass_vanilla = Param.Bool(False, "Enable bypass using new VC")   
     optimized = Param.Bool(False, "Enable optimized bypass")
     optimization_rate = Param.UInt32(50, "rate of optimization, default 50")
     attack_enabled = Param.Bool(False, "whether attack is enabled in"
@@ -62,12 +63,6 @@ class GarnetNetwork(RubyNetwork):
     dynamic_delay = Param.Bool(False, "Whether the optimization is dynamically \
         adjusted, default is False")
 
-    fixed_target_enabled = Param.Bool(False, "Whether fixed target pair is \
-        enabled for this simulation or not. Default is Not Enabled")
-    fixed_target_near = Param.Int(-1, "Fixed Target Nearest Node")
-    fixed_target_far = Param.Int(-1,"Fixed Target Farthest Node")
-    randomly_selected_targets = Param.Bool(False, "Randomly selected target \
-            default is False")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

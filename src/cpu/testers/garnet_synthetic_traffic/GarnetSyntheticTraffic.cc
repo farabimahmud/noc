@@ -119,34 +119,7 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
         DPRINTF(AttackPacketGenerator, "%d is set as Attack Node\n", id);
         DPRINTF(AttackPacketGenerator, "Attack Rate is %f\n", attackRate);
     }
-    
-    if (p->fixed_target_enabled && p->attack_enabled && p->attack_node==id){
-        if (p->randomly_selected_targets){
-            fixedTargetNearNode = random_mt.random<unsigned>(0, (int) numCPUs );
-            unsigned temp = random_mt.random<unsigned>(0, (int) numCPUs );
-            while(temp == fixedTargetNearNode) {
-                temp = random_mt.random<unsigned>(0, (int) numCPUs );
-            }
-            fixedTargetFarNode = temp;
-
-            if (fixedTargetNearNode > fixedTargetFarNode){
-                fixedTargetFarNode = fixedTargetNearNode;
-                fixedTargetNearNode = temp;
-                
-            }
-            DPRINTF(AttackPacketGenerator, "Randomly Selected Attack Nodes"
-            "are far %d near %d\n", 
-            fixedTargetFarNode, fixedTargetNearNode);
-
-        }else{
-            fixedTargetNearNode = p->fixed_target_near;
-            fixedTargetFarNode = p->fixed_target_far;
-            DPRINTF(AttackPacketGenerator, "Attack Nodes are far %d near %d\n", 
-            fixedTargetFarNode, fixedTargetNearNode);
-
-        }
-    }
-   
+       
 }
 
 Port &
@@ -204,8 +177,8 @@ GarnetSyntheticTraffic::tick()
     bool sentPacket = false;
     if (sendAllowedThisCycle) {
         bool senderEnable = true;
-        DPRINTF(AttackPacketGenerator,
-        "Send Allowd this cycle at %d\n", id);
+        // DPRINTF(AttackPacketGenerator,
+        // "Send Allowd this cycle at %d\n", id);
         if (numPacketsMax >= 0 && numPacketsSent >= numPacketsMax)
             senderEnable = false;
 
@@ -241,17 +214,6 @@ GarnetSyntheticTraffic::generateAttackPkt(){
     int num_destinations = numDestinations;
     unsigned destination = id;
     destination = random_mt.random<unsigned>(0, num_destinations - 1);
-    if (hasFixedTarget){
-        assert( 0 <= fixedTargetNearNode && fixedTargetNearNode < num_destinations);
-        assert( 0 <= fixedTargetFarNode &&  fixedTargetFarNode < num_destinations);
-        destination = random_mt.random<unsigned>(0,1); 
-        if (destination == 0){
-            destination = fixedTargetNearNode;
-        }
-        else{
-            destination = fixedTargetFarNode;
-        }
-    }
     Addr paddr =  destination;
     paddr <<= blockSizeBits;
     unsigned access_size = 1; // Does not affect Ruby simulation

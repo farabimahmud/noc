@@ -37,6 +37,7 @@
 class OutVcState
 {
   public:
+    OutVcState();
     OutVcState(int id, GarnetNetwork *network_ptr);
 
     int get_credit_count()          { return m_credit_count; }

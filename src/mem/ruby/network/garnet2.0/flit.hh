@@ -134,11 +134,15 @@ class flit
         return jitter_amount;
     }
 
-    void setAttackFlit(bool x);
-    bool getAttackFlit();
+    void set_attack(bool x);
+    bool get_attack();
+
+    void set_bypass(bool x);
+    bool get_bypass();
 
     bool isAttackFlit; 
     bool jitter;
+    bool bypass;
     Cycles jitter_amount;
     Cycles ready_to_commit;
 

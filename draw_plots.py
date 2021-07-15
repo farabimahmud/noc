@@ -19,8 +19,8 @@ benches = [
             ]
 
 week_update = "/home/grads/f/farabi/noc/m5out/restore/week-jan-26/"
-
-week_update = "/home/grads/f/farabi/noc/"
+week_update = "/home/farabi/noc/"
+# week_update = "/home/grads/f/farabi/noc/"
 
 
 def print_feature(stat_files, feature_name):

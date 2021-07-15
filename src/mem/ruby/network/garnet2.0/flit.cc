@@ -62,14 +62,26 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
 
 // set to determine attack flit
 void 
-flit::setAttackFlit(bool x=true){
+flit::set_attack(bool x=true){
   isAttackFlit = x;
 }
 
 bool 
-flit::getAttackFlit(){
+flit::get_attack(){
   return isAttackFlit;
 }
+
+// for bypass flit
+void 
+flit::set_bypass(bool x=true){
+  bypass = x;
+}
+
+bool 
+flit::get_bypass(){
+  return bypass;
+}
+
 
 // Flit can be printed out for debugging purposes
 void
@@ -96,3 +108,4 @@ flit::functionalWrite(Packet *pkt)
     Message *msg = m_msg_ptr.get();
     return msg->functionalWrite(pkt);
 }
+

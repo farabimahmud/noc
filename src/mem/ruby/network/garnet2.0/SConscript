@@ -53,3 +53,4 @@ Source('Credit.cc')
 
 
 DebugFlag('Naive')
+DebugFlag('Vanilla')

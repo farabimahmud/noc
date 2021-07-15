@@ -148,10 +148,6 @@ class GarnetSyntheticTraffic : public ClockedObject
 
     void generateAttackPkt();
 
-    bool hasFixedTarget;
-    int fixedTargetNearNode;
-    int fixedTargetFarNode;
-
 };
 
 #endif // __CPU_GARNET_SYNTHETIC_TRAFFIC_HH__

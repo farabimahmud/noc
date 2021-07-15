@@ -80,7 +80,7 @@ CrossbarSwitch::wakeup()
             switch_buffer.getTopFlit();
             m_crossbar_activity++;
 
-            DPRINTF(Naive, "[CB] sending %s via port %d\n", *t_flit, outport);
+            // DPRINTF(Naive, "[CB] sending %s via port %d\n", *t_flit, outport);
         }
     }
 }

@@ -38,12 +38,11 @@
 #include "debug/RubyNetwork.hh"
 #include "debug/Naive.hh"
 #include "debug/SK.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/Credit.hh"
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
-#include "mem/ruby/slicc_interface/RubyRequest.hh"
-#include "mem/ruby/slicc_interface/RequestMsg.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 
 using namespace std;
@@ -56,7 +55,9 @@ NetworkInterface::NetworkInterface(const Params *p)
     m_deadlock_threshold(p->garnet_deadlock_threshold),
     vc_busy_counter(m_virtual_networks, 0)
 {
+    
     const int num_vcs = m_vc_per_vnet * m_virtual_networks;
+
     niOutVcs.resize(num_vcs);
     m_ni_out_vcs_enqueue_time.resize(num_vcs);
 
@@ -64,12 +65,15 @@ NetworkInterface::NetworkInterface(const Params *p)
     for (auto& time : m_ni_out_vcs_enqueue_time) {
         time = Cycles(INFINITE_);
     }
+    // added for bypass Virtual Channel
+    m_ni_out_bypass_vc_enq_time = Cycles(INFINITE_);
 
     m_stall_count.resize(m_virtual_networks);
     flit_jitter_threshold = Cycles(p->flit_jitter_threshold);
     // DPRINTF(Naive, "flit jitter threshold %d\n", flit_jitter_threshold);
 
     jq = new flitBufferRTC();
+    monitoring_list.clear();
 }
 
 void
@@ -80,6 +84,7 @@ NetworkInterface::init()
     for (int i = 0; i < num_vcs; i++) {
         outVcState.emplace_back(i, m_net_ptr);
     }
+    bypassVcState = new OutVcState(GarnetNetwork::BYPASS_VC_ID,m_net_ptr);
 }
 
 void
@@ -455,7 +460,7 @@ NetworkInterface::wakeup()
                 jq->insert(t_flit);
             }
             else if (m_net_ptr->jitter_all && 
-                    t_flit->getAttackFlit() && 
+                    t_flit->get_attack() && 
                     t_flit->get_route().dest_ni == m_id){          
                 
                 Cycles latency = curCycle() - t_flit->get_enqueue_time();
@@ -594,13 +599,11 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
 
     bool isAttackMessage = net_msg_ptr->m_attackMessage;
     
-    DPRINTF(Naive, "[NI:flitisize] msg %s at %#x is %s Packet\n",
-        *net_msg_ptr, net_msg_ptr,
-        isAttackMessage ? "Attack" :"Regular");
-    DPRINTF(Naive, "isAttackMessage: %d, %#x\n", net_msg_ptr->m_attackMessage, &(net_msg_ptr->m_attackMessage));
+    // DPRINTF(Vanilla, "[NI:flitisize] msg %s at %#x is %s Packet\n",
+    //     *net_msg_ptr, net_msg_ptr,
+    //     isAttackMessage ? "Attack" :"Regular");
 
-
-
+    
     // gets all the destinations associated with this message.
     vector<NodeID> dest_nodes = net_msg_dest.getAllDest();
 
@@ -653,19 +656,21 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         route.dest_ni = destID;
         route.dest_router = m_net_ptr->get_router_id(destID);
 
+        if (isAttackMessage){
+            monitoring_list.insert(route.dest_router);
+            get_monitoring_list();
+
+        }
+
+
         // initialize hops_traversed to -1
         // so that the first router increments it to 0
         route.hops_traversed = -1;
         uint32_t random_value = rand() % 100;
 
         // check if this packet is attack packet
-        bool isAttackFarFlit =  (route.dest_router == 
-                m_net_ptr->fixedTargetFarNode);
-        bool isAttackNearFlit = (route.dest_router == 
-                m_net_ptr->fixedTargetNearNode);
-        DPRINTF(Naive, "[AttackFlit] Far %d Near %d\n", isAttackFarFlit,
-                        isAttackNearFlit);
         m_net_ptr->increment_injected_packets(vnet);
+
         for (int i = 0; i < num_flits; i++) {
             m_net_ptr->increment_injected_flits(vnet);
             flit *fl = new flit(i, vc, vnet, route, num_flits, new_msg_ptr,
@@ -680,64 +685,12 @@ NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
                     random_value,
                     m_net_ptr->optimization_rate);
 
+// send this flits into VCs according to the policies
+
             if (m_net_ptr->jitter_all){
                 fl->set_jittered(true);                
             }
-        
-            if (m_net_ptr->optimized && random_value <= m_net_ptr->optimization_rate){
-              if (m_net_ptr->checkFree(m_router_id, route.dest_router,
-                            GarnetNetwork::PACKETID)){
-                 
-                 fl->set_optimized(true); 
-                 m_net_ptr->insertFlitInOptimizedNI(route.dest_ni, fl);
-                 NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
-
-                 dest_ni->scheduleEvent(Cycles(2+i));
-                 DPRINTF(Naive, "[OQ] Created flit %s at OQ of Router %d\n", 
-                         *fl, 
-                         route.dest_router);
-              } else{
-                 DPRINTF(Naive, "[OQ] Not Free so Created flit %s \n", 
-                         *fl);
-                 niOutVcs[vc].insert(fl);
-              }
-            }
-            else if(m_net_ptr->dynamic_delay ){
-                Cycles far_node_delay = m_net_ptr->m_routers[m_router_id]->getExpectedDelay(m_net_ptr->fixedTargetFarNode);
-                Cycles near_node_delay = m_net_ptr->m_routers[m_router_id]->getExpectedDelay(m_net_ptr->fixedTargetNearNode);
-                Cycles threshold_delay = Cycles((far_node_delay+near_node_delay) /2);
-                fl->set_jitter_amount(threshold_delay);
-                DPRINTF(Naive, "Jitter set as %d for %s\n", threshold_delay, *fl);
-
-                if (isAttackMessage){
-                    if(route.src_router == m_net_ptr->attack_node 
-                        && route.dest_router == m_net_ptr->fixedTargetNearNode){
-                        fl->set_jittered(true);
-                        niOutVcs[vc].insert(fl);
-                        DPRINTF(Naive, "Created flit %s at NI\n",
-                            *fl);                        
-                    }
-                    else if (route.src_router == m_net_ptr->attack_node 
-                        && route.dest_router == m_net_ptr->fixedTargetFarNode){
-                        fl->set_optimized(true); 
-                        m_net_ptr->insertFlitInOptimizedNI(route.dest_ni, fl);
-                        NetworkInterface* dest_ni = m_net_ptr->get_ni_from_id(destID);
-
-                        dest_ni->scheduleEvent(Cycles(2+i));
-                        DPRINTF(Naive, "[OQ] Created flit %s at OQ of Router %d\n", 
-                                *fl, 
-                                route.dest_router);
-                    }
-                } else{
-                    niOutVcs[vc].insert(fl);
-                    DPRINTF(Naive, "Created flit %s at NI\n",
-                        *fl);
-                }                 
-            }
-
             else{
-
-
                 niOutVcs[vc].insert(fl);
                 DPRINTF(Naive, "Created flit %s at NI\n",
                     *fl);
@@ -899,4 +852,17 @@ NetworkInterface *
 GarnetNetworkInterfaceParams::create()
 {
     return new NetworkInterface(this);
+}
+
+std::string
+NetworkInterface::get_monitoring_list()
+{
+    std::string s = "";
+    for (auto i:monitoring_list){
+        s +=  std::to_string(i);
+        s +=  " ";
+    }
+    DPRINTF(Vanilla, "List of Destinations to monitor %s\n", s);
+
+    return s;
 }

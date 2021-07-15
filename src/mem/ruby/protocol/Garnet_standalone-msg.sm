@@ -33,15 +33,14 @@ enumeration(CoherenceRequestType, desc="...") {
 }
 
 // RequestMsg (and also forwarded requests)
-structure(RequestMsg, desc="...", interface="Message", external="yes") {
+structure(RequestMsg, desc="...", interface="Message") {
   Addr addr,                   desc="Physical address for this request";
   CoherenceRequestType Type,   desc="Type of request (GetS, GetX, PutX, etc)";
   MachineID Requestor,         desc="Node who initiated the request";
   NetDest Destination,         desc="Multicast destination mask";
   DataBlock DataBlk,           desc="data for the cache line";
   MessageSizeType MessageSize, desc="size category of the message";
-  bool attackMessage,          desc="whether the message is attack message";
-  
+  bool attackMessage,          desc="Whether this is a attack message"; 
 
   bool functionalRead(Packet *pkt) {
     error("Garnet_standalone does not support functional accesses!");

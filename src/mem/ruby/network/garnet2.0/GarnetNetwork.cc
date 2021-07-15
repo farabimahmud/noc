@@ -36,6 +36,7 @@
 #include "debug/AttackPacketGenerator.hh"
 #include "debug/Naive.hh"
 #include "debug/SK.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/common/NetDest.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
@@ -48,6 +49,7 @@
 
 using namespace std;
 int GarnetNetwork::PACKETID = 0;
+int GarnetNetwork::BYPASS_VC_ID = 99; 
 /*
  * GarnetNetwork sets up the routers and links and collects stats.
  * Default parameters (GarnetNetwork.py) can be overwritten from command line
@@ -117,21 +119,10 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     min_cycles = p->min_cycles;
     max_cycles = p->max_cycles;
     dynamic_delay = p->dynamic_delay; 
-    hasFixedTarget = p->fixed_target_enabled;
-    if (attack_enabled && hasFixedTarget ){
-        fixedTargetNearNode = p->fixed_target_near;
-        fixedTargetFarNode = p->fixed_target_far;
-        DPRINTF(AttackPacketGenerator, "assigned fixed taget near %d "
-        "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
+    bypass_vanilla = p->bypass_vanilla;
+    if(bypass_vanilla) {
+        DPRINTF(Vanilla, "Vanilla bypass has been enabled\n");
     }
-    else if(p->randomly_selected_targets){
-      DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
-      fixedTargetNearNode = 1; 
-      fixedTargetFarNode = 51;
-    }
-
-    // initialize expected_delay if scheme is dynamic
-
 }
 
 void
@@ -179,11 +170,12 @@ GarnetNetwork::init()
     }
 
     // Reset router entries if dynamic delay is enabled
-    if(dynamic_delay){
+    if(dynamic_delay || bypass_vanilla ){
         for (int i=0; i<m_routers.size(); i++){
             m_routers[i]->resetExpectedDelay();
         }
     }
+
 }
 
 /*

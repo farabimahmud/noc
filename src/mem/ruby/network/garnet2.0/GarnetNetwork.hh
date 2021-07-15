@@ -51,8 +51,9 @@ class GarnetNetwork : public Network
 {
   public:
     static int PACKETID;
-    bool jitter_all, optimized, bypass_all, bypass_x;  
+    bool jitter_all, optimized, bypass_all, bypass_x, bypass_vanilla;  
     uint32_t optimization_rate;
+    static int BYPASS_VC_ID;
 
     // ATTACK parameters
     bool attack_enabled;
@@ -62,11 +63,6 @@ class GarnetNetwork : public Network
     int min_cycles;
     int max_cycles;
     bool dynamic_delay;
-
-    // Attack Targets
-    bool hasFixedTarget;
-    int fixedTargetNearNode;
-    int fixedTargetFarNode;
 
 
     typedef GarnetNetworkParams Params;

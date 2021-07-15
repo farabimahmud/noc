@@ -32,6 +32,12 @@
 
 #include "mem/ruby/system/RubySystem.hh"
 
+
+OutVcState::OutVcState()
+    : m_time(0)
+{    
+    m_vc_state = IDLE_;
+}
 OutVcState::OutVcState(int id, GarnetNetwork *network_ptr)
     : m_time(0)
 {

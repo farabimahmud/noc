@@ -65,7 +65,7 @@ void
 Router::resetExpectedDelay(){
     int numRouters = m_network_ptr->getNumRouters();    
     int num_cols = m_network_ptr->getNumCols();
-    DPRINTF(Naive, "number of cols is %d\n",num_cols);
+    // DPRINTF(Naive, "number of cols is %d\n",num_cols);
     int my_id = m_id;
     int my_x = my_id % num_cols;
     int my_y = my_id / num_cols;
@@ -92,11 +92,14 @@ Router::setExpectedDelay(int dest, Cycles value){
     expected_delay[dest] = Cycles((previous + value)/2);
 
 }
+
+
 Cycles
 Router::getExpectedDelay(int dest){
     assert(expected_delay.size()>dest);
     return expected_delay[dest];    
 }
+
 void
 Router::wakeup()
 {
@@ -184,8 +187,8 @@ void
 Router::grant_switch(int inport, flit *t_flit)
 {
     crossbarSwitch.update_sw_winner(inport, t_flit);
-    DPRINTF(Naive, "[RO] %s granted switch at port %d\n",
-            *t_flit, inport);
+    // DPRINTF(Naive, "[RO] %s granted switch at port %d\n",
+    //        *t_flit, inport);
 }
 
 void
