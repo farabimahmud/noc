@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "mem/ruby/network/Network.hh"
 #include "mem/ruby/network/garnet2.0/OutputUnit.hh"
@@ -56,7 +57,7 @@ class GarnetNetwork : public Network
     static int PACKETID;
     bool jitter_all, optimized, bypass_all, bypass_x;  
     uint32_t optimization_rate;
-
+    std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
     // ATTACK parameters
     bool attack_enabled;
     int attack_node;

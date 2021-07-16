@@ -56,8 +56,8 @@ int GarnetNetwork::PACKETID = 0;
  */
 
 
-GarnetNetwork::GarnetNetwork(const Params *p)
-    : Network(p)
+    GarnetNetwork::GarnetNetwork(const Params *p)
+: Network(p)
 {
     m_num_rows = p->num_rows;
     m_ni_flit_size = p->ni_flit_size;
@@ -81,7 +81,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
 
     // record the routers
     for (vector<BasicRouter*>::const_iterator i =  p->routers.begin();
-         i != p->routers.end(); ++i) {
+            i != p->routers.end(); ++i) {
         Router* router = safe_cast<Router*>(*i);
         m_routers.push_back(router);
 
@@ -92,7 +92,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     // record the network interfaces
     int tmp_i = 0;
     for (vector<ClockedObject*>::const_iterator i = p->netifs.begin();
-         i != p->netifs.end(); ++i) {
+            i != p->netifs.end(); ++i) {
         NetworkInterface *ni = safe_cast<NetworkInterface *>(*i);
         m_nis.push_back(ni);
         ni->init_net_ptr(this);
@@ -123,19 +123,19 @@ GarnetNetwork::GarnetNetwork(const Params *p)
         fixedTargetNearNode = p->fixed_target_near;
         fixedTargetFarNode = p->fixed_target_far;
         DPRINTF(AttackPacketGenerator, "assigned fixed taget near %d "
-        "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
+                "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
     }
     else if(p->randomly_selected_targets){
-      DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
-      fixedTargetNearNode = 1; 
-      fixedTargetFarNode = 51;
+        DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
+        fixedTargetNearNode = 1; 
+        fixedTargetFarNode = 51;
     }
 
     // initialize expected_delay if scheme is dynamic
 
 }
 
-void
+    void
 GarnetNetwork::init()
 {
     Network::init();
@@ -165,14 +165,14 @@ GarnetNetwork::init()
     // FaultModel: declare each router to the fault model
     if (isFaultModelEnabled()) {
         for (vector<Router*>::const_iterator i= m_routers.begin();
-             i != m_routers.end(); ++i) {
+                i != m_routers.end(); ++i) {
             Router* router = safe_cast<Router*>(*i);
             int router_id M5_VAR_USED =
                 fault_model->declare_router(router->get_num_inports(),
-                                            router->get_num_outports(),
-                                            router->get_vc_per_vnet(),
-                                            getBuffersPerDataVC(),
-                                            getBuffersPerCtrlVC());
+                        router->get_num_outports(),
+                        router->get_vc_per_vnet(),
+                        getBuffersPerDataVC(),
+                        getBuffersPerCtrlVC());
             assert(router_id == router->get_id());
             router->printAggregateFaultProbability(cout);
             router->printFaultVector(cout);
@@ -186,7 +186,7 @@ GarnetNetwork::init()
         }
     }
 
-    createOutputUnitTable(m_nis.size());
+    createOutputUnitTable(m_routers.size());
 
 }
 
@@ -195,11 +195,11 @@ GarnetNetwork::init()
  * into the Network.
  * It creates a Network Link from the NI to a Router and a Credit Link from
  * the Router to the NI
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
-                            const NetDest& routing_table_entry)
+        const NetDest& routing_table_entry)
 {
     assert(src < m_nodes);
 
@@ -222,11 +222,11 @@ GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
  * This function creates a link from the Network to a NI.
  * It creates a Network Link from a Router to the NI and
  * a Credit Link from NI to the Router
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
-                             const NetDest& routing_table_entry)
+        const NetDest& routing_table_entry)
 {
     assert(dest < m_nodes);
     assert(src < m_routers.size());
@@ -244,21 +244,21 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
 
     PortDirection src_outport_dirn = "Local";
     m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);
+            routing_table_entry,
+            link->m_weight, credit_link);
     m_nis[dest]->addInPort(net_link, credit_link);
 }
 
 /*
  * This function creates an internal network link between two routers.
  * It adds both the network link and an opposite credit link.
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
-                                const NetDest& routing_table_entry,
-                                PortDirection src_outport_dirn,
-                                PortDirection dst_inport_dirn)
+        const NetDest& routing_table_entry,
+        PortDirection src_outport_dirn,
+        PortDirection dst_inport_dirn)
 {
     GarnetIntLink* garnet_link = safe_cast<GarnetIntLink*>(link);
 
@@ -272,25 +272,28 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
 
     m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
     m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);
+            routing_table_entry,
+            link->m_weight, credit_link);
+    src_r_link_dest_r_map[std::make_pair(src,net_link)] = dest;
+    DPRINTF(Vanilla, "Router %d connected via %#x to Router %d\n",
+            src, net_link, dest);
 }
 
 // Total routers in the network
-int
+    int
 GarnetNetwork::getNumRouters()
 {
     return m_routers.size();
 }
 
 // Get ID of router connected to a NI.
-int
+    int
 GarnetNetwork::get_router_id(int ni)
 {
     return m_nis[ni]->get_router_id();
 }
 
-void
+    void
 GarnetNetwork::regStats()
 {
     Network::regStats();
@@ -441,7 +444,7 @@ GarnetNetwork::regStats()
         ;
 }
 
-void
+    void
 GarnetNetwork::collateStats()
 {
     RubySystem *rs = params()->ruby_system;
@@ -479,13 +482,13 @@ GarnetNetwork::print(ostream& out) const
     out << "[GarnetNetwork]";
 }
 
-GarnetNetwork *
+    GarnetNetwork *
 GarnetNetworkParams::create()
 {
     return new GarnetNetwork(this);
 }
 
-uint32_t
+    uint32_t
 GarnetNetwork::functionalWrite(Packet *pkt)
 {
     uint32_t num_functional_writes = 0;
@@ -555,47 +558,59 @@ GarnetNetwork::get_ni_from_id(int id){
 
 
 void
-GarnetNetwork::createOutputUnitTable(int num_nis){
-    DPRINTF(Vanilla, "creating %dx%d matrix of OutputUnit*\n", num_nis, num_nis);
-    output_unit_table.resize(num_nis);
-    for (int i =0; i< num_nis; i++){
-        output_unit_table[i].resize(num_nis);
-        for (int j =0; j < num_nis; j++){
-            NetworkInterface * src_ni = m_nis[i];
-            NetworkInterface * dest_ni = m_nis[j]; 
-            
- //           int num_rows = getNumRows();
-            int num_cols = getNumCols();
-            int src_id = src_ni->get_router_id();
-            int src_x = src_id % num_cols; 
-            int src_y = src_id / num_cols;
+GarnetNetwork::createOutputUnitTable(int num_routers){
+    DPRINTF(Vanilla, "creating %dx%d matrix of OutputUnit*\n", num_routers, num_routers);
+    output_unit_table.resize(num_routers);
+    for (int i =0; i< num_routers; i++){
+        output_unit_table[i].resize(num_routers);
+        for (int j =0; j < num_routers; j++){
+            int src_id =  i;
+            int dest_id = j;
+            std::vector<OutputUnit*> ou_vector;
 
-            int dest_id = dest_ni->get_router_id();
-            int dest_x = dest_id % num_cols;
-            int dest_y = dest_id / num_cols;
-
-            int x_hops = abs(dest_x - src_x);
-            int y_hops = abs(dest_y - src_y);
-
-//            bool x_dirn = (dest_x >= src_x);
-//             bool y_dirn = (dest_y >= src_y);
-
-            if (x_hops == 0 && y_hops == 0){
-                std::vector<OutputUnit*> ou_vector;
+            if (i==j){
                 ou_vector.clear();
-
                 output_unit_table[i][j] = ou_vector; 
-                
-            } else{
-               Router * src_router = m_routers[src_id];
-               PortDirection initial = "Local"; 
-               OutputUnit* first_output_unit = src_router->OutputUnit_compute_XY(src_id, dest_id, initial);
-               output_unit_table[i][j].push_back(first_output_unit);
-               DPRINTF(Vanilla, "src %d dest %d first OU %#X\n", i,j, first_output_unit);
 
+            } else{
+
+                int cur_router_id = src_id;
+                Router * cur_router = m_routers[cur_router_id];
+                PortDirection cur_dirn = "Local";
+
+                int cur_outport; 
+                OutputUnit* cur_output_unit; 
+
+                while(cur_router_id != dest_id){
+                    DPRINTF(Vanilla, "createOutputUnitTable "
+                            "i %d j %d cur router %d\n", 
+                            i,j,
+                            cur_router_id);
+                    cur_outport = cur_router->outport_compute_XY(
+                            cur_router_id,
+                            dest_id,
+                            cur_dirn
+                            );
+
+                    cur_output_unit = cur_router->getOutputUnit(cur_outport);
+                    cur_dirn = cur_router->getInputDirection(
+                            cur_router->getOutportDirection(cur_outport));
+                   
+                    NetworkLink * cur_link = cur_output_unit->get_outlink();
+                    ou_vector.push_back(cur_output_unit);    
+                    cur_router_id  =  src_r_link_dest_r_map[
+                        std::make_pair(
+                                cur_router_id,
+                                cur_link
+                                )
+                                ];
+                    cur_router = m_routers[cur_router_id];
+                   
+                }
+                output_unit_table[i][j] = ou_vector;
             }
 
-
+            
         }   
     }
 

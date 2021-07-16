@@ -33,6 +33,7 @@
 
 #include "debug/RubyNetwork.hh"
 #include "debug/Naive.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/network/garnet2.0/CreditLink.hh"
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
@@ -351,7 +352,28 @@ Router::printExpectedDelay(std::ostream& out)
     out << flush;
 }
 
-OutputUnit* 
-Router::OutputUnit_compute_XY(int src_id, int dest_id, PortDirection dirn){
-   return getOutputUnit(routingUnit.outportComputeXY(src_id, dest_id, dirn));
+int
+Router::outport_compute_XY(int src_id, int dest_id, PortDirection dirn){
+   return routingUnit.outportComputeXY(src_id, dest_id, dirn);
+}
+
+PortDirection
+Router::getInputDirection(PortDirection input){
+
+    DPRINTF(Vanilla,"Router:getInputDirection %s\n", input);
+    if (input == "East"){
+        return "West";
+    }
+    else if (input== "West"){
+        return "East";
+    }
+    else if (input == "North"){
+        return "South";
+    }else if(input == "South"){
+        return "North";
+    }else{
+        assert(false &&  "Error! Should not Happen\n"); 
+        return "";
+    }
+   
 }

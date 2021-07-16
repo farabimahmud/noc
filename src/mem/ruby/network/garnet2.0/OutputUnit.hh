@@ -64,6 +64,7 @@ class OutputUnit : public Consumer
     inline PortDirection get_direction() { return m_direction; }
     bool bypass_flag;
     
+    NetworkLink* get_outlink();    
     int get_credit_count(int vc);
     inline int get_outlink_id();
     inline void set_vc_state(VC_state_type,int, Cycles);

@@ -37,8 +37,8 @@
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
 
-OutputUnit::OutputUnit(int id, PortDirection direction, Router *router)
-  : Consumer(router), m_router(router), m_id(id), m_direction(direction),
+    OutputUnit::OutputUnit(int id, PortDirection direction, Router *router)
+: Consumer(router), m_router(router), m_id(id), m_direction(direction),
     m_vc_per_vnet(m_router->get_vc_per_vnet())
 {
     const int m_num_vcs = m_router->get_num_vcs();
@@ -52,31 +52,37 @@ OutputUnit::OutputUnit(int id, PortDirection direction, Router *router)
 
 
     int
-    OutputUnit::get_credit_count(int vc)
-    {
-        return outVcState[vc]->get_credit_count();
-    }
+OutputUnit::get_credit_count(int vc)
+{
+    return outVcState[vc]->get_credit_count();
+}
+
+NetworkLink * 
+OutputUnit::get_outlink(){
+    return m_out_link;
+}
+
 
     inline int
-    OutputUnit::get_outlink_id()
-    {
-        return m_out_link->get_id();
-    }
+OutputUnit::get_outlink_id()
+{
+    return m_out_link->get_id();
+}
 
     inline void
-    OutputUnit::set_vc_state(VC_state_type state, int vc, Cycles curTime)
-    {
-      outVcState[vc]->setState(state, curTime);
-    }
+OutputUnit::set_vc_state(VC_state_type state, int vc, Cycles curTime)
+{
+    outVcState[vc]->setState(state, curTime);
+}
 
     inline bool
-    OutputUnit::is_vc_idle(int vc, Cycles curTime)
-    {
-        return (outVcState[vc]->isInState(IDLE_, curTime));
-    }
+OutputUnit::is_vc_idle(int vc, Cycles curTime)
+{
+    return (outVcState[vc]->isInState(IDLE_, curTime));
+}
 
 
-void
+    void
 OutputUnit::decrement_credit(int out_vc)
 {
     DPRINTF(RubyNetwork, "Router %d OutputUnit %d decrementing credit for "
@@ -86,7 +92,7 @@ OutputUnit::decrement_credit(int out_vc)
     outVcState[out_vc]->decrement_credit();
 }
 
-void
+    void
 OutputUnit::increment_credit(int out_vc)
 {
     DPRINTF(RubyNetwork, "Router %d OutputUnit %d incrementing credit for "
@@ -99,7 +105,7 @@ OutputUnit::increment_credit(int out_vc)
 // Check if the output VC (i.e., input VC at next router)
 // has free credits (i..e, buffer slots).
 // This is tracked by OutVcState
-bool
+    bool
 OutputUnit::has_credit(int out_vc)
 {
     assert(outVcState[out_vc]->isInState(ACTIVE_, m_router->curCycle()));
@@ -108,7 +114,7 @@ OutputUnit::has_credit(int out_vc)
 
 
 // Check if the output port (i.e., input port at next router) has free VCs.
-bool
+    bool
 OutputUnit::has_free_vc(int vnet)
 {
     int vc_base = vnet*m_vc_per_vnet;
@@ -121,7 +127,7 @@ OutputUnit::has_free_vc(int vnet)
 }
 
 // Assign a free output VC to the winner of Switch Allocation
-int
+    int
 OutputUnit::select_free_vc(int vnet)
 {
     int vc_base = vnet*m_vc_per_vnet;
@@ -143,7 +149,7 @@ OutputUnit::select_free_vc(int vnet)
  * the output VC is marked IDLE.
  */
 
-void
+    void
 OutputUnit::wakeup()
 {
     if (m_credit_link->isReady(m_router->curCycle())) {
@@ -157,32 +163,32 @@ OutputUnit::wakeup()
     }
 }
 
-flitBuffer*
+    flitBuffer*
 OutputUnit::getOutQueue()
 {
     return &outBuffer;
 }
 
-void
+    void
 OutputUnit::set_out_link(NetworkLink *link)
 {
     m_out_link = link;
 }
 
-void
+    void
 OutputUnit::set_credit_link(CreditLink *credit_link)
 {
     m_credit_link = credit_link;
 }
 
-void
+    void
 OutputUnit::insert_flit(flit *t_flit)
 {
     outBuffer.insert(t_flit);
     m_out_link->scheduleEventAbsolute(m_router->clockEdge(Cycles(1)));
 }
 
-uint32_t
+    uint32_t
 OutputUnit::functionalWrite(Packet *pkt)
 {
     return outBuffer.functionalWrite(pkt);
