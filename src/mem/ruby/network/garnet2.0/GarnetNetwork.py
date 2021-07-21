@@ -69,6 +69,20 @@ class GarnetNetwork(RubyNetwork):
     randomly_selected_targets = Param.Bool(False, "Randomly selected target \
             default is False")
 
+    all_out_bypass = Param.Bool(False, "All out bypass blocks all the output \
+            units along the path of bypass until bypass is completed. \
+            Default value false")
+
+    max_hpc = Param.Int(3, "Maximum Hops Per Cycle one packet can bypass \
+            depends on the technology. Default value is 3")
+    lower_limit = Param.Int(10, "Number of cycles it takes to reach the \
+            farthest node using bypass.")
+    upper_limit = Param.Int(40, "Number of cycles it takes to reach the \
+            farthest node using Normal path. Default is 40")
+
+    delta_s  = Param.Int(4, "Number of cycles we cannot differentiate \
+            the timing differences between. Default is 4")
+
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'
     cxx_class = 'NetworkInterface'

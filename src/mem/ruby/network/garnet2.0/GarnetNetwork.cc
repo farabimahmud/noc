@@ -88,6 +88,7 @@ int GarnetNetwork::PACKETID = 0;
         // initialize the router's network pointers
         router->init_net_ptr(this);
     }
+    all_out_bypass = p->all_out_bypass;
 
     // record the network interfaces
     int tmp_i = 0;
@@ -132,6 +133,14 @@ int GarnetNetwork::PACKETID = 0;
     }
 
     // initialize expected_delay if scheme is dynamic
+    if (all_out_bypass){
+        DPRINTF(Vanilla, "All out bypass enabled\n");
+    }
+    max_hpc = p->max_hpc;
+    lower_limit = Cycles(p->lower_limit);
+    upper_limit = Cycles(p->upper_limit);
+    delta_s = Cycles(p->delta_s);
+    target = Cycles(p->upper_limit);
 
 }
 

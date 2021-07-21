@@ -12,7 +12,7 @@
     --mesh-rows=8  \
     --synthetic=uniform_random \
     --injectionrate=0.01 \
-    --bypass=bypass_none \
+    --bypass=bypass_all_out \
     --attack-enabled \
     --attack-node=0 \
     --attack-rate=0.1 \
@@ -20,6 +20,11 @@
     --fixed-target-enabled \
     --fixed-target-near=1 \
     --fixed-target-far=53 \
+    --max-hpc=3 \
+    --lower_limit=10 \
+    --upper_limit=40 \
+    --delta_s=4 \
+
 
 
     # --num-packets-max=1 \

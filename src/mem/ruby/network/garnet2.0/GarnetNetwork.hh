@@ -56,11 +56,17 @@ class GarnetNetwork : public Network
   public:
     static int PACKETID;
     bool jitter_all, optimized, bypass_all, bypass_x;  
+    bool all_out_bypass; 
     uint32_t optimization_rate;
     std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
+
+    int max_hpc; 
+    Cycles lower_limit, upper_limit, delta_s, target;
+
     // ATTACK parameters
     bool attack_enabled;
     int attack_node;
+
 
     // Window size
     int min_cycles;
