@@ -58,6 +58,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
         m_type = BODY_;
     isAttackFlit = false;
     jitter = false;
+    target_latency = Cycles(0);
 }
 
 // set to determine attack flit
@@ -87,6 +88,7 @@ flit::print(std::ostream& out) const
     out << "Dest Router=" << m_route.dest_router << " ";
     out << "Enqueue Time=" << m_enqueue_time << " ";
     out << "Attack Flit=" << isAttackFlit << " ";
+    out << "RTC=" << ready_to_commit << " ";
     out << "]";
 }
 

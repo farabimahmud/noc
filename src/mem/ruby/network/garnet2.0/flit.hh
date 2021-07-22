@@ -141,6 +141,7 @@ class flit
     bool jitter;
     Cycles jitter_amount;
     Cycles ready_to_commit;
+    Cycles target_latency;
 
 
   protected:
