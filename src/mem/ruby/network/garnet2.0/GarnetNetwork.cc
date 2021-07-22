@@ -284,8 +284,8 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
             routing_table_entry,
             link->m_weight, credit_link);
     src_r_link_dest_r_map[std::make_pair(src,net_link)] = dest;
-    DPRINTF(Vanilla, "Router %d connected via %#x to Router %d\n",
-            src, net_link, dest);
+    // DPRINTF(Vanilla, "Router %d connected via %#x to Router %d\n",
+    //         src, net_link, dest);
 }
 
 // Total routers in the network
@@ -591,10 +591,10 @@ GarnetNetwork::createOutputUnitTable(int num_routers){
                 OutputUnit* cur_output_unit; 
 
                 while(cur_router_id != dest_id){
-                    DPRINTF(Vanilla, "createOutputUnitTable "
-                            "i %d j %d cur router %d\n", 
-                            i,j,
-                            cur_router_id);
+                    //DPRINTF(Vanilla, "createOutputUnitTable "
+                    //        "i %d j %d cur router %d\n", 
+                    //        i,j,
+                    //        cur_router_id);
                     cur_outport = cur_router->outport_compute_XY(
                             cur_router_id,
                             dest_id,

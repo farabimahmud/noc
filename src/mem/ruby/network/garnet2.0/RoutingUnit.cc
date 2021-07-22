@@ -126,8 +126,8 @@ RoutingUnit::addOutDirection(PortDirection outport_dirn, int outport_idx)
 {
     m_outports_dirn2idx[outport_dirn] = outport_idx;
     m_outports_idx2dirn[outport_idx]  = outport_dirn;
-    DPRINTF(Vanilla, "At Router %d direction %s id %d\n", m_router->get_id(),
-            outport_dirn, outport_idx); 
+    // DPRINTF(Vanilla, "At Router %d direction %s id %d\n", m_router->get_id(),
+    //        outport_dirn, outport_idx); 
 }
 
 // outportCompute() is called by the InputUnit

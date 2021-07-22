@@ -111,17 +111,10 @@ class flit
         m_pid = x;
     }
 
-    void set_optimized(bool x){
-        optimized = x;
-    }
-
-    bool is_optimized(){
-        return optimized;
-    }
-
     void set_jittered(bool x){
         jitter = x;
     }
+
     bool is_jittered(){
         return jitter; 
     }
@@ -134,18 +127,27 @@ class flit
         return jitter_amount;
     }
 
+    void set_bypass_flag(bool x){
+        bypass = x;
+    }
+    
+    bool get_bypass_flag(){
+        return bypass;
+    } 
+
     void setAttackFlit(bool x);
     bool getAttackFlit();
 
     bool isAttackFlit; 
     bool jitter;
+    bool bypass;
+
     Cycles jitter_amount;
     Cycles ready_to_commit;
     Cycles target_latency;
 
 
   protected:
-    bool optimized;
     uint64_t m_pid;
     int m_id;
     int m_vnet;

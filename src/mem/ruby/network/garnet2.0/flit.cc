@@ -59,6 +59,8 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
     isAttackFlit = false;
     jitter = false;
     target_latency = Cycles(0);
+    ready_to_commit = Cycles(0);
+  
 }
 
 // set to determine attack flit

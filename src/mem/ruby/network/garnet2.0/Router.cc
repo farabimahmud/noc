@@ -360,7 +360,7 @@ Router::outport_compute_XY(int src_id, int dest_id, PortDirection dirn){
 PortDirection
 Router::getInputDirection(PortDirection input){
 
-    DPRINTF(Vanilla,"Router:getInputDirection %s\n", input);
+    // DPRINTF(Vanilla,"Router:getInputDirection %s\n", input);
     if (input == "East"){
         return "West";
     }
