@@ -224,7 +224,6 @@ NetworkInterface::readJQ(){
     bool read_from_JQ = false;
     Cycles currentCycle = curCycle();
     Tick curTime = clockEdge();
-    DPRINTF(Vanilla, "contents of jq is %s\n", *jq);
     if (jq->isReady(currentCycle)){
         DPRINTF(Vanilla, "[NI:readJQ] entered JQ\n");
         flit * t_flit = jq->getTopFlit();
@@ -236,9 +235,10 @@ NetworkInterface::readJQ(){
         outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                 cyclesToTicks(Cycles(1)));
         sendCredit(t_flit, true);
+        DPRINTF(Vanilla, "[NI:readJQ] Reading from new JQ %s\n", *t_flit);
+
         incrementStats(t_flit);
 
-        DPRINTF(Vanilla, "[NI:readJQ] Reading from new JQ %s\n", *t_flit);
 
         delete t_flit;
 
@@ -426,17 +426,17 @@ NetworkInterface::wakeup()
                 DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n",
                         *t_flit, latency, t_flit->target_latency);
                 if (latency < t_flit->target_latency){
-                    Cycles remaining = t_flit->target_latency - latency;
-                    if (remaining > 0){
-                       scheduleEvent(Cycles(remaining));
+                    if (t_flit->target_latency > latency){
+                        scheduleEvent(t_flit->target_latency - latency);
+                        DPRINTF(Vanilla, "%s will wait %d cycles\n", 
+                            *t_flit, t_flit->target_latency - latency);                                   
                     }
                     else{
                         scheduleEvent(Cycles(1));
+                        DPRINTF(Vanilla, "%s will wait %d cycles\n", 
+                           *t_flit, Cycles(1));                                                          
                     }
-
                     jq->insert(t_flit); 
-                    DPRINTF(Vanilla, "%s will wait %d cycles\n", 
-                            *t_flit, remaining);             
                 }         
             }
 
@@ -450,6 +450,9 @@ NetworkInterface::wakeup()
                 // this flit in the NI
                 sendCredit(t_flit, true);
                 // Update stats and delete flit pointer
+                DPRINTF(Vanilla, "[NI:wakeup] enqueMessage %s\n",
+                        *t_flit);
+
                 incrementStats(t_flit);
                 delete t_flit;
             } else {
@@ -472,6 +475,9 @@ NetworkInterface::wakeup()
             sendCredit(t_flit, false);
 
             // Update stats and delete flit pointer.
+            DPRINTF(Vanilla, "[NI:wakeup] Consume NonTail Flit %s\n",
+                        *t_flit);
+           
             incrementStats(t_flit);
             delete t_flit;
         }
@@ -533,6 +539,8 @@ NetworkInterface::checkStallQueue()
                 sendCredit(stallFlit, true);
 
                 // Update Stats
+                DPRINTF(Vanilla, "[NI:checkStallQueue] eject to protocol %s\n",
+                        *stallFlit);                
                 incrementStats(stallFlit);
 
                 // Flit can now safely be deleted and removed from stall queue
@@ -704,13 +712,13 @@ NetworkInterface::sendAttackFlit(flit *fl){
                 / (float) m_net_ptr->max_hpc));
     Cycles latency_n = Cycles(ou_units_req.size());
 
-    //Cycles latency_b_rt = Cycles(ceil(
-    //            ((float) ou_units_req.size() + ou_units_resp.size())
-    //            / ((float) m_net_ptr->max_hpc)));
-    // Cycles latency_n_rt = Cycles(ou_units_req.size()+ ou_units_resp.size());
+    Cycles latency_b_rt = Cycles(ceil(
+                ((float) ou_units_req.size() + ou_units_resp.size())
+                / ((float) m_net_ptr->max_hpc)));
+    Cycles latency_n_rt = Cycles(ou_units_req.size()+ ou_units_resp.size());
 
-    // DPRINTF(Vanilla, "[NI:sendAttackflit] RTT bypass %d normal %d\n", 
-    //         latency_b_rt, latency_n_rt);
+    DPRINTF(Vanilla, "[NI:sendAttackflit] RTT bypass %d normal %d flit %s\n", 
+             latency_b_rt, latency_n_rt, *fl);
 
     /**
     // (1) latency_b <= latency_n 
@@ -730,18 +738,19 @@ NetworkInterface::sendAttackFlit(flit *fl){
     bool case_3 = latency_n >= target;
 
     Cycles jitter_amount = Cycles(0);
-
+    DPRINTF(Vanilla, "Case 1 %d Case 2 %d Case 3 %d\n",
+            case_1, case_2, case_3);
     // Case 1: latency_n < lower 
     // Case 2: latency_n > lower  && latency_n < upper
     // add jitter to make at least lower
     if (case_1 || case_2){
         niOutVcs[vc].insert(fl);
-        if (target - m_net_ptr->delta_s - latency_n > 0){
-            jitter_amount =  target - m_net_ptr->delta_s 
-                - latency_n 
-                + Cycles(fl->get_id());
+        if (target > (m_net_ptr->delta_s + latency_n)){
+            Cycles(fl->get_id());
+            jitter_amount =  (target + Cycles(fl->get_id())) - m_net_ptr->delta_s 
+                - latency_n;
         }
-        fl->target_latency = target - m_net_ptr->delta_s + Cycles(fl->get_id());
+        fl->target_latency = (target + Cycles(fl->get_id())) - m_net_ptr->delta_s;
         fl->ready_to_commit = curCycle() + fl->target_latency;
 
         DPRINTF(Vanilla, "[NI:sendAttackflit] "
@@ -770,7 +779,7 @@ NetworkInterface::sendAttackFlit(flit *fl){
         for (auto ou: ou_units_req){
             ou->bypass_flag = true; 
         }
-        if (target - m_net_ptr->delta_s - latency_b > 0){
+        if (target >  m_net_ptr->delta_s + latency_b){
             jitter_amount =  target - m_net_ptr->delta_s - latency_b;
         }
         fl->set_jitter_amount(jitter_amount);
@@ -779,6 +788,8 @@ NetworkInterface::sendAttackFlit(flit *fl){
         fl->ready_to_commit = curCycle() + latency_b + Cycles(fl->get_id());
         fl->target_latency = target - m_net_ptr->delta_s ;
         dest_ni->bq->insert(fl);
+        DPRINTF(Vanilla, "Scheduling event latency_b %d id %d %d\n",
+              latency_b, Cycles(fl->get_id()), latency_b + Cycles(fl->get_id()));
         dest_ni->scheduleEvent(latency_b + Cycles(fl->get_id())); 
         DPRINTF(Vanilla, "flit %s inserted into Bypass Queue "
                 "that will wake up dest_ni %d at cycle %d\n", 
@@ -927,7 +938,8 @@ NetworkInterface::checkReschedule()
     for (auto& ni_out_vc : niOutVcs) {
         if (ni_out_vc.isReady(curCycle() + Cycles(1))) {
             // flit * tf = ni_out_vc.peekTopFlit();
-            DPRINTF(Vanilla, "Current flits waiting in niOutVc %s\n", ni_out_vc);
+            DPRINTF(Vanilla, "[NI:CheckReschedule] "
+                    "current flits waiting in niOutVc %s\n", ni_out_vc);
             scheduleEvent(Cycles(1));
             return;
         }
