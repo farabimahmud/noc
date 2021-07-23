@@ -172,13 +172,21 @@ NetworkInterface::incrementStats(flit *t_flit)
         m_net_ptr->increment_packet_network_latency(network_delay, vnet);
         m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
         m_net_ptr->sample_latency(network_delay);
-        DPRINTF(Vanilla, "SR %d, DR %d, ND %d, QD %d, AT %d\n", 
+        
+        if (t_flit->isAttackFlit){
+        DPRINTF(Vanilla, "SR %d, DR %d, ND %d, QD %d, AT %d,"
+                " LB %d, LN %d, TC %d, VN %d msg_ptr %s\n", 
                 src_router_id, 
                 dest_router_id,
                 network_delay,
                 queueing_delay,
-                t_flit->isAttackFlit);
-
+                t_flit->isAttackFlit,
+                t_flit->lb,
+                t_flit->ln, 
+                t_flit->tc, 
+                t_flit->get_vnet(),
+                *t_flit->m_msg_ptr);
+        }
         // update expected delay table
         if(m_net_ptr->dynamic_delay){
             src_router->setExpectedDelay(dest_router_id,
@@ -225,24 +233,33 @@ NetworkInterface::readJQ(){
     Cycles currentCycle = curCycle();
     Tick curTime = clockEdge();
     if (jq->isReady(currentCycle)){
-        DPRINTF(Vanilla, "[NI:readJQ] entered JQ\n");
         flit * t_flit = jq->getTopFlit();
         flit_type t_flit_type = t_flit->get_type();
         assert(t_flit_type == HEAD_TAIL_ || t_flit_type == TAIL_);
         int vc = t_flit->get_vc();
         int vnet = t_flit->get_vnet();
-        outVcState[vc].setState(IDLE_, currentCycle);
-        outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+
+        bool messageEnqueuedThisCycle = checkStallQueue();
+        if (!messageEnqueuedThisCycle  && 
+                outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)){
+            outVcState[vc].setState(IDLE_, currentCycle);
+            outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                 cyclesToTicks(Cycles(1)));
-        sendCredit(t_flit, true);
-        DPRINTF(Vanilla, "[NI:readJQ] Reading from new JQ %s\n", *t_flit);
+            sendCredit(t_flit, true);
+            incrementStats(t_flit);        
+            delete t_flit;
+            read_from_JQ = true;
 
-        incrementStats(t_flit);
+        }else{
+            m_stall_queue.push_back(t_flit);
+            m_stall_count[vnet]++;
 
+            auto cb = std::bind(&NetworkInterface::dequeueCallback, 
+                    this);
+            outNode_ptr[vnet]->registerDequeueCallback(cb);
 
-        delete t_flit;
+        }
 
-        read_from_JQ = true;
         // if there are new flits, schedule NI to wake up
         if (!jq->isEmpty()){
             flit * next_flit = jq->peekTopFlit(); 
@@ -393,80 +410,52 @@ NetworkInterface::wakeup()
         // If a tail flit is received, enqueue into the protocol buffers if
         // space is available. 
         // Otherwise, exchange non-tail flits for credits.
-        if (vnet == 2) {
-            DPRINTF(Vanilla, "[NI:wakeup] Response flit getting"
-                    " consumed %s\n", *t_flit);
-        }
-
+ 
         if (t_flit->get_type() == TAIL_ || 
                 t_flit->get_type() == HEAD_TAIL_) {
             // Cycles elapsed = curCycle() - t_flit->get_enqueue_time();
             // Cycles ready_to_commit = t_flit->ready_to_commit;
 
-            if (m_net_ptr->jitter_all  && 
+            Cycles latency = curCycle() - t_flit->get_enqueue_time();
+            if (m_net_ptr->all_out_bypass  && 
                     t_flit->getAttackFlit() && 
-                    t_flit->get_route().dest_ni == m_id){          
-
-                Cycles latency = curCycle() - t_flit->get_enqueue_time();
-                if (latency < flit_jitter_threshold){
-                    Cycles remaining = flit_jitter_threshold - latency;
-                    t_flit->ready_to_commit = t_flit->get_enqueue_time() + 
-                        flit_jitter_threshold; 
-                    jq->insert(t_flit); 
-                    scheduleEvent(Cycles(remaining));     
-                    DPRINTF(Naive, "%s will wait %d cycles\n", 
-                            *t_flit, remaining);             
-                }         
-            }
-            else if (m_net_ptr->all_out_bypass  && 
-                    t_flit->getAttackFlit() && 
-                    t_flit->get_route().dest_ni == m_id &&
-                    t_flit->get_vnet() == 2){           // vnet 2 for response
-                Cycles latency = curCycle() - t_flit->get_enqueue_time();
+                    t_flit->get_vnet() == 2 &&
+                    latency < t_flit->target_latency){           // vnet 2 for response
                 DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n",
                         *t_flit, latency, t_flit->target_latency);
-                if (latency < t_flit->target_latency){
-                    if (t_flit->target_latency > latency){
-                        scheduleEvent(t_flit->target_latency - latency);
-                        DPRINTF(Vanilla, "%s will wait %d cycles\n", 
-                            *t_flit, t_flit->target_latency - latency);                                   
-                    }
-                    else{
-                        scheduleEvent(Cycles(1));
-                        DPRINTF(Vanilla, "%s will wait %d cycles\n", 
-                           *t_flit, Cycles(1));                                                          
-                    }
-                    jq->insert(t_flit); 
-                }         
-            }
-
-            else if (!messageEnqueuedThisCycle &&
-                    outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
-                // Space is available. Enqueue to protocol buffer.
-                DPRINTF(SK, "[3] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
-                outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
-                        cyclesToTicks(Cycles(1)));
-                // Simply send a credit back since we are not buffering
-                // this flit in the NI
-                sendCredit(t_flit, true);
-                // Update stats and delete flit pointer
-                DPRINTF(Vanilla, "[NI:wakeup] enqueMessage %s\n",
-                        *t_flit);
-
-                incrementStats(t_flit);
-                delete t_flit;
+                jq->insert(t_flit); 
+                scheduleEvent(t_flit->target_latency - latency);
+                DPRINTF(Vanilla, "%s will wait %d cycles\n", 
+                        *t_flit, t_flit->target_latency - latency);                                   
             } else {
-                // No space available- 
-                // Place tail flit in stall queue and set
-                // up a callback for when protocol buffer is dequeued. 
-                // Stat update and flit pointer deletion 
-                // will occur upon unstall.
-                m_stall_queue.push_back(t_flit);
-                m_stall_count[vnet]++;
+                if (!messageEnqueuedThisCycle &&
+                        outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
+                    // Space is available. Enqueue to protocol buffer.
+                    DPRINTF(SK, "[3] enqueue msg: %s\n", *(t_flit->get_msg_ptr()));
+                    outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+                            cyclesToTicks(Cycles(1)));
+                    // Simply send a credit back since we are not buffering
+                    // this flit in the NI
+                    sendCredit(t_flit, true);
+                    // Update stats and delete flit pointer
+                    DPRINTF(Vanilla, "[NI:wakeup] enqueMessage %s\n",
+                            *t_flit);
 
-                auto cb = std::bind(&NetworkInterface::dequeueCallback, 
-                        this);
-                outNode_ptr[vnet]->registerDequeueCallback(cb);
+                    incrementStats(t_flit);
+                    delete t_flit;
+                } else {
+                    // No space available- 
+                    // Place tail flit in stall queue and set
+                    // up a callback for when protocol buffer is dequeued. 
+                    // Stat update and flit pointer deletion 
+                    // will occur upon unstall.
+                    m_stall_queue.push_back(t_flit);
+                    m_stall_count[vnet]++;
+
+                    auto cb = std::bind(&NetworkInterface::dequeueCallback, 
+                            this);
+                    outNode_ptr[vnet]->registerDequeueCallback(cb);
+                }
             }
 
         } else {
@@ -740,6 +729,12 @@ NetworkInterface::sendAttackFlit(flit *fl){
     Cycles jitter_amount = Cycles(0);
     DPRINTF(Vanilla, "Case 1 %d Case 2 %d Case 3 %d\n",
             case_1, case_2, case_3);
+  
+    fl->lb = latency_b;
+    fl->ln = latency_n;
+    fl->tc = target;
+
+   
     // Case 1: latency_n < lower 
     // Case 2: latency_n > lower  && latency_n < upper
     // add jitter to make at least lower

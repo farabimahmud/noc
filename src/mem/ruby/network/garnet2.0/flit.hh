@@ -146,6 +146,9 @@ class flit
     Cycles ready_to_commit;
     Cycles target_latency;
 
+    Cycles lb, ln, tc;
+    MsgPtr m_msg_ptr;
+
 
   protected:
     uint64_t m_pid;
@@ -156,7 +159,6 @@ class flit
     int m_size;
     Cycles m_enqueue_time, m_dequeue_time, m_time;
     flit_type m_type;
-    MsgPtr m_msg_ptr;
     int m_outport;
     Cycles src_delay;
     std::pair<flit_stage, Cycles> m_stage;
