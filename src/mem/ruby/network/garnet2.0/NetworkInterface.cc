@@ -224,6 +224,7 @@ NetworkInterface::readJQ(){
     bool read_from_JQ = false;
     Cycles currentCycle = curCycle();
     Tick curTime = clockEdge();
+    DPRINTF(Vanilla, "contents of jq is %s\n", *jq);
     if (jq->isReady(currentCycle)){
         DPRINTF(Vanilla, "[NI:readJQ] entered JQ\n");
         flit * t_flit = jq->getTopFlit();
@@ -248,9 +249,9 @@ NetworkInterface::readJQ(){
 
             Cycles ready_to_commit = next_flit->ready_to_commit;
             if(ready_to_commit - curCycle() > 0){ 
-                scheduleEventAbsolute(clockEdge(ready_to_commit-curCycle()));
+                scheduleEvent(ready_to_commit-curCycle());
             }else{
-                scheduleEventAbsolute(clockEdge(Cycles(1)));                    
+                scheduleEvent(Cycles(1));                    
             }            
         }
     }
@@ -293,9 +294,8 @@ NetworkInterface::readBypassQueue(){
 
         if (t_flit->get_type() == HEAD_TAIL_ || 
                 t_flit->get_type() == TAIL_ ){
-            RouteInfo route = t_flit->get_route();
             std::vector<OutputUnit*> list_of_output_units = 
-                m_net_ptr->output_unit_table[m_router_id][route.dest_router];
+                m_net_ptr->output_unit_table[src_router_id][dest_router_id];
             for (auto ou: list_of_output_units){
                 ou->bypass_flag = false; 
             }
@@ -315,12 +315,12 @@ NetworkInterface::readBypassQueue(){
             if(ready_to_commit > curCycle()){ 
                 DPRINTF(Vanilla, "RTC %d cur %d\n", 
                         ready_to_commit, curCycle());
-                scheduleEventAbsolute(clockEdge(ready_to_commit-curCycle()));
+                scheduleEvent(ready_to_commit-curCycle());
             }else{
                 DPRINTF(Vanilla, "[NI:readBypassQueue] "
                         "Scheduling Event on cycle %d\n", curCycle()+1);
 
-                scheduleEventAbsolute(clockEdge(Cycles(1)));                    
+                scheduleEvent(Cycles(1));                    
             }            
         }
     }
@@ -369,9 +369,7 @@ NetworkInterface::wakeup()
         }
     }
 
-    if (m_net_ptr->dynamic_delay 
-            || m_net_ptr->jitter_all
-            || m_net_ptr->all_out_bypass){
+    if (m_net_ptr->all_out_bypass){
         bool read_from_jq = readJQ();
         if(read_from_jq){
             DPRINTF(Naive, "[NI:Wakeup] Read flit from JQ\n");
@@ -415,7 +413,7 @@ NetworkInterface::wakeup()
                     t_flit->ready_to_commit = t_flit->get_enqueue_time() + 
                         flit_jitter_threshold; 
                     jq->insert(t_flit); 
-                    scheduleEventAbsolute(clockEdge(Cycles(remaining)));     
+                    scheduleEvent(Cycles(remaining));     
                     DPRINTF(Naive, "%s will wait %d cycles\n", 
                             *t_flit, remaining);             
                 }         
@@ -430,7 +428,7 @@ NetworkInterface::wakeup()
                 if (latency < t_flit->target_latency){
                     Cycles remaining = t_flit->target_latency - latency;
                     if (remaining > 0){
-                       scheduleEventAbsolute(clockEdge(remaining));
+                       scheduleEvent(Cycles(remaining));
                     }
                     else{
                         scheduleEvent(Cycles(1));
@@ -920,6 +918,7 @@ NetworkInterface::checkReschedule()
         }
 
         while (it->isReady(clockEdge())) { // Is there a message waiting
+            DPRINTF(Vanilla, "[NI:CheckReschedule] call to wakeup next cycle\n");
             scheduleEvent(Cycles(1));
             return;
         }
@@ -927,8 +926,8 @@ NetworkInterface::checkReschedule()
 
     for (auto& ni_out_vc : niOutVcs) {
         if (ni_out_vc.isReady(curCycle() + Cycles(1))) {
-            flit * tf = ni_out_vc.peekTopFlit();
-            DPRINTF(Naive, "%s is ready at niOutVc\n", *tf);
+            // flit * tf = ni_out_vc.peekTopFlit();
+            DPRINTF(Vanilla, "Current flits waiting in niOutVc %s\n", ni_out_vc);
             scheduleEvent(Cycles(1));
             return;
         }
