@@ -12,7 +12,7 @@
     --mesh-rows=8  \
     --synthetic=uniform_random \
     --injectionrate=0.01 \
-    --bypass=bypass_all_out \
+    --bypass=bypass_none \
     --attack-enabled \
     --attack-node=0 \
     --attack-rate=0.01 \

@@ -159,10 +159,33 @@ def addNoISAOptions(parser):
              "Direct parameters of the root object are not accessible, "
              "only parameters of its children.")
 
+    # Attack options
+
 # Add common options that assume a non-NULL ISA.
 def addCommonOptions(parser):
     # start by adding the base options that do not assume an ISA
     addNoISAOptions(parser)
+
+    # Following Options for selecting one node to generate Attack Packet
+    parser.add_option("--attack-node", type="int", default=0,
+                    help="The node that is being attacked at this point \
+                            Default value node 0")
+    parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
+                    help="Attack rate in packets per cycle per node,\
+                            takes floating point value between 0 to 1 \
+                            default value is 0.1")
+    parser.add_option("--attack-enabled", action="store_true")
+
+    # Following options for selecting two nodes to receive attack packet
+    parser.add_option("--fixed-target-enabled", action="store_true")
+    parser.add_option("--fixed-target-near",type=int, default=-1,
+                    help="Fixed Target for destinations, near node")
+    parser.add_option("--fixed-target-far", type=int, default=-1,
+                    help="Fixed Target for destinations, far node")
+
+    parser.add_option("--randomly-selected-targets",action="store_true")
+
+
 
     # system options
     parser.add_option("--list-cpu-types",

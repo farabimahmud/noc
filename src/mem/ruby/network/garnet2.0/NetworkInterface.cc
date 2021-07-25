@@ -43,7 +43,6 @@
 #include "mem/ruby/network/garnet2.0/flitBuffer.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 #include "mem/ruby/slicc_interface/RubyRequest.hh"
-#include "mem/ruby/slicc_interface/RequestMsg.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 
 using namespace std;

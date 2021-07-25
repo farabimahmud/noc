@@ -1,18 +1,20 @@
 #!/bin/bash
 
 ./build/X86_MESI_Two_Level/gem5.opt \
-    --debug-flag=Naive \
+    --debug-flag=Vanilla_X86 \
     --debug-file=debug.out \
     configs/example/se.py \
-    --num-cpus=16 \
-    --num-dirs=16 \
+    --num-cpus=64 \
+    --num-dirs=64 \
     --network=garnet2.0 \
     --topology=Mesh_XY \
-    --mesh-rows=4 \
+    --mesh-rows=8 \
     --ruby \
     --l2cache \
-    --num-l2caches=16 \
+    --num-l2caches=64 \
     --caches \
     -c attack.out \
     --bypass=bypass_none \
-    --optimization_rate=0 \
+    --attack-enabled \
+    --attack-node=0 \
+    --attack-rate=0.01 \

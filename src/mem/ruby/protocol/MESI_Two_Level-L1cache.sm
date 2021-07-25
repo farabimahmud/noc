@@ -834,7 +834,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     assert(is_valid(cache_entry));
     DPRINTF(RubySlicc, "%s\n", cache_entry.DataBlk);
     L1Dcache.setMRU(cache_entry);
-    sequencer.readCallback(address, cache_entry.DataBlk);
+    // TODO: Fix dummy true
+    sequencer.readCallback(address, true, cache_entry.DataBlk);
   }
 
   action(h_ifetch_hit, "hi", desc="Notify sequencer the instruction fetch completed.")
@@ -842,7 +843,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     assert(is_valid(cache_entry));
     DPRINTF(RubySlicc, "%s\n", cache_entry.DataBlk);
     L1Icache.setMRU(cache_entry);
-    sequencer.readCallback(address, cache_entry.DataBlk);
+    // TODO: Fix dummy true
+    sequencer.readCallback(address, true, cache_entry.DataBlk);
   }
 
   action(hx_load_hit, "hx", desc="Notify sequencer the load completed.")
@@ -851,7 +853,9 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     DPRINTF(RubySlicc, "%s\n", cache_entry.DataBlk);
     L1Icache.setMRU(address);
     L1Dcache.setMRU(address);
-    sequencer.readCallback(address, cache_entry.DataBlk, true);
+    // Update attackMessage flag as Request Packet already has this
+    // following dummy true is avoiding compilation error 
+    sequencer.readCallback(address, true, cache_entry.DataBlk, true);
   }
 
   action(hh_store_hit, "\h", desc="Notify sequencer that store completed.")
