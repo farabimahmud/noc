@@ -14,7 +14,7 @@
     --num-l2caches=64 \
     --caches \
     -c attack.out \
-    --bypass=bypass_none \
+    --bypass=bypass_all_out \
     --attack-enabled \
     --attack-node=0 \
     --attack-rate=0.01 \

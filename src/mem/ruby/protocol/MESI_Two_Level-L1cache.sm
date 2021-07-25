@@ -454,9 +454,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   in_port(mandatoryQueue_in, RubyRequest, mandatoryQueue, desc="...", rank = 0) {
     if (mandatoryQueue_in.isReady(clockEdge())) {
       peek(mandatoryQueue_in, RubyRequest, block_on="LineAddress") {
-
         // Check for data access to blocks in I-cache and ifetchs to blocks in D-cache
-
+        DPRINTF(Vanilla_X86,"Protocol L1 MQ Attack Message %d\n", in_msg.attackMessage);
         if (in_msg.Type == RubyRequestType:IFETCH) {
           // ** INSTRUCTION ACCESS ***
 
@@ -554,6 +553,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         out_msg.MessageSize := MessageSizeType:Control;
         out_msg.Prefetch := in_msg.Prefetch;
         out_msg.AccessMode := in_msg.AccessMode;
+        out_msg.attackMessage := in_msg.attackMessage;
       }
     }
   }

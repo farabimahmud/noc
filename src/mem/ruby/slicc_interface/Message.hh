@@ -113,7 +113,7 @@ class Message
     //   return m_attackMessage;
     // }
     bool m_attackMessage =false;
-
+    Cycles m_req_enqueue_time; 
   private:
     // attack packet?
 

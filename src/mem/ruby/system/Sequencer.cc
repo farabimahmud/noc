@@ -48,6 +48,7 @@
 #include "cpu/testers/rubytest/RubyTester.hh"
 #include "debug/Naive.hh"
 #include "debug/Vanilla.hh"
+#include "debug/Vanilla_X86.hh"
 #include "debug/LLSC.hh"
 #include "debug/MemoryAccess.hh"
 #include "debug/ProtocolTrace.hh"
@@ -89,7 +90,7 @@ Sequencer::Sequencer(const Params *p)
     assert(m_dataCache_ptr != NULL);
 
     m_runningGarnetStandalone = p->garnet_standalone;
-    DPRINTF(Vanilla, "name of this Seuquencer %s coreid %s\n",name(), m_coreId);
+    // DPRINTF(Vanilla, "name of this Seuquencer %s coreid %s\n",name(), m_coreId);
 }
 
 Sequencer::~Sequencer()
@@ -870,7 +871,7 @@ void Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
         {
             msg->m_attackMessage = true;
         }
-        DPRINTF(Vanilla, "[Sequencer] %s\n", *msg);
+        DPRINTF(Vanilla_X86, "[Sequencer] %s\n", *msg);
     }
 
 
@@ -893,7 +894,7 @@ void Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
 
     assert(m_mandatory_q_ptr != NULL);
 
-    DPRINTF(Naive, "[Sequencer:issueReq] Inserting into MQ %#x"
+    DPRINTF(Vanilla, "[Sequencer:issueReq] Inserting into MQ %#x"
                    " Message %#x : %s\n",
             m_mandatory_q_ptr, msg, *msg);
     m_mandatory_q_ptr->enqueue(msg, clockEdge(), latency);

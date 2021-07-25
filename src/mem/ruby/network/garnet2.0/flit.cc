@@ -36,6 +36,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
 {
     m_size = size;
     m_msg_ptr = msg_ptr;
+    if(vnet==0) m_msg_ptr->m_req_enqueue_time = curTime;
     m_enqueue_time = curTime;
     m_dequeue_time = curTime;
     m_time = curTime;
