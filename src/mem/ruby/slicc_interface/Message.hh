@@ -56,6 +56,7 @@ class Message
           m_msg_counter(other.m_msg_counter)
     {
         m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time;
     }
 
     virtual ~Message() { }
@@ -105,13 +106,7 @@ class Message
     int getVnet() const { return vnet; }
     void setVnet(int net) { vnet = net; }
     
-    // void setAttackMessage(bool x){
-    //   m_attackMessage = x;
-    // }
 
-    // bool getAttackMessage(){
-    //   return m_attackMessage;
-    // }
     bool m_attackMessage =false;
     Cycles m_req_enqueue_time; 
   private:

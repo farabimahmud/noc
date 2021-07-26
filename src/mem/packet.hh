@@ -252,6 +252,9 @@ class Packet : public Printable
     typedef uint32_t FlagsType;
     typedef ::Flags<FlagsType> Flags;
     bool isAttackPacket = false;
+
+    /** Jitter for the packet **/
+    uint8_t pkt_jitter = 0;
   private:
 
     enum : FlagsType {

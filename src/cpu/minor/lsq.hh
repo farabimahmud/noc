@@ -455,6 +455,15 @@ class LSQ : public Named
 
         /** Part of the address translation loop, see startAddTranslation */
         void sendNextFragmentToTranslation();
+
+        /** Jitter in the LSQ **/
+        uint8_t lsq_jitter = 0;
+
+        /** Set jitter **/
+        void set_LSQ_Jitter(uint8_t jit) {  lsq_jitter = jit;   }
+
+        /** Get jitter **/
+        uint8_t get_LSQ_Jitter() {  return lsq_jitter;   }
     };
 
     /** Store buffer.  This contains stores which have been committed

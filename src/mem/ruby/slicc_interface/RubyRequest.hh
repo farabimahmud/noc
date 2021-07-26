@@ -60,6 +60,7 @@ class RubyRequest : public Message
     int m_wfid;
     HSAScope m_scope;
     HSASegment m_segment;
+    uint8_t m_jit;
     // bool m_attackMessage;
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
@@ -82,6 +83,7 @@ class RubyRequest : public Message
           m_segment(_segment)
     {
         m_LineAddress = makeLineAddress(m_PhysicalAddress);
+        m_jit = m_pkt->pkt_jitter;
     }
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
@@ -140,7 +142,8 @@ class RubyRequest : public Message
     }
 
 
-    RubyRequest(Tick curTime) : Message(curTime) {}
+    RubyRequest(Tick curTime) : Message(curTime) {
+    }
     MsgPtr clone() const
     { return std::shared_ptr<Message>(new RubyRequest(*this)); }
 

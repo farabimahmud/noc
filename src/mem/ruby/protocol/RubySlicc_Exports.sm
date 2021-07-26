@@ -291,7 +291,7 @@ enumeration(PrefetchBit, default="PrefetchBit_No", desc="...") {
 }
 
 // CacheMsg
-structure(SequencerMsg, desc="...", interface="Message") {
+structure(SequencerMsg, desc="...", interface="Message", external="yes") {
   Addr LineAddress,       desc="Line address for this request";
   Addr PhysicalAddress,   desc="Physical address for this request";
   SequencerRequestType Type,     desc="Type of request (LD, ST, etc)";
@@ -301,7 +301,7 @@ structure(SequencerMsg, desc="...", interface="Message") {
   int Len,                   desc="size in bytes of access";
   PrefetchBit Prefetch,      desc="Is this a prefetch request";
   MessageSizeType MessageSize, default="MessageSizeType_Request_Control";
-  bool attackMessage,        desc="is this attack?";
+  // bool attackMessage,        desc="is this attack?";
   bool functionalRead(Packet *pkt) {
     return false;
   }

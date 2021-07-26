@@ -57,7 +57,7 @@ enumeration(CoherenceResponseType, desc="...") {
 }
 
 // RequestMsg
-structure(RequestMsg, desc="...", interface="Message") {
+structure(RequestMsg, desc="...", interface="Message", external="yes") {
   Addr addr,              desc="Physical address for this request";
   CoherenceRequestType Type,    desc="Type of request (GetS, GetX, PutX, etc)";
   RubyAccessMode AccessMode,    desc="user/supervisor access type";
@@ -88,7 +88,7 @@ structure(RequestMsg, desc="...", interface="Message") {
 }
 
 // ResponseMsg
-structure(ResponseMsg, desc="...", interface="Message") {
+structure(ResponseMsg, desc="...", interface="Message", external='yes') {
   Addr addr,              desc="Physical address for this request";
   CoherenceResponseType Type,   desc="Type of response (Ack, Data, etc)";
   MachineID Sender,             desc="What component sent the data";

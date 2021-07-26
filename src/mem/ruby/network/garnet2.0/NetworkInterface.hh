@@ -131,6 +131,7 @@ class NetworkInterface : public ClockedObject, public Consumer
     void sendCredit(flit *t_flit, bool is_free);
 
     void incrementStats(flit *t_flit);
+    void incrementStatsForBypassFlit(flit *t_flit);
 
     void setBypassFlags(flit * t_flit);
     void resetBypassFlags(flit * t_flit);

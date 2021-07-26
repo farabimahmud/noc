@@ -370,7 +370,6 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       peek(L1RequestL2Network_in,  RequestMsg) {
         Entry cache_entry := getCacheEntry(in_msg.addr);
         TBE tbe := TBEs[in_msg.addr];
-
         DPRINTF(RubySlicc, "Addr: %#x State: %s Req: %s Type: %s Dest: %s\n",
                 in_msg.addr, getState(tbe, cache_entry, in_msg.addr),
                 in_msg.Requestor, in_msg.Type, in_msg.Destination);
@@ -519,6 +518,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   action(ds_sendSharedDataToRequestor, "ds", desc="Send data from cache to reqeustor") {
     peek(L1RequestL2Network_in, RequestMsg) {
       enqueue(responseL2Network_out, ResponseMsg, l2_response_latency) {
+        DPRINTF(Vanilla_X86, "Protocol L2 ds Attack Message %d\n", in_msg.attackMessage);
         assert(is_valid(cache_entry));
         out_msg.addr := address;
         out_msg.Type := CoherenceResponseType:DATA;

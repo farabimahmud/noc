@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./build/X86_MESI_Two_Level/gem5.opt \
-    --debug-flag=Vanilla_X86 \
+    --debug-flag=Vanilla_X86,Vanilla \
     --debug-file=debug.out \
     configs/example/se.py \
     --num-cpus=64 \
@@ -18,3 +18,4 @@
     --attack-enabled \
     --attack-node=0 \
     --attack-rate=0.01 \
+    --lower_limit=20 \

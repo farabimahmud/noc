@@ -1034,6 +1034,9 @@ LSQ<Impl>::SingleDataRequest::buildPackets()
         _packets.back()->dataStatic(_inst->memData);
         _packets.back()->senderState = _senderState;
     }
+    if ((_inst->pcState()).get_Jitter() == 1) { _packets.back()->pkt_jitter = 1; }
+
+    //DPRINTF(LSQ, "Packet jitter in the current packet: %02x\n", _packets.back()->pkt_jitter);
     assert(_packets.size() == 1);
 }
 
@@ -1050,6 +1053,8 @@ LSQ<Impl>::SplitDataRequest::buildPackets()
             _mainPacket = Packet::createRead(mainReq);
             _mainPacket->dataStatic(_inst->memData);
         }
+        if ((_inst->pcState()).get_Jitter() == 1) { _mainPacket->pkt_jitter = 1; }
+        //DPRINTF(HtmCpu, "Packet jitter in the current packet: %02x\n", _mainPacket->pkt_jitter);
         for (int i = 0; i < _requests.size() && _fault[i] == NoFault; i++) {
             RequestPtr r = _requests[i];
             PacketPtr pkt = isLoad() ? Packet::createRead(r)
@@ -1065,6 +1070,8 @@ LSQ<Impl>::SplitDataRequest::buildPackets()
                 pkt->dataDynamic(req_data);
             }
             pkt->senderState = _senderState;
+            if ((_inst->pcState()).get_Jitter() == 1) { pkt->pkt_jitter = 1; }
+            //DPRINTF(HtmCpu, "Packet jitter in the current packet: %02x\n", pkt->pkt_jitter);
             _packets.push_back(pkt);
         }
     }

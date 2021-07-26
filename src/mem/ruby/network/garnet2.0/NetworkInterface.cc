@@ -140,19 +140,20 @@ void NetworkInterface::dequeueCallback()
     scheduleEventAbsolute(clockEdge(Cycles(1)));
 }
 
-void NetworkInterface::incrementStats(flit *t_flit)
+void NetworkInterface::incrementStatsForBypassFlit(flit *t_flit)
 {
     int vnet = t_flit->get_vnet();
-
-    // Latency
     m_net_ptr->increment_received_flits(vnet);
+    DPRINTF(Vanilla_X86, "Deq %d Enq %d\n",
+            t_flit->get_dequeue_time(),
+            t_flit->get_enqueue_time());
     Cycles network_delay =
-        t_flit->get_dequeue_time() - t_flit->get_enqueue_time() - Cycles(1);
+        m_net_ptr->lower_limit; // fix this
     Cycles src_queueing_delay = t_flit->get_src_delay();
     Cycles dest_queueing_delay = (curCycle() - t_flit->get_dequeue_time());
-
-    // Cycles RTT_latency = t_flit->get_dequeue_time() - t_flit->request_flit->enqueue_time(); 
-    
+    DPRINTF(Vanilla_X86, "Src QD %d Dest QD %d\n",
+            src_queueing_delay,
+            dest_queueing_delay);
     Cycles queueing_delay = src_queueing_delay + dest_queueing_delay;
 
     unsigned src_router_id = t_flit->get_route().src_router;
@@ -168,18 +169,89 @@ void NetworkInterface::incrementStats(flit *t_flit)
         m_net_ptr->increment_packet_network_latency(network_delay, vnet);
         m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
         m_net_ptr->sample_latency(network_delay);
-
-        if (t_flit->isAttackFlit){
-            DPRINTF(Vanilla_X86, "SR %d, DR %d, LT %d,"
-            " LB %d, LN %d, TC %d RTL %d\n ",
+        if (t_flit->isAttackFlit)
+        {
+            DPRINTF(Vanilla_X86, "SR,%d,DR,%d,LT,%d,"
+                                 "LB,%d,LN,%d,TC,%d,RTL,%d\n ",
                     src_router_id,
                     dest_router_id,
                     network_delay + queueing_delay,
                     t_flit->lb,
                     t_flit->ln,
-                    t_flit->tc, 
-                    t_flit->get_dequeue_time() - t_flit->get_msg_ptr()->m_req_enqueue_time);
+                    t_flit->tc,
+                    t_flit->get_dequeue_time() -
+                        t_flit->get_msg_ptr()->m_req_enqueue_time - Cycles(1));
         }
+    }
+
+    Cycles lat = queueing_delay + network_delay;
+
+    if (src_router_id == m_net_ptr->attack_node)
+    {
+
+        dest_router->sample_latency(lat);
+
+        if (t_flit->isAttackFlit)
+        {
+            dest_router->sample_attack_latency(lat);
+        }
+        else
+        {
+            dest_router->sample_regular_latency(lat);
+        }
+    }
+
+    DPRINTF(Vanilla_X86, "Increment Stats 5\n");
+    // Hops
+    m_net_ptr->increment_total_hops(t_flit->get_route().hops_traversed);
+}
+
+void NetworkInterface::incrementStats(flit *t_flit)
+{
+    int vnet = t_flit->get_vnet();
+
+    // Latency
+    m_net_ptr->increment_received_flits(vnet);
+    DPRINTF(Vanilla_X86, "Increment Stats 0\n");
+    Cycles network_delay =
+        t_flit->get_dequeue_time() - t_flit->get_enqueue_time() - Cycles(1);
+    DPRINTF(Vanilla_X86, "Increment Stats 1\n");
+    Cycles src_queueing_delay = t_flit->get_src_delay();
+    Cycles dest_queueing_delay = (curCycle() - t_flit->get_dequeue_time());
+    DPRINTF(Vanilla_X86, "Increment Stats 2\n");
+
+    // Cycles RTT_latency = t_flit->get_dequeue_time() - t_flit->request_flit->enqueue_time();
+
+    Cycles queueing_delay = src_queueing_delay + dest_queueing_delay;
+
+    unsigned src_router_id = t_flit->get_route().src_router;
+    unsigned dest_router_id = t_flit->get_route().dest_router;
+    Router *dest_router = m_net_ptr->m_routers[dest_router_id];
+
+    m_net_ptr->increment_flit_network_latency(network_delay, vnet);
+    m_net_ptr->increment_flit_queueing_latency(queueing_delay, vnet);
+
+    if (t_flit->get_type() == TAIL_ || t_flit->get_type() == HEAD_TAIL_)
+    {
+        m_net_ptr->increment_received_packets(vnet);
+        m_net_ptr->increment_packet_network_latency(network_delay, vnet);
+        m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
+        m_net_ptr->sample_latency(network_delay);
+        DPRINTF(Vanilla_X86, "Increment Stats 3\n");
+        if (t_flit->isAttackFlit)
+        {
+            DPRINTF(Vanilla_X86, "SR,%d,DR,%d,LT,%d,"
+                                 "LB,%d,LN,%d,TC,%d,RTL,%d\n ",
+                    src_router_id,
+                    dest_router_id,
+                    network_delay + queueing_delay,
+                    t_flit->lb,
+                    t_flit->ln,
+                    t_flit->tc,
+                    t_flit->get_dequeue_time() -
+                        t_flit->get_msg_ptr()->m_req_enqueue_time - Cycles(1));
+        }
+        DPRINTF(Vanilla_X86, "Increment Stats 4\n");
     }
 
     /****
@@ -210,7 +282,7 @@ void NetworkInterface::incrementStats(flit *t_flit)
     //               queueing_delay + network_delay
     //              );
     //   }
-
+    DPRINTF(Vanilla_X86, "Increment Stats 5\n");
     // Hops
     m_net_ptr->increment_total_hops(t_flit->get_route().hops_traversed);
 }
@@ -256,7 +328,7 @@ bool NetworkInterface::readJQ()
             flit *next_flit = jq->peekTopFlit();
 
             Cycles ready_to_commit = next_flit->ready_to_commit;
-            if (ready_to_commit - curCycle() > 0)
+            if (ready_to_commit > curCycle())
             {
                 scheduleEvent(ready_to_commit - curCycle());
             }
@@ -273,67 +345,86 @@ bool NetworkInterface::readBypassQueue()
 {
     bool read_from_bq = false;
     Cycles currentCycle = curCycle();
+    Tick curTime = clockEdge();
+
     // Tick curTime = clockEdge();
-    // DPRINTF(Vanilla, "[NI:readBypassQueue] Current BQ addr %#x content %s\n",
-    //        bq, *bq);
+    DPRINTF(Vanilla, "[NI:readBypassQueue] Current BQ addr %#x content %s\n",
+            bq, *bq);
+
     if (bq->isReady(currentCycle))
     {
-        flit *t_flit = bq->getTopFlit();
-        unsigned src_router_id = t_flit->get_route().src_router;
-        unsigned dest_router_id = t_flit->get_route().dest_router;
-        Router *dest_router = m_net_ptr->m_routers[dest_router_id];
-        t_flit->set_dequeue_time(curCycle());
-        DPRINTF(Vanilla, "[NI:readBypassQueue] Reading from BQ %s\n", *t_flit);
-        Cycles network_delay =
-            t_flit->get_dequeue_time() - t_flit->get_enqueue_time() - Cycles(1);
-        Cycles src_queueing_delay = t_flit->get_src_delay();
-        Cycles dest_queueing_delay = (curCycle() - t_flit->get_dequeue_time());
-        Cycles queueing_delay = src_queueing_delay + dest_queueing_delay;
 
-        if (t_flit->isAttackFlit){
-            DPRINTF(Vanilla, "SR %d, DR %d, ND %d, QD %d, AT %d,"
-            " LB %d, LN %d, TC %d, VN %d, MSG_PTR %s\n ",
-                    src_router_id,
-                    dest_router_id,
-                    network_delay,
-                    queueing_delay,
-                    t_flit->isAttackFlit,
-                    t_flit->lb,
-                    t_flit->ln,
-                    t_flit->tc,
-                    t_flit->get_vnet(),
-                    *t_flit->m_msg_ptr);
-        }
-
-        Cycles lat = queueing_delay + network_delay;
-
-        if (src_router_id == m_net_ptr->attack_node)
+        flit *t_flit = bq->peekTopFlit();
+        int vnet = t_flit->get_vnet();
+        // if non tail consume flit no need to stall since we are not sending
+        // out to the outNode_ptr[vnet]
+        DPRINTF(Vanilla_X86, "Reading flit %s at BQ \n", *t_flit);
+        flit_type t_flit_type = t_flit->get_type();
+        bool tail_flit = (t_flit_type == HEAD_TAIL_) || (t_flit_type == TAIL_);
+        if (!tail_flit)
         {
-            dest_router->sample_latency(lat);
-            if (t_flit->isAttackFlit)
-            {
-                dest_router->sample_attack_latency(lat);
-            }
-            else
-            {
-                dest_router->sample_regular_latency(lat);
-            }
+            t_flit = bq->getTopFlit();
+            t_flit->set_dequeue_time(currentCycle);
+            incrementStatsForBypassFlit(t_flit);
+            delete t_flit;
         }
-
-        if (t_flit->get_type() == HEAD_TAIL_ ||
-            t_flit->get_type() == TAIL_)
+        else
         {
+            // tail flit reached destination, so free OutputUnits
+            unsigned src_router_id = t_flit->get_route().src_router;
+            unsigned dest_router_id = t_flit->get_route().dest_router;
             std::vector<OutputUnit *> list_of_output_units =
                 m_net_ptr->output_unit_table[src_router_id][dest_router_id];
             for (auto ou : list_of_output_units)
             {
                 ou->bypass_flag = false;
             }
+
+            // check if we can consume this i.e send via outNode_ptr
+            DPRINTF(Vanilla_X86, "Reset the bypass flags for %s\n", *t_flit);
+            Cycles latency = curCycle() - t_flit->get_enqueue_time();
+            if (latency < m_net_ptr->lower_limit)
+            {
+                t_flit = bq->getTopFlit();
+                t_flit->ready_to_commit = currentCycle + m_net_ptr->lower_limit - latency;
+                DPRINTF(Vanilla_X86, "Added %d Jitter to Bypassed Flit %s\n",
+                        m_net_ptr->lower_limit - latency, *t_flit);
+                bq->insert(t_flit);
+                scheduleEvent(m_net_ptr->lower_limit - latency);
+                return false;
+            }
+            else
+            {
+                if (outNode_ptr[vnet]->areNSlotsAvailable(1, curTime))
+                {
+                    DPRINTF(Vanilla_X86, "Will send out this flit to outnode %s\n", *t_flit);
+                    DPRINTF(Vanilla_X86, "Consuming Flit %s at BQ\n", *t_flit);
+                    // outVcState[vc].setState(IDLE_, currentCycle);
+                    outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
+                                               cyclesToTicks(Cycles(1)));
+                    // sendCredit(t_flit, true);
+                    t_flit = bq->getTopFlit();
+                    DPRINTF(Vanilla_X86, "Updating Stats for Flit %s at BQ\n", *t_flit);
+                    t_flit->set_dequeue_time(currentCycle);
+                    incrementStatsForBypassFlit(t_flit);
+                    DPRINTF(Vanilla_X86, "Updated Stats for Flit %s at BQ\n", *t_flit);
+                    delete t_flit;
+
+                    read_from_bq = true;
+                }
+            }
+
+            // else
+            // {
+            //     auto cb = std::bind(&NetworkInterface::readBypassQueue, this);
+            //     outNode_ptr[vnet]->registerDequeueCallback(cb);
+            //     // m_stall_queue.push_back(t_flit);
+            //     // m_stall_count[vnet]++;
+            //     // auto cb = std::bind(&NetworkInterface::dequeueCallback,
+            //     //                     this);
+            //     // outNode_ptr[vnet]->registerDequeueCallback(cb);
+            // }
         }
-
-        delete t_flit;
-
-        read_from_bq = true;
         // if there are new flits, schedule NI to wake up
         if (!bq->isEmpty())
         {
@@ -451,6 +542,7 @@ void NetworkInterface::wakeup()
                 DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n",
                         *t_flit, latency, t_flit->target_latency);
                 jq->insert(t_flit);
+
                 scheduleEvent(t_flit->target_latency - latency);
                 DPRINTF(Vanilla, "%s will wait %d cycles\n",
                         *t_flit, t_flit->target_latency - latency);
@@ -596,7 +688,7 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
 
     bool isAttackMessage = net_msg_ptr->m_attackMessage;
 
-    DPRINTF(Naive, "[NI:flitisize] msg %s at %#x is %s Packet\n",
+    DPRINTF(Vanilla_X86, "[NI:flitisize] msg %s at %#x is %s Packet\n",
             *net_msg_ptr, net_msg_ptr,
             isAttackMessage ? "Attack" : "Regular");
     DPRINTF(Naive, "isAttackMessage: %d, %#x\n", net_msg_ptr->m_attackMessage, &(net_msg_ptr->m_attackMessage));
@@ -675,7 +767,6 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
         for (int i = 0; i < num_flits; i++)
         {
             m_net_ptr->increment_injected_flits(vnet);
-
             flit *fl = new flit(i, vc, vnet, route, num_flits, new_msg_ptr,
                                 curCycle());
             fl->set_pid(GarnetNetwork::PACKETID);
@@ -686,12 +777,13 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             {
                 fl->set_jittered(true);
             }
-
             else if (m_net_ptr->all_out_bypass)
             {
                 if (fl->isAttackFlit)
                 { // vnet 0 for request
                     algorithm_decision = sendAttackFlit(fl);
+                    DPRINTF(Vanilla, "Decision was %s\n",
+                            algorithm_decision == 1 ? "bypass" : "no_bypass");
                 }
                 else
                 {
@@ -818,12 +910,14 @@ int NetworkInterface::sendAttackFlit(flit *fl)
         fl->ready_to_commit = curCycle() + latency_b + Cycles(fl->get_id());
         fl->target_latency = target - m_net_ptr->delta_s;
         dest_ni->bq->insert(fl);
-        DPRINTF(Vanilla, "Scheduling event latency_b %d id %d %d\n",
-                latency_b, Cycles(fl->get_id()), latency_b + Cycles(fl->get_id()));
+        DPRINTF(Vanilla, "Scheduling event latency_b %d id %d latency_b+id %d\n",
+                latency_b,
+                Cycles(fl->get_id()),
+                latency_b + Cycles(fl->get_id()));
         dest_ni->scheduleEvent(latency_b + Cycles(fl->get_id()));
-        DPRINTF(Vanilla, "flit %s inserted into Bypass Queue "
+        DPRINTF(Vanilla, "at Tick %d flit %s inserted into Bypass Queue "
                          "that will wake up dest_ni %d at cycle %d\n",
-                *fl, destID, latency_b + Cycles(fl->get_id()));
+                curTick(), *fl, destID, cyclesToTicks(fl->ready_to_commit));
         return 1;
     }
     else

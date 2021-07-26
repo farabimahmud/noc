@@ -1228,9 +1228,10 @@ DefaultIEW<Impl>::executeInsts()
         DPRINTF(IEW, "Execute: Executing instructions from IQ.\n");
 
         DynInstPtr inst = instQueue.getInstToExecute();
-
-        DPRINTF(IEW, "Execute: Processing PC %s, [tid:%i] [sn:%llu].\n",
-                inst->pcState(), inst->threadNumber,inst->seqNum);
+        TheISA::PCState thisPC = inst->pcState();
+        uint8_t jit = thisPC.get_Jitter();
+        DPRINTF(IEW, "Execute: Processing PC %s, [tid:%i] [sn:%llu] Jitter: %02x.\n",
+                inst->pcState(), inst->threadNumber,inst->seqNum, jit & 0xff);
 
         // Notify potential listeners that this instruction has started
         // executing

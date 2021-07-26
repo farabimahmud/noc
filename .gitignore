@@ -1,4 +1,6 @@
+benchmark
 build
+build_garnet
 parser.out
 parsetab.py
 cscope.files

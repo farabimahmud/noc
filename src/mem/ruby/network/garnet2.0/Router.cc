@@ -34,6 +34,7 @@
 #include "debug/RubyNetwork.hh"
 #include "debug/Naive.hh"
 #include "debug/Vanilla.hh"
+#include "debug/Vanilla_X86.hh"
 #include "mem/ruby/network/garnet2.0/CreditLink.hh"
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
@@ -102,7 +103,6 @@ void
 Router::wakeup()
 {
     DPRINTF(RubyNetwork, "Router %d woke up\n", m_id);
-
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
         m_input_unit[inport]->wakeup();
