@@ -72,6 +72,7 @@
 #include "sim/full_system.hh"
 #include "sim/system.hh"
 #include "cpu/o3/isa_specific.hh"
+#include "special_inst.hh"
 
 using namespace std;
 
@@ -1156,7 +1157,8 @@ DefaultFetch<Impl>::fetch(bool &status_change)
     // Start actual fetch
     //////////////////////////////////////////
     ThreadID tid = getFetchingThread();
-
+    char *file = (char *) malloc(256 * sizeof(char));
+    strcpy(file, "/home/grads/h/harpreetsc/test/data_files/pcs_file");
     assert(!cpu->switchedOut());
 
     if (tid == InvalidThreadID) {
@@ -1174,6 +1176,24 @@ DefaultFetch<Impl>::fetch(bool &status_change)
 
     // The current PC.
     TheISA::PCState thisPC = pc[tid];
+    /*
+     * Check pc value for special insts
+     */
+    struct sp_pc_list *pc_struct = read_sp_insts(file);
+    uint64_t curr_pc = thisPC.instAddr();//inst->pcState().instAddr();
+
+    uint64_t total_pcs = pc_struct[0].total_lines;
+    //DPRINTF(Fetch, "%xu\n", curr_pc);
+
+    for (int i = 0; i < total_pcs; i++)
+    {
+        if (curr_pc == pc_struct[i].pc)
+        {
+            thisPC.set_Jitter();
+            uint8_t jit = thisPC.get_Jitter();
+            DPRINTF(Fetch, "Found the jitter value: %02x\n", jit & 0xff);
+        }
+    }
 
     Addr pcOffset = fetchOffset[tid];
     Addr fetchAddr = (thisPC.instAddr() + pcOffset) & BaseCPU::PCMask;
