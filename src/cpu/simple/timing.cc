@@ -629,6 +629,8 @@ TimingSimpleCPU::finishTranslation(WholeTranslationState *state)
         state->deleteReqs();
         translationFault(state->getFault());
     } else {
+        // @TODO: Sungkeun
+        // Forward flag from curStaticInst to pkt
         if (!state->isSplit) {
             sendData(state->mainReq, state->data, state->res,
                      state->mode == BaseTLB::Read);
@@ -785,6 +787,8 @@ TimingSimpleCPU::completeIfetch(PacketPtr pkt)
 
 
     preExecute();
+    // @TODO: Sungkeun 
+    // Using curStaticInst, set a flag if PC of is in the list.
     if (curStaticInst && curStaticInst->isMemRef()) {
         // load or store: just send to dcache
         Fault fault = curStaticInst->initiateAcc(&t_info, traceData);
