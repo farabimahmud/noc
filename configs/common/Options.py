@@ -431,7 +431,8 @@ def addSEOptions(parser):
     parser.add_option("--wait-gdb", default=False,
                       help="Wait for remote GDB to connect.")
 
-
+    parser.add_option("--rodinia-attack", action="store_true",
+                      help="this is useds for combination of rodinia with attack program")
 
 def addFSOptions(parser):
     from common.FSConfig import os_types

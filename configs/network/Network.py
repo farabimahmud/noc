@@ -91,15 +91,15 @@ def define_options(parser):
                       help="""Maximum hops a bypass packet can travel per
                       cycles, default=3""")
     
-    parser.add_option("--delta_s", type="int", default=4,
+    parser.add_option("--delta-s", type="int", default=4,
             help="""Number of cycles beyond which we cannot differentiate
             default is 4""")
 
-    parser.add_option("--lower_limit", type="int", default=10,
+    parser.add_option("--lower-limit", type="int", default=10,
             help="""Number of cycles it takes to reach the farthest node 
             using bypass Default is 10""")
 
-    parser.add_option("--upper_limit", type="int", default=40,
+    parser.add_option("--upper-limit", type="int", default=40,
             help="""Number of cycles it takes to reach the farthest node 
             using normal path Default is 40 cycles""")
 

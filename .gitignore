@@ -34,3 +34,4 @@ configs/example/memcheck.cfg
 configs/dram/lowp_sweep.cfg
 
 *.out
+hpca_results

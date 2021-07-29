@@ -225,7 +225,13 @@ for i in range(np):
     elif len(multiprocesses) == 1:
         system.cpu[i].workload = multiprocesses[0]
     else:
-        system.cpu[i].workload = multiprocesses[i]
+        if options.rodinia_attack:
+            if i < (np-1):
+                system.cpu[i].workload = multiprocesses[0]
+            else:
+                system.cpu[i].workload = multiprocesses[1]
+        else:
+            system.cpu[i].workload = multiprocesses[i]
 
     if options.simpoint_profile:
         system.cpu[i].addSimPointProbe(options.simpoint_interval)

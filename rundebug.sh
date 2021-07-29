@@ -21,9 +21,9 @@
     --fixed-target-near=1 \
     --fixed-target-far=53 \
     --max-hpc=3 \
-    --lower_limit=20 \
-    --upper_limit=40 \
-    --delta_s=4 \
+    --lower-limit=20 \
+    --upper-limit=40 \
+    --delta-s=4 \
 
 
 
