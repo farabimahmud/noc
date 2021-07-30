@@ -1,22 +1,24 @@
+#!/bin/python3
+
 import os 
 import math 
 
-gem5_binary     = "build/NULL/gem5.debug"
-base_dir        = "/home/farabi/noc"
-results_dir     = os.path.join(base_dir, "hpca_results")
-bash_scripts_dir = os.path.join(base_dir, "hpca_scripts/garnet_1/") 
-config_file     = os.path.join(base_dir,
-        "configs/example/se.py")
-injection_rate  = [ 0.001*i + 0.00 for i in range(200) ]
-traffic_type    = ["uniform_random"]
-attack_rate     = [0.1]
-policy          = ["bypass_none", "jitter_all"]
+run_case        = "rodinia_3"
+gem5_binary     = "build/X86_MESI_Two_Level/gem5.opt"
+base_dir        = "/home/grads/f/farabi/noc"
+results_dir     = os.path.join(base_dir, os.path.join("hpca_results",run_case))
+bash_scripts_dir = os.path.join(base_dir, os.path.join("hpca_scripts",run_case)) 
+config_file     = os.path.join(base_dir, "configs/example/se.py")
+
+
+attack_rate     = [0.5]
+policy          = ["bypass_none", "jitter_all", "bypass_all_out"]
 
 debug_flag_lists= ["JitterAllStats"]
 debug_flags     = ','.join(map(str, debug_flag_lists))
 debug_file      = "debug.out"
 
-sim_cycles      = 1000000
+sim_cycles      = 10000000
 max_hpc         = 5
 lower_limit     = 20
 upper_limit     = 40
@@ -28,13 +30,82 @@ n_rows          = int(math.sqrt(n_dirs))
 
 attacker_node   = 0
 
+list_of_application = [
+    'backprop',
+    # 'b+tree',
+    'heartwall',
+    'kmeans',
+    'lud',
+    # 'nn',
+    #'particlefilter',
+    'srad_v1',
+    'srad_v2',
+    'bfs',
+    'cfd',
+    'hotspot',
+    'lavaMD',
+    'myocyte',
+    'nw',
+    'pathfinder',
+    'streamcluster',
+    ]
 
-def get_test_case(p, ir):
-    return "{:s}-{:03.0f}".format(p,ir*1000)
 
-def get_out_dir(dir_name, ir, p, t):
-    test_case = os.path.join(results_dir,get_test_case(p,ir))
-    # print(test_case)    
+application_cmd= {
+    'kmeans'    : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/kmeans/kmeans_openmp/kmeans",
+    "-n 64 -i /home/grads/f/farabi/benchmarks/rodinia_3.0/data/kmeans/kdd_cup"],
+    'bfs'       :   ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/bfs/bfs",
+    "64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/bfs/graph1MW_6.txt"], 
+    'lavaMD'    :    ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/lavaMD/lavaMD", 
+    "-cores 64 -boxes1d 10"],
+    'lud'       :    ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/lud/omp/lud_omp", 
+    "-n 64 -i /home/grads/f/farabi/benchmarks/rodinia_3.0/data/lud/512.dat"],
+    'nn'        : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/nn/nn",
+    "filelist_4 5 30 90"],
+    'srad_v2'   :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/srad/srad_v2/srad", 
+    "2048 2048 0 127 0 127 64 0.5 2"],
+    'srad_v1'   :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/srad/srad_v1/srad", 
+    "100 0.5 502 458 64"],
+    'streamcluster' :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/streamcluster/sc_omp", 
+    "10 20 256 65536 65536 1000 none output.txt 64"],
+    'nw'        : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/nw/needle",
+    "2048 10 64"],
+    'particlefilter' :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/particlefilter/particle_filter",
+    "-x 128 -y 128 -z 10 -np 10000"],
+    'cfd'       :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/cfd/euler3d_cpu",
+    "/home/grads/f/farabi/benchmarks/rodinia_3.0/data/cfd/fvcorr.down.097K"],
+    'pathfinder':
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/pathfinder/pathfinder",
+    "100000 100 64"],
+    'heartwall' :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/heartwall/heartwall",
+    "/home/grads/f/farabi/benchmarks/rodinia_3.0/data/heartwall/test.avi 20 64"],
+    'backprop'  :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/backprop/backprop",
+    "65536 64"],
+    'b+tree'    :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/b+tree/b+tree.out", 
+    "core 64 file /home/grads/f/farabi/benchmarks/rodinia_3.0/data/b+tree/mil.txt command ./../data/b+tree/command.txt"],
+    'hotspot'   :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot",
+    "512 512 2 64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512  /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512"],
+    'myocyte'   :
+        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/myocyte.out","100 1 0 64"]
+}
+
+
+
+def get_test_case(a,p):
+    return "{}-{}".format(a,p)
+
+def get_out_dir(dir_name, a,p):
+    test_case = os.path.join(results_dir,get_test_case(a,p))
+    #print(test_case)    
     if not os.path.exists(test_case):
         try:
             os.makedirs(test_case)
@@ -44,11 +115,11 @@ def get_out_dir(dir_name, ir, p, t):
     return test_case
 
 
-def get_gem5_command(ir, p, t):
-    outdir = get_out_dir(base_dir, ir, p, t)
+def get_gem5_command(a, p):
+    outdir = get_out_dir(base_dir, a, p)
     s = os.path.join(base_dir,gem5_binary)
-    s += " --debug-flags={} ".format(debug_flags)
-    s += " --debug-file={} ".format(os.path.join(outdir,debug_file))
+    #s += " --debug-flags={} ".format(debug_flags)
+    #s += " --debug-file={} ".format(os.path.join(outdir,debug_file))
     s += " --outdir={} ".format(outdir)         
     s += " --redirect-stdout "         
     s += " --redirect-stderr "         
@@ -56,55 +127,55 @@ def get_gem5_command(ir, p, t):
     s += " --stderr-file={} ".format(os.path.join(outdir,"stderr.log"))         
 
     s += " {} ".format(config_file)
+    
     s += "--num-cpus={} ".format(n_cpus)
     s += "--num-dirs={} ".format(n_dirs)
     s += "--network=garnet2.0 "
     s += "--topology=Mesh_XY "
     s += "--mesh-row={} ".format(n_rows)
-    s += "--sim-cycles={} ".format(sim_cycles)
-    s += "--synthetic={} ".format(t)
+    s += "--maxinsts={} ".format(sim_cycles)
+
+    s += "--ruby "
+    s += "--caches "
+    s += "--l2cache "
+    s += "--num-l2caches={} ".format(n_cpus)
+    s += "--fast-forward=9223372036854775807 "
     s += "--bypass={} ".format(p)
-    s += "--injectionrate={} ".format(ir)
     s += "--attack-enabled "
     s += "--attack-node={} ".format(attacker_node)
     s += "--max-hpc={} ".format(max_hpc)
     s += "--lower-limit={} ".format(lower_limit)
     s += "--upper-limit={} ".format(upper_limit)
+    s += "--cmd={} ".format(application_cmd[a][0])
+    s += "--options=\"{}\" ".format(application_cmd[a][1])
     return s
 
 def create_bash_script():
-    for ir in injection_rate:
+    for a in list_of_application:
         for p in policy:
-            for t in traffic_type:
-                gem5_command = get_gem5_command(ir,p,t)
-                bash_script_filename = "{}.sh".format(get_test_case(p,ir))
-                bash_script_file = os.path.join(bash_scripts_dir,
-                        bash_script_filename)
+            gem5_command = get_gem5_command(a,p)
+            bash_script_filename = "{}.sh".format(get_test_case(a,p))
+            get_out_dir(bash_scripts_dir, a,p)
+            bash_script_file = os.path.join(bash_scripts_dir, bash_script_filename)
+            print(gem5_command)
+            with open(bash_script_file, "w") as f:
+                print("#!/bin/bash", file=f)
+                print("source ~/.bashrc", file=f)
+                print("mkdir -p {}".format(get_out_dir(bash_scripts_dir, a,p)),
+                    file=f)
+                print("{}".format(gem5_command), file=f)
 
-                print(gem5_command)
-                with open(bash_script_file, "w") as f:
-                    print("#!/bin/bash", file=f)
-                    print("source ~/.bashrc", file=f)
-                    print("mkdir -p {}".format(get_out_dir(base_dir,ir,p,t)),
-                            file=f)
-                    print("{}".format(gem5_command), file=f)
-    
 def create_slurm_job():
-    with open("garnet_1.sh", "w") as f:
+    with open("{}.sh".format(run_case), "w") as f:
         print("#!/bin/bash",file=f)
-        for ir in injection_rate:
+        for a in list_of_application:
             for p in policy:
-                for t in traffic_type:
-                    bash_script_filename = "{}.sh".format(get_test_case(p,ir))
-                    bash_script_file = os.path.join(bash_scripts_dir,
-                        bash_script_filename)
-
-                    print("chmod +x {} &&".format(bash_script_file), file=f)
-                    print("sbatch {}".format(bash_script_file), file=f)
-
-               
+                bash_script_filename = "{}.sh".format(get_test_case(a,p))
+                bash_script_file = os.path.join(bash_scripts_dir, bash_script_filename)
+                print("chmod +x {} &&".format(bash_script_file), file=f)
+                print("sbatch {}".format(bash_script_file), file=f)           
 
 
-    
+#print(get_out_dir(results_dir, "bfs","bypass_none"))  
 create_bash_script()
 create_slurm_job()

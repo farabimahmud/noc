@@ -12,11 +12,13 @@
     --l2cache \
     --num-l2caches=64 \
     --caches \
-    -c /home/farabi/benchmarks/rodinia_3.0/openmp/backprop/backprop \
-    -o 65536 \
-    --bypass=bypass_all_out \
+    -c /home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot \
+    -o "512 512 2 64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512" \
+    --bypass=bypass_none \
     --attack-enabled \
-    --attack-node=63 \
+    --attack-node=0 \
     --attack-rate=0.01 \
     --lower-limit=20 \
-    --maxinsts=1000000 \
+    --upper-limit=40 \
+    --fast-forward=9223372036854775807
+    #--maxinsts=100000 \

@@ -1,71 +1,51 @@
+#!/bin/python3 
 
 import os
 import glob
 import re
+import sys 
 
-benches = [
-          'blackscholes',
-          'canneal',
-          'dedup',
-          'facesim',
-          'fluidanimate',
-          'freqmine',
-          'streamcluster',
-          'swaptions',
-          'x264',
-            ]
+#base_dir = "/home/grads/f/farabi/noc/m5out/restore/week-jan-26/"
 
-week_update = "/home/grads/f/farabi/noc/m5out/restore/week-jan-26/"
+base_dir = "/home/grads/f/farabi/noc/hpca_results/"
+test_case= "rodinia_3"
 
-week_update = "/home/grads/f/farabi/noc/m5out"
+results = []
 
-
-def print_feature(stat_files, feature_name):
+def print_feature(stat_files, feature_name, tdir):
     for filename in stat_files:
         with open(filename, "r") as f:
             for line in f.readlines():
                 if feature_name in line:
                     row_data = line.split()
-                    benchmark_name = filename.replace(week_update,"")
-                    benchmark_name = benchmark_name[:benchmark_name.index("-")]
+                    # print(row_data)
+                    benchmark_name = filename.replace(tdir,"")
+                    benchmark_name = benchmark_name[1:benchmark_name.index("-")]
                     scheme_name = filename.replace("/stats.txt", "")
-                    scheme_name = scheme_name[scheme_name.rindex("-")+1:]
-                    print(benchmark_name,",",scheme_name, end=",")
+                    scheme_name = scheme_name[scheme_name.index("-")+1:]
+                    # print(benchmark_name,",",scheme_name, end=",")                   
                     if (feature_name == "packet_network_latency_dist |"):
                         for j in range(3,len(row_data),4 ):
                             print(row_data[j], end=", ")
                     elif (feature_name == "average_packet_network_latency"):
                         print(row_data[1])
-
-
-        print()
-
-
-
-def print_debug_feature(stat_files, feature_name):
-    for filename in stat_files:
-        with open(filename, "r") as f:
-            for line in f.readlines():
-                if feature_name in line:
-                    row_data = line.split()
-                    if (feature_name == "packet_network_latency_dist |") :
-                        for j in range(3,len(row_data),4 ):
-                            print(row_data[j], end=", ")
-                    elif (feature_name == "average_packet_network_latency"):
-                        print(row_data[1])
-                    elif (feature_name == ".network_latency_dist |"):
-                        lindex = row_data[0].index("routers")
-                        print(row_data[0][lindex+7:lindex+9], end=", ")
-                        for j in range(3, len(row_data), 4):
-                            print(row_data[j], end=", ")
-                        print()
-        print()
+                    #elif (row_data[0].startswith("system.switch_cpus")):
+                    #    # print("here")
+                    elif feature_name == "sim_insts" or feature_name == "sim_ticks":
+                        print("{},{},{},{}".format(feature_name,
+                            benchmark_name, scheme_name, row_data[1]))
+                    elif feature_name == "committedInsts":
+                        print("{},{},{},{}".format(feature_name,
+                            benchmark_name, scheme_name, row_data[1]))
+    print()
 
 
 
-
-
-stat_files = glob.glob( week_update + "*/stats.txt")
-feature_name =  ".network_latency_dist |"
+tdir = os.path.join(base_dir, test_case)
+stat_files = glob.glob( tdir + "/*/stats.txt")
+feature_name =  "committedInsts"
 # print(stat_files)
-print_debug_feature(stat_files, feature_name)
+print_feature(stat_files, "committedInsts", tdir)
+print_feature(stat_files, "sim_insts", tdir)
+print_feature(stat_files, "sim_ticks", tdir)
+print_feature(stat_files,"packet_network_latency::mean", tdir)

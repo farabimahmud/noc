@@ -500,7 +500,8 @@ void NetworkInterface::wakeup()
         }
     }
 
-    if (m_net_ptr->all_out_bypass)
+    if (m_net_ptr->all_out_bypass || 
+            m_net_ptr->jitter_all)
     {
         bool read_from_jq = readJQ();
         if (read_from_jq)
@@ -534,7 +535,24 @@ void NetworkInterface::wakeup()
             // Cycles ready_to_commit = t_flit->ready_to_commit;
 
             Cycles latency = curCycle() - t_flit->get_enqueue_time();
-            if (m_net_ptr->all_out_bypass &&
+            if (m_net_ptr->jitter_all && 
+                    t_flit->getAttackFlit() && 
+                    t_flit->get_vnet() == 2 && 
+                    latency < m_net_ptr->upper_limit){
+ 
+                DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n",
+                        *t_flit, latency, m_net_ptr->upper_limit);
+                t_flit->target_latency = m_net_ptr->upper_limit;
+                t_flit->ready_to_commit = curCycle() + (m_net_ptr->upper_limit - latency);
+                jq->insert(t_flit);
+
+                scheduleEvent(t_flit->target_latency - latency);
+                DPRINTF(Vanilla, "%s will wait %d cycles\n",
+                        *t_flit, t_flit->target_latency - latency);
+
+
+            }
+            else if (m_net_ptr->all_out_bypass &&
                 t_flit->getAttackFlit() &&
                 t_flit->get_vnet() == 2 &&
                 latency < t_flit->target_latency)
@@ -776,6 +794,8 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet)
             if (m_net_ptr->jitter_all)
             {
                 fl->set_jittered(true);
+                niOutVcs[vc].insert(fl);
+
             }
             else if (m_net_ptr->all_out_bypass)
             {
