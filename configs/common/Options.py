@@ -116,6 +116,23 @@ def addNoISAOptions(parser):
 
     parser.add_option("--memchecker", action="store_true")
 
+
+    # Following Options for selecting one node to generate Attack Packet
+    parser.add_option("--attack-node", type="int", default=0,
+                    help="The node that is being attacked at this point \
+                            Default value node 0")
+    parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
+                    help="Attack rate in packets per cycle per node,\
+                            takes floating point value between 0 to 1 \
+                            default value is 0.1")
+    parser.add_option("--attack-enabled", action="store_true")
+
+    parser.add_option("--destination-list", type="string", 
+            default=None, action="store",
+            help= """list of destinations that the attacker will try to send
+            packets default is None """)
+
+
     # Cache Options
     parser.add_option("--external-memory-system", type="string",
                       help="use external ports of this port_type for caches")
@@ -166,15 +183,6 @@ def addCommonOptions(parser):
     # start by adding the base options that do not assume an ISA
     addNoISAOptions(parser)
 
-    # Following Options for selecting one node to generate Attack Packet
-    parser.add_option("--attack-node", type="int", default=0,
-                    help="The node that is being attacked at this point \
-                            Default value node 0")
-    parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
-                    help="Attack rate in packets per cycle per node,\
-                            takes floating point value between 0 to 1 \
-                            default value is 0.1")
-    parser.add_option("--attack-enabled", action="store_true")
 
     # Following options for selecting two nodes to receive attack packet
     parser.add_option("--fixed-target-enabled", action="store_true")

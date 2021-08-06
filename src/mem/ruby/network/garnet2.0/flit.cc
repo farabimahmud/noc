@@ -36,7 +36,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
 {
     m_size = size;
     m_msg_ptr = msg_ptr;
-    if(vnet==0) m_msg_ptr->m_req_enqueue_time = curTime;
+    if(vnet==0) m_msg_ptr->setReqEnqueueTime(curTime);
     m_enqueue_time = curTime;
     m_dequeue_time = curTime;
     m_time = curTime;
@@ -46,6 +46,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
     m_route = route;
     m_stage.first = I_;
     m_stage.second = m_time;
+    isBypassFlagsReset = false;
 
     if (size == 1) {
         m_type = HEAD_TAIL_;
@@ -108,6 +109,7 @@ flit::print(std::ostream& out) const
     out << "Enqueue Time=" << m_enqueue_time << " ";
     out << "Attack Flit=" << isAttackFlit << " ";
     out << "RTC=" << ready_to_commit << " ";
+    out << "Target Latency=" << target_latency << " ";
     out << "]";
 }
 

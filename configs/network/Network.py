@@ -95,13 +95,17 @@ def define_options(parser):
             help="""Number of cycles beyond which we cannot differentiate
             default is 4""")
 
-    parser.add_option("--lower-limit", type="int", default=10,
+    parser.add_option("--lower-limit", type="int", default=-1,
             help="""Number of cycles it takes to reach the farthest node 
             using bypass Default is 10""")
 
     parser.add_option("--upper-limit", type="int", default=40,
             help="""Number of cycles it takes to reach the farthest node 
             using normal path Default is 40 cycles""")
+    parser.add_option("--target-latency", type="int", default=20,
+    help="""Number of cycles it takes to reach the farthest node 
+    using Camouflage Default is 20""")
+
 
 def create_network(options, ruby):
 
@@ -170,7 +174,15 @@ def init_network(options, network, InterfaceClass):
         network.max_hpc = options.max_hpc
         network.lower_limit = options.lower_limit 
         network.upper_limit = options.upper_limit 
+        network.target_latency = options.target_latency
         network.delta_s = options.delta_s
+
+        if options.destination_list is not None:
+            s = options.destination_list.split(",")
+            print("Destinations of Attack/Secure LDs are")
+            for d in s:
+                print(d, end=" ")
+            network.destination_list = options.destination_list
 
 
 

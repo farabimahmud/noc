@@ -75,13 +75,19 @@ class GarnetNetwork(RubyNetwork):
 
     max_hpc = Param.Int(3, "Maximum Hops Per Cycle one packet can bypass \
             depends on the technology. Default value is 3")
-    lower_limit = Param.Int(10, "Number of cycles it takes to reach the \
+    lower_limit = Param.Int(-1, "Number of cycles it takes to reach the \
             farthest node using bypass.")
     upper_limit = Param.Int(40, "Number of cycles it takes to reach the \
             farthest node using Normal path. Default is 40")
+    target_latency = Param.Int(20, "Number of cycles it takes to reach the \
+            farthest node using Our Algorithm. Default is 20")
 
     delta_s  = Param.Int(4, "Number of cycles we cannot differentiate \
             the timing differences between. Default is 4")
+
+    destination_list = Param.String("", "comma separated list of \
+            destinations that the attacker going to use and we have \
+            to protect from, Default is None")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

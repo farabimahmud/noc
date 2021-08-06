@@ -42,7 +42,7 @@
 
 #include "debug/RubyQueue.hh"
 #include "mem/ruby/network/Network.hh"
-#include "mem/ruby/protocol/MemoryMsg.hh"
+#include "mem/ruby/slicc_interface/bug_fix/MemoryMsg.hh"
 #include "mem/ruby/system/GPUCoalescer.hh"
 #include "mem/ruby/system/RubySystem.hh"
 #include "mem/ruby/system/Sequencer.hh"
@@ -359,6 +359,14 @@ AbstractController::mapAddressToMachine(Addr addr, MachineType mtype) const
 {
     NodeID node = m_net_ptr->addressToNodeID(addr, mtype);
     MachineID mach = {mtype, node};
+    return mach;
+}
+
+MachineID
+AbstractController::mapAddressToL1Cache(Addr addr) const
+{
+    NodeID node = m_net_ptr->addressToNodeID(addr, MachineType_Directory);
+    MachineID mach = {MachineType_L1Cache, node};
     return mach;
 }
 

@@ -73,6 +73,8 @@ MemCmd::commandInfo[] =
 {
     /* InvalidCmd */
     { 0, InvalidCmd, "InvalidCmd" },
+    { SET2(IsRead, IsRequest), ReadResp, "GarnetLD" },
+    { SET2(IsWrite, IsRequest), ReadResp, "GarnetST" },
     /* ReadReq - Read issued by a non-caching agent such as a CPU or
      * device, with no restrictions on alignment. */
     { SET3(IsRead, IsRequest, NeedsResponse), ReadResp, "ReadReq" },

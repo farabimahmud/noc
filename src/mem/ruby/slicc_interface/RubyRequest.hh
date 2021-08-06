@@ -61,7 +61,8 @@ class RubyRequest : public Message
     HSAScope m_scope;
     HSASegment m_segment;
     uint8_t m_jit;
-    // bool m_attackMessage;
+    bool m_attackMessage = false;
+    Cycles m_req_enqueue_time; 
 
     RubyRequest(Tick curTime, uint64_t _paddr, uint8_t* _data, int _len,
         uint64_t _pc, RubyRequestType _type, RubyAccessMode _access_mode,
@@ -158,6 +159,14 @@ class RubyRequest : public Message
     void print(std::ostream& out) const;
     bool functionalRead(Packet *pkt);
     bool functionalWrite(Packet *pkt);
+
+  public:
+    virtual bool isAttackMessage() { return m_attackMessage; }
+    virtual void AttackMessage() { m_attackMessage = true; }
+
+    virtual Cycles getReqEnqueueTime() { return m_req_enqueue_time; }
+    virtual void setReqEnqueueTime(Cycles c) { m_req_enqueue_time = c; }
+
 };
 
 inline std::ostream&

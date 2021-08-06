@@ -59,6 +59,9 @@ class GarnetSyntheticTraffic(ClockedObject):
         Default is false, i.e. attack not enabled")
     attack_rate = Param.Float(0.1, "Rate of attack. Injection rate for \
         attack packets")
+    
+    destination_list = Param.String('', "list of nodes targeted by attack \
+            default is None")
 
     fixed_target_enabled = Param.Bool(False, "Whether fixed target pair is \
         enabled for this simulation or not. Default is Not Enabled")

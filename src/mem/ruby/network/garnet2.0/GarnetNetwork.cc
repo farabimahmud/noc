@@ -31,6 +31,8 @@
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 
 #include <cassert>
+#include <string>
+#include <sstream>
 
 #include "base/cast.hh"
 #include "debug/AttackPacketGenerator.hh"
@@ -119,29 +121,80 @@ int GarnetNetwork::PACKETID = 0;
     min_cycles = p->min_cycles;
     max_cycles = p->max_cycles;
     dynamic_delay = p->dynamic_delay; 
-    hasFixedTarget = p->fixed_target_enabled;
-    if (attack_enabled && hasFixedTarget ){
-        fixedTargetNearNode = p->fixed_target_near;
-        fixedTargetFarNode = p->fixed_target_far;
-        DPRINTF(AttackPacketGenerator, "assigned fixed taget near %d "
-                "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
-    }
-    else if(p->randomly_selected_targets){
-        DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
-        fixedTargetNearNode = 1; 
-        fixedTargetFarNode = 51;
-    }
 
     // initialize expected_delay if scheme is dynamic
     if (all_out_bypass){
         DPRINTF(Vanilla, "All out bypass enabled\n");
     }
     max_hpc = p->max_hpc;
-    lower_limit = Cycles(p->lower_limit);
     upper_limit = Cycles(p->upper_limit);
     delta_s = Cycles(p->delta_s);
-    target = Cycles(p->upper_limit);
+    target_latency = Cycles(p->target_latency);
 
+    if (p->destination_list.length() > 0){
+        DPRINTF(Vanilla, "Setting Up Destination List\n");
+        std::stringstream stream(p->destination_list);
+        std::string token; 
+        while(std::getline(stream, token, ',')){
+            int dest_node = std::stoi(token);
+            assert(0 < dest_node &&  dest_node < m_routers.size());
+            destination_list.push_back(dest_node);
+        }
+        DPRINTF(Vanilla, "[GN] Destination List is - \n");
+        for (auto d:destination_list){
+            DPRINTF(Vanilla, "%d\n", d);
+        }
+
+       
+    }
+    if (p->lower_limit != -1){
+        DPRINTF(Vanilla, "Overriding lower limit from the destinations\n");
+        lower_limit = Cycles(p->lower_limit);
+    }
+    closest_rt = Cycles(p->target_latency);
+}
+
+int
+GarnetNetwork::get_bypass_cost(int src, int dest){
+    int x_src = src % m_num_cols;
+    int y_src = src / m_num_cols;
+    int x_dest = dest % m_num_cols;
+    int y_dest = dest / m_num_cols;  
+    int x_cost = abs(x_src - x_dest);
+    int y_cost = abs(y_src - y_dest);      
+    int bypass_cost = 0; 
+    bypass_cost = int(ceil( (float) (x_cost+y_cost)/ (float) max_hpc)); 
+    DPRINTF(Vanilla,"Bypass cost from src %d to dest %d is %d\n",
+            src,
+            dest,
+            bypass_cost);
+    assert(bypass_cost != 0 && "bypass cost cannot be 0");
+    return bypass_cost;
+}
+
+Cycles 
+GarnetNetwork::get_farthest_node_bypass_cost(int src, std::vector<int> dlist){
+    std::vector<int> bypass_cost_from_source;   
+    for (auto d:dlist){
+        bypass_cost_from_source.push_back(get_bypass_cost(src,d));
+     }
+    int max_value = *std::max_element(
+            bypass_cost_from_source.begin(), 
+            bypass_cost_from_source.end());
+
+    int closest_index = std::min_element(
+            bypass_cost_from_source.begin(), 
+            bypass_cost_from_source.end()
+            ) - bypass_cost_from_source.begin();
+    closest_dest  = dlist[closest_index];
+
+    int farthest_index = std::max_element(
+            bypass_cost_from_source.begin(), 
+            bypass_cost_from_source.end()
+            ) - bypass_cost_from_source.begin();
+    farthest_dest = dlist[farthest_index];
+    DPRINTF(Vanilla, "Closest %d Farthest %d lower %d\n", closest_dest, farthest_dest, max_value);
+    return Cycles(max_value);
 }
 
     void
@@ -196,6 +249,7 @@ GarnetNetwork::init()
     }
 
     createOutputUnitTable(m_routers.size());
+    lower_limit  = get_farthest_node_bypass_cost(attack_node, destination_list);
 
 }
 
@@ -302,6 +356,8 @@ GarnetNetwork::get_router_id(int ni)
     return m_nis[ni]->get_router_id();
 }
 
+
+
     void
 GarnetNetwork::regStats()
 {
@@ -313,6 +369,35 @@ GarnetNetwork::regStats()
         .init(0, 50, 2 )
         .name(name() + ".packet_network_latency_dist")
         .flags(Stats::oneline)
+        .precision(12)       
+        ;
+    
+    m_closest_dest_attack_packet_latency
+        .init(0,100,5)
+        .name(name() + ".closest_dest_attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+        ;
+
+    m_farthest_dest_attack_packet_latency
+        .init(0,100,5)
+        .name(name() + ".farthest_dest_attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+       ; 
+
+    m_attack_packet_latency
+        .init(0, 100, 5 )
+        .name(name() + ".attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+        ;
+
+    m_regular_packet_latency
+        .init(0, 100, 5 )
+        .name(name() + ".regular_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)        
         ;
 
     m_packets_received
@@ -445,6 +530,17 @@ GarnetNetwork::regStats()
         .name(name() + ".int_link_utilization");
     m_average_link_utilization
         .name(name() + ".avg_link_utilization");
+    
+    m_total_bypass_count 
+        .name(name() + ".total_bypass_count");
+    m_total_jitter_count
+      .name(name() + ".total_jitter_count");
+    m_total_num_attack_packets 
+        .name(name() + ".total_num_attack_packet");
+    m_total_normal_count
+        .name(name() + ".total_normal_count");
+    m_total_jitter_amount 
+        .name(name() + ".total_jitter_amount");
 
     m_average_vc_load
         .init(m_virtual_networks * m_vcs_per_vnet)

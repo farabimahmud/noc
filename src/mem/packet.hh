@@ -78,6 +78,8 @@ class MemCmd
     enum Command
     {
         InvalidCmd,
+        GarnetLD,
+        GarnetST,
         ReadReq,
         ReadResp,
         ReadRespWithInvalidate,

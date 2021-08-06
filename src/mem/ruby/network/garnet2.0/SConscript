@@ -54,3 +54,4 @@ Source('Credit.cc')
 
 DebugFlag('Naive')
 DebugFlag('Vanilla')
+DebugFlag('JitterAllStats')

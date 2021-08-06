@@ -149,6 +149,8 @@ class flit
     Cycles lb, ln, tc;
     MsgPtr m_msg_ptr;
 
+    bool isBypassFlagsReset; 
+
 
   protected:
     uint64_t m_pid;

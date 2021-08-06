@@ -55,8 +55,8 @@ class Message
           m_DelayedTicks(other.m_DelayedTicks),
           m_msg_counter(other.m_msg_counter)
     {
-        m_attackMessage = other.m_attackMessage;
-        m_req_enqueue_time = other.m_req_enqueue_time;
+       m_attackMessage = other.m_attackMessage;
+       m_req_enqueue_time = other.m_req_enqueue_time;
     }
 
     virtual ~Message() { }
@@ -78,6 +78,13 @@ class Message
      */
     virtual bool functionalRead(Packet *pkt) = 0;
     virtual bool functionalWrite(Packet *pkt) = 0;
+
+    virtual bool isAttackMessage() { return false; }
+    virtual void AttackMessage() { }
+
+    virtual Cycles getReqEnqueueTime() { return Cycles(0); }
+    virtual void setReqEnqueueTime(Cycles c) {}
+
 
     //! Update the delay this message has experienced so far.
     void updateDelayedTicks(Tick curTime)

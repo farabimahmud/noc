@@ -54,6 +54,12 @@ class Packet;
 class GarnetSyntheticTraffic : public ClockedObject
 {
   public:
+
+    bool attack_enabled;
+    int attack_node;
+    float attack_rate;
+    int index = 0;
+    std::vector<int> destination_list;
     typedef GarnetSyntheticTrafficParams Params;
     GarnetSyntheticTraffic(const Params *p);
 
@@ -142,15 +148,6 @@ class GarnetSyntheticTraffic : public ClockedObject
 
     friend class MemCompleteEvent;
 
-    bool isAttackNode;
-    bool isAttackEnabled;
-    float attackRate;
-
-    void generateAttackPkt();
-
-    bool hasFixedTarget;
-    int fixedTargetNearNode;
-    int fixedTargetFarNode;
 
 };
 

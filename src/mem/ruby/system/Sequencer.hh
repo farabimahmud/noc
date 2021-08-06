@@ -80,7 +80,10 @@ std::ostream& operator<<(std::ostream& out, const SequencerRequest& obj);
 class Sequencer : public RubyPort
 {
   public:
-    double attackRate = 1; 
+    double attackRate ; 
+    std::vector<int> destination_list;
+    bool is_attack_node; 
+
     typedef RubySequencerParams Params;
     Sequencer(const Params *);
     ~Sequencer();

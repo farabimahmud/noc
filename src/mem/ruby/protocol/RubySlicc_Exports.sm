@@ -301,7 +301,8 @@ structure(SequencerMsg, desc="...", interface="Message", external="yes") {
   int Len,                   desc="size in bytes of access";
   PrefetchBit Prefetch,      desc="Is this a prefetch request";
   MessageSizeType MessageSize, default="MessageSizeType_Request_Control";
-  // bool attackMessage,        desc="is this attack?";
+  bool attackMessage,        desc="is this attack?";
+  Cycles req_enqueue_time,   desc="Enqueue time of the Request of Response";
   bool functionalRead(Packet *pkt) {
     return false;
   }
