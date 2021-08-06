@@ -37,6 +37,9 @@ class SequencerMsg :  public Message
         m_DataBlk = other.m_DataBlk;
         m_Len = other.m_Len;
         m_Prefetch = other.m_Prefetch;
+        m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time; 
+
         m_MessageSize = other.m_MessageSize;
     }
     SequencerMsg
@@ -281,6 +284,10 @@ class SequencerMsg :  public Message
     MessageSizeType m_MessageSize;
     bool functionalRead(Packet* param_pkt);
     bool functionalWrite(Packet* param_pkt);
+   public:
+    bool m_attackMessage =false;
+    Cycles m_req_enqueue_time; 
+   
 };
 inline std::ostream&
 operator<<(std::ostream& out, const SequencerMsg& obj)

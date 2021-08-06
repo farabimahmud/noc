@@ -43,8 +43,10 @@ class ResponseMsg :  public Message
         m_Dirty = other.m_Dirty;
         m_AckCount = other.m_AckCount;
         m_MessageSize = other.m_MessageSize;
-        m_req_enqueue_time = other.m_req_enqueue_time;
-    }
+        m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time; 
+       
+     }
     ResponseMsg
     &operator=(const ResponseMsg&) = default;
     ResponseMsg(const Tick curTime, const Addr& local_addr, const CoherenceResponseType& local_Type, const MachineID& local_Sender, const NetDest& local_Destination, const DataBlock& local_DataBlk, const bool& local_Dirty, const int& local_AckCount, const MessageSizeType& local_MessageSize, const Cycles& local_req_enqueue_time)
@@ -287,6 +289,10 @@ class ResponseMsg :  public Message
     /** Enqueue time of the request message */
     bool functionalRead(Packet* param_pkt);
     bool functionalWrite(Packet* param_pkt);
+    public:
+    bool m_attackMessage =false;
+    Cycles m_req_enqueue_time; 
+  
 };
 inline std::ostream&
 operator<<(std::ostream& out, const ResponseMsg& obj)

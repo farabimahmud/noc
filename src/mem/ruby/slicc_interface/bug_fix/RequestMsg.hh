@@ -43,6 +43,10 @@ class RequestMsg :  public Message
         m_Dirty = other.m_Dirty;
         m_Prefetch = other.m_Prefetch;
         m_req_enqueue_time = other.m_req_enqueue_time;
+        m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time; 
+
+ 
     }
     RequestMsg
     &operator=(const RequestMsg&) = default;
@@ -334,6 +338,9 @@ class RequestMsg :  public Message
     PrefetchBit m_Prefetch;
     bool functionalRead(Packet* param_pkt);
     bool functionalWrite(Packet* param_pkt);
+  public:
+    bool m_attackMessage =false;
+    Cycles m_req_enqueue_time; 
 };
 inline std::ostream&
 operator<<(std::ostream& out, const RequestMsg& obj)

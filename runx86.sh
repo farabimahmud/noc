@@ -15,8 +15,8 @@
     --l2cache \
     --num-l2caches=64 \
     --caches \
-    -c /home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot \
-    -o "512 512 2 64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512" \
+    -c /home/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot \
+    -o "512 512 2 64 /home/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512 /home/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512" \
     --bypass=bypass_all \
     --attack-enabled \
     --attack-node=0 \

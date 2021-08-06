@@ -5,7 +5,8 @@ import math
 
 run_case        = "rodinia_3"
 gem5_binary     = "build/X86_MESI_Two_Level/gem5.opt"
-base_dir        = "/home/grads/f/farabi/noc"
+benchmark_dir   = "/home/farabi/benchmarks/rodinia_3.0/"
+base_dir        = os.path.abspath(os.getcwd())
 results_dir     = os.path.join(base_dir, os.path.join("hpca_results",run_case))
 bash_scripts_dir = os.path.join(base_dir, os.path.join("hpca_scripts",run_case)) 
 config_file     = os.path.join(base_dir, "configs/example/se.py")
@@ -31,71 +32,71 @@ n_rows          = int(math.sqrt(n_dirs))
 attacker_node   = 0
 
 list_of_application = [
-    'backprop',
-    # 'b+tree',
-    'heartwall',
+    # 'backprop',
+    # # 'b+tree',
+    # 'heartwall',
     'kmeans',
-    'lud',
-    # 'nn',
-    #'particlefilter',
-    'srad_v1',
-    'srad_v2',
-    'bfs',
-    'cfd',
-    'hotspot',
-    'lavaMD',
-    'myocyte',
-    'nw',
-    'pathfinder',
-    'streamcluster',
+    # 'lud',
+    # # 'nn',
+    # #'particlefilter',
+    # 'srad_v1',
+    # 'srad_v2',
+    # 'bfs',
+    # 'cfd',
+    # 'hotspot',
+    # 'lavaMD',
+    # 'myocyte',
+    # 'nw',
+    # 'pathfinder',
+    # 'streamcluster',
     ]
 
 
 application_cmd= {
-    'kmeans'    : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/kmeans/kmeans_openmp/kmeans",
-    "-n 64 -i /home/grads/f/farabi/benchmarks/rodinia_3.0/data/kmeans/kdd_cup"],
-    'bfs'       :   ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/bfs/bfs",
-    "64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/bfs/graph1MW_6.txt"], 
-    'lavaMD'    :    ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/lavaMD/lavaMD", 
+    'kmeans'    : [benchmark_dir+"openmp/kmeans/kmeans_openmp/kmeans",
+    "-n 64 -i "+benchmark_dir+"data/kmeans/kdd_cup"],
+    'bfs'       :   [benchmark_dir+"openmp/bfs/bfs",
+    "64 "+benchmark_dir+"data/bfs/graph1MW_6.txt"], 
+    'lavaMD'    :    [benchmark_dir+"openmp/lavaMD/lavaMD", 
     "-cores 64 -boxes1d 10"],
-    'lud'       :    ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/lud/omp/lud_omp", 
-    "-n 64 -i /home/grads/f/farabi/benchmarks/rodinia_3.0/data/lud/512.dat"],
-    'nn'        : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/nn/nn",
+    'lud'       :    [benchmark_dir+"openmp/lud/omp/lud_omp", 
+    "-n 64 -i "+benchmark_dir+"data/lud/512.dat"],
+    'nn'        : [benchmark_dir+"openmp/nn/nn",
     "filelist_4 5 30 90"],
     'srad_v2'   :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/srad/srad_v2/srad", 
+        [benchmark_dir+"openmp/srad/srad_v2/srad", 
     "2048 2048 0 127 0 127 64 0.5 2"],
     'srad_v1'   :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/srad/srad_v1/srad", 
+        [benchmark_dir+"openmp/srad/srad_v1/srad", 
     "100 0.5 502 458 64"],
     'streamcluster' :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/streamcluster/sc_omp", 
+        [benchmark_dir+"openmp/streamcluster/sc_omp", 
     "10 20 256 65536 65536 1000 none output.txt 64"],
-    'nw'        : ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/nw/needle",
+    'nw'        : [benchmark_dir+"openmp/nw/needle",
     "2048 10 64"],
     'particlefilter' :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/particlefilter/particle_filter",
+        [benchmark_dir+"openmp/particlefilter/particle_filter",
     "-x 128 -y 128 -z 10 -np 10000"],
     'cfd'       :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/cfd/euler3d_cpu",
-    "/home/grads/f/farabi/benchmarks/rodinia_3.0/data/cfd/fvcorr.down.097K"],
+        [benchmark_dir+"openmp/cfd/euler3d_cpu",
+    benchmark_dir+"data/cfd/fvcorr.down.097K"],
     'pathfinder':
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/pathfinder/pathfinder",
+        [benchmark_dir+"openmp/pathfinder/pathfinder",
     "100000 100 64"],
     'heartwall' :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/heartwall/heartwall",
-    "/home/grads/f/farabi/benchmarks/rodinia_3.0/data/heartwall/test.avi 20 64"],
+        [benchmark_dir+"openmp/heartwall/heartwall",
+    benchmark_dir+"data/heartwall/test.avi 20 64"],
     'backprop'  :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/backprop/backprop",
+        [benchmark_dir+"openmp/backprop/backprop",
     "65536 64"],
     'b+tree'    :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/b+tree/b+tree.out", 
-    "core 64 file /home/grads/f/farabi/benchmarks/rodinia_3.0/data/b+tree/mil.txt command ./../data/b+tree/command.txt"],
+        [benchmark_dir+"openmp/b+tree/b+tree.out", 
+    "core 64 file "+benchmark_dir+"data/b+tree/mil.txt command "+benchmark_dir+"data/b+tree/command.txt"],
     'hotspot'   :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot",
-    "512 512 2 64 /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512  /home/grads/f/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512"],
+        [benchmark_dir+"openmp/hotspot/hotspot",
+    "512 512 2 64 "+benchmark_dir+"data/hotspot/temp_512  "+benchmark_dir+"data/hotspot/power_512"],
     'myocyte'   :
-        ["/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/myocyte.out","100 1 0 64"]
+        [benchmark_dir+"openmp/myocyte.out","100 1 0 64"]
 }
 
 

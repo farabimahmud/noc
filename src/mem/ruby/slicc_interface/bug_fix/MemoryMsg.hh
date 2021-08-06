@@ -41,6 +41,9 @@ class MemoryMsg :  public Message
         m_Prefetch = other.m_Prefetch;
         m_ReadX = other.m_ReadX;
         m_Acks = other.m_Acks;
+        m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time; 
+
     }
     MemoryMsg
     &operator=(const MemoryMsg&) = default;
@@ -310,6 +313,10 @@ class MemoryMsg :  public Message
     int m_Acks;
     bool functionalRead(Packet* param_pkt);
     bool functionalWrite(Packet* param_pkt);
+   public:
+    bool m_attackMessage =false;
+    Cycles m_req_enqueue_time; 
+   
 };
 inline std::ostream&
 operator<<(std::ostream& out, const MemoryMsg& obj)
