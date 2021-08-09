@@ -662,6 +662,7 @@ DefaultDecode<Impl>::decodeInsts(ThreadID tid)
     } else if (decodeStatus[tid] == Running) {
         ++decodeRunCycles;
     }
+
     std::queue<DynInstPtr>
         &insts_to_decode = decodeStatus[tid] == Unblocking ?
         skidBuffer[tid] : insts[tid];
@@ -672,7 +673,7 @@ DefaultDecode<Impl>::decodeInsts(ThreadID tid)
         assert(!insts_to_decode.empty());
 
         DynInstPtr inst = std::move(insts_to_decode.front());
-        DPRINTF(Decode, "DecJitter: %02x\n", (inst->pcState().get_Jitter()) & 0xff);
+
         insts_to_decode.pop();
 
         DPRINTF(Decode, "[tid:%i] Processing instruction [sn:%lli] with "

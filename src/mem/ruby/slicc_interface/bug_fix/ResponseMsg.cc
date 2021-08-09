@@ -18,6 +18,7 @@ ResponseMsg::print(ostream& out) const
     out << "Dirty = " << m_Dirty << " ";
     out << "AckCount = " << m_AckCount << " ";
     out << "MessageSize = " << m_MessageSize << " ";
+    out << "attackMessage = " << m_attackMessage << " "; 
     out << "req_enqueue_time = " << m_req_enqueue_time << " ";
     out << "]";
 }

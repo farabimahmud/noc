@@ -34,6 +34,7 @@
 #include <cmath>
 
 #include "base/cast.hh"
+#include "debug/Flitisize.hh"
 #include "debug/JitterAllStats.hh"
 #include "debug/Naive.hh"
 #include "debug/RubyNetwork.hh"
@@ -159,7 +160,11 @@ void NetworkInterface::incrementStatsForBypassFlit(flit *t_flit) {
     m_net_ptr->increment_received_packets(vnet);
     m_net_ptr->increment_packet_network_latency(network_delay, vnet);
     m_net_ptr->increment_packet_queueing_latency(queueing_delay, vnet);
-    if (t_flit->isAttackFlit && vnet == 1) {
+    MessageSizeType message_size = t_flit->get_msg_ptr()->getMessageSize();
+    bool isResponse = (message_size == MessageSizeType_Response_Control) || 
+         (message_size == MessageSizeType_Response_Data);
+
+    if (t_flit->isAttackFlit && isResponse) {
       Cycles round_trip_latency = t_flit->get_dequeue_time() -
                                   t_flit->get_msg_ptr()->getReqEnqueueTime() -
                                   Cycles(1);
@@ -226,8 +231,11 @@ void NetworkInterface::incrementStats(flit *t_flit) {
     DPRINTF(JitterAllStats, "%d,%d,%d,%d,%d,%d,%d\n", src_router_id,
             dest_router_id, t_flit->target_latency, network_delay,
             queueing_delay, actual_latency, t_flit->isAttackFlit);
+    MessageSizeType message_size = t_flit->get_msg_ptr()->getMessageSize();
+    bool isResponse = (message_size == MessageSizeType_Response_Control) || 
+         (message_size == MessageSizeType_Response_Data);
 
-    if (t_flit->isAttackFlit && vnet == 1) {
+    if (t_flit->isAttackFlit && isResponse) {
       Cycles round_trip_latency = t_flit->get_dequeue_time() -
                                   t_flit->get_msg_ptr()->getReqEnqueueTime() -
                                   Cycles(1);
@@ -469,8 +477,12 @@ void NetworkInterface::wakeup() {
 
     if (t_flit->get_type() == TAIL_ || t_flit->get_type() == HEAD_TAIL_) {
       Cycles latency = curCycle() - t_flit->get_msg_ptr()->getReqEnqueueTime();
+      MessageSizeType message_size = t_flit->get_msg_ptr()->getMessageSize();
+      bool isResponse = (message_size == MessageSizeType_Response_Control) || 
+         (message_size == MessageSizeType_Response_Data);
+
       if (m_net_ptr->jitter_all && t_flit->getAttackFlit() &&
-          latency < m_net_ptr->upper_limit && t_flit->get_vnet() == 1) {
+          latency < m_net_ptr->upper_limit && isResponse) {
         DPRINTF(Vanilla, "Inserted %s into Jitter Queue\n", *t_flit);
         t_flit->ready_to_commit = m_net_ptr->upper_limit - latency + curCycle(); 
         jq->insert(t_flit);
@@ -478,7 +490,7 @@ void NetworkInterface::wakeup() {
         m_net_ptr->inc_total_jitter_amount(m_net_ptr->upper_limit - latency);
         scheduleEvent(m_net_ptr->upper_limit - latency);
       } else if (m_net_ptr->all_out_bypass && t_flit->getAttackFlit() &&
-                 t_flit->get_vnet() == 1 &&
+                 isResponse &&
                  latency < t_flit->target_latency) {  // vnet 2 for response
         DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n", *t_flit,
                 latency, t_flit->target_latency);
@@ -611,9 +623,8 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
   NetDest net_msg_dest = net_msg_ptr->getDestination();
 
   bool isAttackMessage = net_msg_ptr->isAttackMessage();
-  MessageSizeType messageSize = net_msg_ptr->getMessageSize();
-  if (messageSize == MessageSizeType_Response_Data)
-    DPRINTF(Vanilla_X86, "[NI:flitisize] msg %s at %#x is %s Packet\n",
+  //  MessageSizeType messageSize = net_msg_ptr->getMessageSize();
+  DPRINTF(Vanilla_X86, "[NI:flitisize] msg %s at %#x is %s Packet\n",
             *net_msg_ptr, net_msg_ptr, isAttackMessage ? "Attack" : "Regular");
 
   // gets all the destinations associated with this message.
@@ -691,6 +702,7 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
 
       } else if (m_net_ptr->all_out_bypass) {
+
         if (fl->isAttackFlit) {  // vnet 0 for request
           use_bypass = sendAttackFlit(fl);
           DPRINTF(Vanilla, "Decision was %s\n",
@@ -706,6 +718,8 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
         niOutVcs[vc].insert(fl);
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
       }
+      DPRINTF(Flitisize, "Flit Created at NI %s\n", *fl);
+     
     }
     // potential issue for sendAttackflit
     if (use_bypass == 0) {

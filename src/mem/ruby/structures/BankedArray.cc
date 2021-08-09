@@ -33,6 +33,7 @@
 
 #include "base/intmath.hh"
 #include "mem/ruby/system/RubySystem.hh"
+#include "debug/Flitisize.hh"
 
 BankedArray::BankedArray(unsigned int banks, Cycles accessLatency,
                          unsigned int startIndexBit, RubySystem *rs)

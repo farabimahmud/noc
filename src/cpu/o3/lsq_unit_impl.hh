@@ -54,7 +54,6 @@
 #include "debug/IEW.hh"
 #include "debug/LSQUnit.hh"
 #include "debug/O3PipeView.hh"
-#include "debug/JitterFlag.hh"
 #include "mem/packet.hh"
 #include "mem/request.hh"
 
@@ -540,10 +539,6 @@ LSQUnit<Impl>::executeLoad(const DynInstPtr &inst)
     assert(!inst->isSquashed());
 
     load_fault = inst->initiateAcc();
-
-    /** Memory addresses are for Load are found here **/
-
-    DPRINTF(LSQUnit, "Load Memory Address Virtual: %p\n Physical: %p Jitter: %02x\n", inst->effAddr, inst->physEffAddr, (inst->pcState()).get_Jitter());
 
     if (load_fault == NoFault && !inst->readMemAccPredicate()) {
         assert(inst->readPredicate());

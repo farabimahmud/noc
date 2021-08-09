@@ -1,28 +1,31 @@
 #!/bin/bash
 
 ./build/X86_MESI_Two_Level/gem5.opt \
+    --outdir=bypass \
     --listener-mode=off \
-    --outdir=$PWD/bypass \
-    --debug-flag=Vanilla \
+    --debug-flags=Flitisize \
     --debug-file=debug.out \
     configs/example/se.py \
     --num-cpus=64 \
     --num-dirs=64 \
     --network=garnet2.0 \
     --topology=Mesh_XY \
-    --mesh-rows=8 \
+    --mesh-row=8 \
+    --maxinsts=1000000 \
     --ruby \
+    --caches \
     --l2cache \
     --num-l2caches=64 \
-    --caches \
-    -c /home/farabi/benchmarks/rodinia_3.0/openmp/hotspot/hotspot \
-    -o "512 512 2 64 /home/farabi/benchmarks/rodinia_3.0/data/hotspot/temp_512 /home/farabi/benchmarks/rodinia_3.0/data/hotspot/power_512" \
-    --bypass=bypass_all \
+    --bypass=bypass_all_out \
+    --rodinia-attack \
     --attack-enabled \
-    --attack-node=0 \
-    --attack-rate=0.1 \
+    --attack-node=63 \
     --max-hpc=5 \
     --upper-limit=80 \
+    --cmd="/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/backprop/backprop;a.out" \
+    --options="64 63" \
+    --destination-list=0,63 \
+    --target-latency=40 \
+    --attack-rate=1 \
     --fast-forward=9223372036854775807 \
-    --destination-list=8,53 \
-    --maxinsts=100000 \
+

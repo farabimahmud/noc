@@ -20,7 +20,8 @@ RequestMsg::print(ostream& out) const
     out << "Len = " << m_Len << " ";
     out << "Dirty = " << m_Dirty << " ";
     out << "Prefetch = " << m_Prefetch << " ";
-    out << "req_enqueue_time = " << m_req_enqueue_time << " ";
+    out << "attackMsg = " << m_attackMessage << " "; 
+    out << "Req Enqueue Time = " << m_req_enqueue_time << " ";
     out << "]";
 }
 bool

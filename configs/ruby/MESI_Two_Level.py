@@ -101,11 +101,18 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                                       clk_domain = clk_domain,
                                       transitions_per_cycle = options.ports,
                                       enable_prefetch = False)
-
-        cpu_seq = RubySequencer(version = i, icache = l1i_cache,
+        if i == int(options.attack_node):
+            cpu_seq = RubySequencer(version = i, icache = l1i_cache,
                                 dcache = l1d_cache, clk_domain = clk_domain,
                                 ruby_system = ruby_system)
-
+            cpu_seq.destination_list = options.destination_list
+            cpu_seq.attack_rate = float(options.attack_rate)
+            cpu_seq.is_attack_node = True 
+        else:
+            cpu_seq = RubySequencer(version = i, icache = l1i_cache,
+                                dcache = l1d_cache, clk_domain = clk_domain,
+                                ruby_system = ruby_system)
+        cpu_seq.coreid = i
 
         l1_cntrl.sequencer = cpu_seq
         exec("ruby_system.l1_cntrl%d = l1_cntrl" % i)

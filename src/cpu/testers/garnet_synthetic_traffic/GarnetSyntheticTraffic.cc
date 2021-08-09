@@ -122,7 +122,7 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
         std::string token; 
         while(std::getline(stream, token, ',')){
             int dest_node = std::stoi(token);
-            assert(0 < dest_node &&  dest_node < numCPUs);
+            assert(0 <= dest_node &&  dest_node < numCPUs);
             destination_list.push_back(dest_node);
         }
         DPRINTF(Vanilla, "[CPU] Destination List is - \n");

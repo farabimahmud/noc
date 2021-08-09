@@ -341,6 +341,13 @@ class RequestMsg :  public Message
   public:
     bool m_attackMessage =false;
     Cycles m_req_enqueue_time; 
+
+    virtual bool isAttackMessage() { return m_attackMessage; }
+    virtual void AttackMessage() { m_attackMessage = true; }
+
+    virtual Cycles getReqEnqueueTime() { return m_req_enqueue_time; }
+    virtual void setReqEnqueueTime(Cycles c) { m_req_enqueue_time = c; }
+
 };
 inline std::ostream&
 operator<<(std::ostream& out, const RequestMsg& obj)

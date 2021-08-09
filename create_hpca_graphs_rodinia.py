@@ -3,26 +3,26 @@
 import os 
 import math 
 
-run_case        = "rodinia_3"
+run_case        = "rodinia_worst_25"
 gem5_binary     = "build/X86_MESI_Two_Level/gem5.opt"
-benchmark_dir   = "/home/farabi/benchmarks/rodinia_3.0/"
+benchmark_dir   = "/home/grads/f/farabi/benchmarks/rodinia_3.0/"
 base_dir        = os.path.abspath(os.getcwd())
 results_dir     = os.path.join(base_dir, os.path.join("hpca_results",run_case))
 bash_scripts_dir = os.path.join(base_dir, os.path.join("hpca_scripts",run_case)) 
 config_file     = os.path.join(base_dir, "configs/example/se.py")
 
 
-attack_rate     = [0.5]
+attack_rate     = [0.25]
 policy          = ["bypass_none", "jitter_all", "bypass_all_out"]
 
 debug_flag_lists= ["JitterAllStats"]
 debug_flags     = ','.join(map(str, debug_flag_lists))
 debug_file      = "debug.out"
 
-sim_cycles      = 10000000
+sim_cycles      = 100000000
 max_hpc         = 5
 lower_limit     = 20
-upper_limit     = 40
+upper_limit     = 80
 
 n_cpus          = 64
 n_dirs          = 64
@@ -30,25 +30,27 @@ n_l2caches      = 64
 n_rows          = int(math.sqrt(n_dirs))
 
 attacker_node   = 0
+destination_list= ["0,63"]
+target_latency  = 40 
 
 list_of_application = [
-    # 'backprop',
-    # # 'b+tree',
-    # 'heartwall',
+    #'backprop',
+    # 'b+tree',
+    'heartwall',
     'kmeans',
-    # 'lud',
-    # # 'nn',
-    # #'particlefilter',
-    # 'srad_v1',
-    # 'srad_v2',
-    # 'bfs',
-    # 'cfd',
-    # 'hotspot',
-    # 'lavaMD',
-    # 'myocyte',
-    # 'nw',
-    # 'pathfinder',
-    # 'streamcluster',
+    'lud',
+    # 'nn',
+    #'particlefilter',
+    'srad_v1',
+    'srad_v2',
+    'bfs',
+    'cfd',
+    'hotspot',
+    # 'lavaMD', #runtime error
+    'myocyte',
+    'nw',
+    'pathfinder',
+    'streamcluster',
     ]
 
 
@@ -145,10 +147,13 @@ def get_gem5_command(a, p):
     s += "--attack-enabled "
     s += "--attack-node={} ".format(attacker_node)
     s += "--max-hpc={} ".format(max_hpc)
-    s += "--lower-limit={} ".format(lower_limit)
+    # s += "--lower-limit={} ".format(lower_limit)
     s += "--upper-limit={} ".format(upper_limit)
     s += "--cmd={} ".format(application_cmd[a][0])
     s += "--options=\"{}\" ".format(application_cmd[a][1])
+    s += "--destination-list={} ".format(destination_list[0])
+    s += "--target-latency={} ".format(target_latency)
+    s += "--attack-rate={} ".format(attack_rate[0])   
     return s
 
 def create_bash_script():
@@ -161,6 +166,9 @@ def create_bash_script():
             print(gem5_command)
             with open(bash_script_file, "w") as f:
                 print("#!/bin/bash", file=f)
+                print("#SBATCH --exclude=compute012,compute013,compute014",
+                        file=f)
+               
                 print("source ~/.bashrc", file=f)
                 print("mkdir -p {}".format(get_out_dir(bash_scripts_dir, a,p)),
                     file=f)

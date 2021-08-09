@@ -137,7 +137,7 @@ int GarnetNetwork::PACKETID = 0;
         std::string token; 
         while(std::getline(stream, token, ',')){
             int dest_node = std::stoi(token);
-            assert(0 < dest_node &&  dest_node < m_routers.size());
+            assert(0 <= dest_node &&  dest_node < m_routers.size());
             destination_list.push_back(dest_node);
         }
         DPRINTF(Vanilla, "[GN] Destination List is - \n");
@@ -168,6 +168,7 @@ GarnetNetwork::get_bypass_cost(int src, int dest){
             src,
             dest,
             bypass_cost);
+    bypass_cost = std::max(bypass_cost,1);
     assert(bypass_cost != 0 && "bypass cost cannot be 0");
     return bypass_cost;
 }

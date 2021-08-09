@@ -829,9 +829,10 @@ void Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
                                       RubyAccessMode_Supervisor, pkt,
                                       PrefetchBit_No, proc_id, core_id);
 
-    DPRINTFR(ProtocolTrace, "%15s %3s %10s%20s %6s>%-6s %#x %s\n",
+    DPRINTFR(ProtocolTrace, "%15s %3s %10s%20s %6s>%-6s %#x %#x %s\n",
              curTick(), m_version, "Seq", "Begin", "", "",
              printAddress(msg->getPhysicalAddress()),
+             printAddress(pkt->req->getVaddr()),
              RubyRequestType_to_string(secondary_type));
 
     // Attack Packet Code
