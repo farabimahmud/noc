@@ -8,4 +8,6 @@
 #SBATCH --output=output.%j      #Send stdout/err to "Example1Out.[jobID]"
 #SBATCH --partition=knl
 
-cat /sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size
+#cat /sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size
+#grep -i huge /proc/meminfo
+grep AnonHugePages /proc/meminfo

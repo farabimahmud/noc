@@ -1,14 +1,8 @@
+#define _GNU_SOURCE
 #include <stdint.h>
 #include <x86intrin.h>
-
-#include <cstdio>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <string>
+#include <stdio.h>
 #include <sched.h>
-
-using namespace std;
 
 /**
  * L1D Cache 32kB per core (total number of cache lines = 32KB/64B = 512)
@@ -51,7 +45,7 @@ int main(int argc, char * argv[])
     unsigned long t[NUM_ARR_ELEMENTS];
     uint8_t x;
     unsigned int junk;
-    char filename[] = "l1_hit_latency.log";
+    char filename[] = "l1-hit.log";
     FILE* output_file = fopen(filename,"w");
 
     //printf("num_l1d_cache_lines: %d\n", NUM_L1D_CACHE_LINES);

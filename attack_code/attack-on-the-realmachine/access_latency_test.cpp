@@ -90,7 +90,6 @@ int main(int argc, char * argv[]){
     int cpuid = -1;
     uint8_t cache_set_target = 1; 
 
-     
     if (argc ==2){
         cpuid = atoi(argv[1]);
 
