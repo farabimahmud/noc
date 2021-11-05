@@ -5,6 +5,7 @@
 #include <sched.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <time.h>
 
 /**
  * L1D Cache 32kB per core (total number of cache lines = 32KB/64B = 512)
@@ -22,16 +23,16 @@
 int idx_array[NUM_ARR_ELEMENTS];
 void shuffle_idx(int* idx_array, uint64_t stride, uint64_t num_idx)
 {
-    srand(0);
+    srand(time(NULL));
     for (int i = 0; i < num_idx; i++) {
-        idx_array[i] = i * stride * 8;
+        idx_array[i] = i * stride;
     }
-    for (int i = 0; i < num_idx; i++) {
-        int temp = idx_array[i];
-        int randomIndex = rand() % num_idx;
-        idx_array[i] = idx_array[randomIndex];
-        idx_array[randomIndex] = temp;
-    }
+    //for (int i = 0; i < num_idx; i++) {
+    //    int temp = idx_array[i];
+    //    int randomIndex = rand() % num_idx;
+    //    idx_array[i] = idx_array[randomIndex];
+    //    idx_array[randomIndex] = temp;
+    //}
 
     //printf("num_idx = %d\n", num_idx);
     //for (int i = 0; i < num_idx; i++) {
@@ -69,8 +70,8 @@ int main(int argc, char * argv[])
 
     arr = allocate_hugepage(HUGEPAGE_SIZE);
 
-    uint64_t stride = 64;
-    uint64_t num_idx = 16;//NUM_ARR_ELEMENTS / stride;
+    uint64_t stride = 4096;
+    uint64_t num_idx = 8;//NUM_ARR_ELEMENTS / stride;
     shuffle_idx(idx_array, stride, num_idx);
 
     system("cat /proc/meminfo");
@@ -78,13 +79,17 @@ int main(int argc, char * argv[])
     printf("num_arr_elements:    %d\n", NUM_ARR_ELEMENTS);
     printf("num_idx:             %d\n", num_idx);
 
-    for (int try = 0; try < 10; try++) {
+    for (int try = 0; try < 100; try++) {
         unsigned int junk;
         for (uint64_t i = 0; i < num_idx; i++) {
-            junk ^= arr[idx_array[i]];
-            //_mm_clflush(&(arr[idx_array[i]]));
+            //junk ^= arr[idx_array[i]];
+            _mm_clflush(&(arr[idx_array[i]]));
         }
         _mm_mfence();
+        //for (uint64_t i = 0; i < num_idx; i++) {
+        //    junk ^= arr[idx_array[i]];
+        //}
+        //_mm_mfence();
 
         uint64_t time;
         uint64_t latency_list[NUM_ARR_ELEMENTS];
