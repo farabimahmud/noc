@@ -8,11 +8,8 @@
 #SBATCH --output=output.%j      #Send stdout/err to "Example1Out.[jobID]"
 #SBATCH --partition=knl
 
-n_cpus=1;
-
-for ((i=0; i<$n_cpus; i++))
-do
-  echo "Executing taskset -c $i setarch $(uname -m) -R ./a.out $i";
-  setarch $(uname -m) -R ./a.out $i;
-done
+setarch $(uname -m) -R ./a.out 0 1;
+setarch $(uname -m) -R ./a.out 0 2;
+setarch $(uname -m) -R ./a.out 0 3;
+#setarch $(uname -m) -R ./a.out 0 ;
 
