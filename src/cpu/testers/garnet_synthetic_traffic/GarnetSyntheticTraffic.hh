@@ -30,6 +30,7 @@
 #define __CPU_GARNET_SYNTHETIC_TRAFFIC_HH__
 
 #include <set>
+#include <vector>
 
 #include "base/statistics.hh"
 #include "mem/port.hh"
@@ -56,7 +57,9 @@ class GarnetSyntheticTraffic : public ClockedObject
   public:
 
     bool attack_enabled;
+    bool is_attack_node;
     int attack_node;
+    std::vector<int> attack_node_list; 
     float attack_rate;
     int index = 0;
     std::vector<int> destination_list;

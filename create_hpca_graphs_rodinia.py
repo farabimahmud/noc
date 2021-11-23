@@ -3,24 +3,24 @@
 import os 
 import math 
 
-run_case        = "rodinia_worst_25"
+run_case        = "rodinia_src_all_dest_all_100"
 gem5_binary     = "build/X86_MESI_Two_Level/gem5.opt"
 benchmark_dir   = "/home/grads/f/farabi/benchmarks/rodinia_3.0/"
 base_dir        = os.path.abspath(os.getcwd())
-results_dir     = os.path.join(base_dir, os.path.join("hpca_results",run_case))
-bash_scripts_dir = os.path.join(base_dir, os.path.join("hpca_scripts",run_case)) 
+results_dir     = os.path.join(base_dir, os.path.join("asplos_results",run_case))
+bash_scripts_dir = os.path.join(base_dir, os.path.join("asplos_scripts",run_case)) 
 config_file     = os.path.join(base_dir, "configs/example/se.py")
 
 
-attack_rate     = [0.25]
+attack_rate     = [1]
 policy          = ["bypass_none", "jitter_all", "bypass_all_out"]
 
 debug_flag_lists= ["JitterAllStats"]
 debug_flags     = ','.join(map(str, debug_flag_lists))
 debug_file      = "debug.out"
 
-sim_cycles      = 100000000
-max_hpc         = 5
+sim_cycles      = 1000000
+max_hpc         = 3
 lower_limit     = 20
 upper_limit     = 80
 
@@ -29,12 +29,14 @@ n_dirs          = 64
 n_l2caches      = 64
 n_rows          = int(math.sqrt(n_dirs))
 
-attacker_node   = 0
-destination_list= ["0,63"]
+dest_list_all = ",".join([ str(i) for i in range(64) ])
+attacker_node = dest_list_all
+# attacker_node   = 0
+destination_list= [dest_list_all]
 target_latency  = 40 
 
 list_of_application = [
-    #'backprop',
+    'backprop',
     # 'b+tree',
     'heartwall',
     'kmeans',
@@ -107,7 +109,7 @@ def get_test_case(a,p):
     return "{}-{}".format(a,p)
 
 def get_out_dir(dir_name, a,p):
-    test_case = os.path.join(results_dir,get_test_case(a,p))
+    test_case = os.path.join(dir_name,get_test_case(a,p))
     #print(test_case)    
     if not os.path.exists(test_case):
         try:
@@ -119,7 +121,7 @@ def get_out_dir(dir_name, a,p):
 
 
 def get_gem5_command(a, p):
-    outdir = get_out_dir(base_dir, a, p)
+    outdir = get_out_dir(results_dir, a, p)
     s = os.path.join(base_dir,gem5_binary)
     #s += " --debug-flags={} ".format(debug_flags)
     #s += " --debug-file={} ".format(os.path.join(outdir,debug_file))

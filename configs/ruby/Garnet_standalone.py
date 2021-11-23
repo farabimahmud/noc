@@ -78,9 +78,9 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl = L1Cache_Controller(version = i,
                                       cacheMemory = cache,
                                       ruby_system = ruby_system)
-        
-        if i == int(options.attack_node):
 
+        attack_node_list = options.attack_node.split(",")
+        if i in attack_node_list:
             cpu_seq = RubySequencer(icache = cache,
                     dcache = cache,
                     garnet_standalone = True,

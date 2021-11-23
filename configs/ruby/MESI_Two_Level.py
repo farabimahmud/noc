@@ -101,7 +101,12 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                                       clk_domain = clk_domain,
                                       transitions_per_cycle = options.ports,
                                       enable_prefetch = False)
-        if i == int(options.attack_node):
+        attack_node_list = []
+        if (options.attack_node is not None):
+            attack_node_list = options.attack_node.split(',')
+
+        print(attack_node_list)
+        if str(i) in attack_node_list:
             cpu_seq = RubySequencer(version = i, icache = l1i_cache,
                                 dcache = l1d_cache, clk_domain = clk_domain,
                                 ruby_system = ruby_system)

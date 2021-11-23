@@ -144,8 +144,19 @@ int GarnetNetwork::PACKETID = 0;
         for (auto d:destination_list){
             DPRINTF(Vanilla, "%d\n", d);
         }
-
-       
+    }
+    if (p->attack_node_list.length() > 0){
+        std::stringstream stream(p->attack_node_list);
+        std::string token;
+        while (std::getline(stream, token, ',')){
+            int cur_attack_node = std::stoi(token);
+            assert(0 <= cur_attack_node &&  cur_attack_node < m_routers.size());
+            attack_node_list.push_back(cur_attack_node);
+        }
+        DPRINTF(Vanilla, "[GN] Attack Node List is - \n");
+        for (auto d:attack_node_list){
+            DPRINTF(Vanilla, "%d\n", d);
+        }
     }
     if (p->lower_limit != -1){
         DPRINTF(Vanilla, "Overriding lower limit from the destinations\n");
@@ -164,38 +175,48 @@ GarnetNetwork::get_bypass_cost(int src, int dest){
     int y_cost = abs(y_src - y_dest);      
     int bypass_cost = 0; 
     bypass_cost = int(ceil( (float) (x_cost+y_cost)/ (float) max_hpc)); 
+    /*
     DPRINTF(Vanilla,"Bypass cost from src %d to dest %d is %d\n",
             src,
             dest,
             bypass_cost);
+    */
     bypass_cost = std::max(bypass_cost,1);
     assert(bypass_cost != 0 && "bypass cost cannot be 0");
     return bypass_cost;
 }
 
 Cycles 
-GarnetNetwork::get_farthest_node_bypass_cost(int src, std::vector<int> dlist){
-    std::vector<int> bypass_cost_from_source;   
-    for (auto d:dlist){
-        bypass_cost_from_source.push_back(get_bypass_cost(src,d));
-     }
-    int max_value = *std::max_element(
-            bypass_cost_from_source.begin(), 
-            bypass_cost_from_source.end());
+GarnetNetwork::get_farthest_node_bypass_cost(std::vector<int>slist, std::vector<int> dlist){
+    std::vector<int> max_costs;
+    for (auto s:slist){
+        std::vector<int> bypass_cost_from_source;
+        bypass_cost_from_source.clear();
+        for (auto d:dlist){
+            bypass_cost_from_source.push_back(get_bypass_cost(s,d));
+        }
+        int max_value = *std::max_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end());
 
-    int closest_index = std::min_element(
-            bypass_cost_from_source.begin(), 
-            bypass_cost_from_source.end()
-            ) - bypass_cost_from_source.begin();
-    closest_dest  = dlist[closest_index];
+        int closest_index = std::min_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end()
+                ) - bypass_cost_from_source.begin();
+        closest_dest  = dlist[closest_index];
+        closest_dest_from_src[s] = closest_dest;
 
-    int farthest_index = std::max_element(
-            bypass_cost_from_source.begin(), 
-            bypass_cost_from_source.end()
-            ) - bypass_cost_from_source.begin();
-    farthest_dest = dlist[farthest_index];
-    DPRINTF(Vanilla, "Closest %d Farthest %d lower %d\n", closest_dest, farthest_dest, max_value);
-    return Cycles(max_value);
+        int farthest_index = std::max_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end()
+                ) - bypass_cost_from_source.begin();
+        farthest_dest = dlist[farthest_index];
+        farthest_dest_from_src[s] = farthest_dest;
+        DPRINTF(Vanilla, "Src %d Closest %d Farthest %d lower %d\n",
+                s, closest_dest, farthest_dest, max_value);
+        max_costs.push_back(get_bypass_cost(s, farthest_dest));
+    }
+    return Cycles(*std::max_element(max_costs.begin(), max_costs.end()));
 }
 
     void
@@ -250,7 +271,7 @@ GarnetNetwork::init()
     }
 
     createOutputUnitTable(m_routers.size());
-    lower_limit  = get_farthest_node_bypass_cost(attack_node, destination_list);
+    lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
 
 }
 

@@ -64,9 +64,12 @@ class GarnetNetwork : public Network
     int max_hpc; 
     Cycles lower_limit, upper_limit, delta_s, target_latency;
     std::vector<int> destination_list;
+    std::vector<int> attack_node_list; 
+    std::map<int, int> closest_dest_from_src; 
+    std::map<int, int> farthest_dest_from_src; 
     int closest_dest, farthest_dest; 
 
-    Cycles get_farthest_node_bypass_cost(int, std::vector<int>);
+    Cycles get_farthest_node_bypass_cost(std::vector<int>, std::vector<int>);
     int get_bypass_cost(int, int);
 
     // ATTACK parameters

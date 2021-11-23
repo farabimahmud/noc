@@ -101,19 +101,17 @@ Sequencer::Sequencer(const Params *p)
     
     
     if (p->destination_list.length() > 0  && is_attack_node){
-        DPRINTF(Vanilla, "Somehow Is Attack Node is %d\n", is_attack_node);
-        DPRINTF(Vanilla, "Setting Up Destination List\n");
         std::stringstream stream(p->destination_list);
         std::string token; 
         while(std::getline(stream, token, ',')){
             int dest_node = std::stoi(token);
             destination_list.push_back(dest_node);
         }
-        DPRINTF(Vanilla, "[Sequencer] Destination List is - \n");
-        for (auto d:destination_list){
-            DPRINTF(Vanilla, "%d\n", d);
-        }
-       
+//        DPRINTF(Vanilla, "[Sequencer] Destination List is - \n");
+//        for (auto d:destination_list){
+//            DPRINTF(Vanilla, "%d\n", d);
+//        }
+
     }
    
     

@@ -88,6 +88,8 @@ class GarnetNetwork(RubyNetwork):
     destination_list = Param.String("", "comma separated list of \
             destinations that the attacker going to use and we have \
             to protect from, Default is None")
+    attack_node_list = Param.String("", "comma separated list of \
+            attack nodes. Default is None")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

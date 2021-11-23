@@ -112,7 +112,7 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
             name(), id);
 
     attack_enabled = p->attack_enabled;
-    attack_node = p->attack_node;
+    // attack_node = p->attack_node;
     attack_rate = p->attack_rate;
     index = 0;
 
@@ -130,7 +130,28 @@ GarnetSyntheticTraffic::GarnetSyntheticTraffic(const Params *p)
             DPRINTF(Vanilla, "%d\n", d);
         }
     }
-   
+    if (p->attack_node_list.length() > 0){
+        DPRINTF(Vanilla, "Setting Up Attack Node List\n");
+        std::stringstream stream(p->attack_node_list);
+        std::string token; 
+        while(std::getline(stream, token, ',')){
+            int a_node = std::stoi(token);
+            assert(0 <= a_node &&  a_node < numCPUs);
+            destination_list.push_back(a_node);
+        }
+        DPRINTF(Vanilla, "[CPU] Attack List is - \n");
+        for (auto a:attack_node_list){
+            DPRINTF(Vanilla, "%d\n", a);
+        }
+        
+    }
+    if (std::find(attack_node_list.begin(), attack_node_list.end(), id) != attack_node_list.end()){
+        is_attack_node = true;
+    }else{
+        is_attack_node = false;
+    }
+
+  
 }
 
 Port &
@@ -273,7 +294,7 @@ GarnetSyntheticTraffic::generatePkt()
     
 
     // if attacking ndoe, send out to packet to the destination list only
-    if (id == attack_node){
+    if (is_attack_node){
         index = (index+1) % destination_list.size();
         destination = destination_list[index];
         DPRINTF(Vanilla, "Current Attack Index %d Destination %d\n", index, destination);
@@ -324,7 +345,7 @@ GarnetSyntheticTraffic::generatePkt()
         injReqType = random_mt.random(0, 1);
     }
 
-    if (injReqType == 0 || attack_node == id) {
+    if (injReqType == 0 || is_attack_node) {
         // generate packet for virtual network 0
         requestType = MemCmd::ReadReq;  // LD
         req = std::make_shared<Request>(paddr, access_size, flags, masterId);

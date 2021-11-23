@@ -53,13 +53,12 @@ class GarnetSyntheticTraffic(ClockedObject):
                                             due to lack of progress")
     test = MasterPort("Port to the memory system to test")
     system = Param.System(Parent.any, "System we belong to")
-    attack_node = Param.Int(0, "Node that is under attack \
-                                default value set to Node 0")
     attack_enabled = Param.Bool(False, "Whether attack is enabled or not \
         Default is false, i.e. attack not enabled")
     attack_rate = Param.Float(0.1, "Rate of attack. Injection rate for \
         attack packets")
-    
+    attack_node_list = Param.String('', "list of nodes that will create attack")
+
     destination_list = Param.String('', "list of nodes targeted by attack \
             default is None")
 

@@ -164,7 +164,8 @@ def init_network(options, network, InterfaceClass):
             network.all_out_bypass = True 
 
         network.attack_enabled = options.attack_enabled
-        network.attack_node = options.attack_node
+        
+        network.attack_node_list = options.attack_node
 
         network.fixed_target_enabled = options.fixed_target_enabled
         network.fixed_target_near = options.fixed_target_near

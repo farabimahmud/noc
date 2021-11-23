@@ -118,9 +118,9 @@ def addNoISAOptions(parser):
 
 
     # Following Options for selecting one node to generate Attack Packet
-    parser.add_option("--attack-node", type="int", default=0,
+    parser.add_option("--attack-node", type="string", default=None,
                     help="The node that is being attacked at this point \
-                            Default value node 0")
+                            Default value None")
     parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
                     help="Attack rate in packets per cycle per node,\
                             takes floating point value between 0 to 1 \
