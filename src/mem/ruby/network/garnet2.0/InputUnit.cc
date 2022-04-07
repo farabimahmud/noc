@@ -31,6 +31,7 @@
 
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 
+#include "debug/InputUnitDebug.hh"
 #include "debug/RubyNetwork.hh"
 #include "mem/ruby/network/garnet2.0/Credit.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
@@ -78,7 +79,11 @@ InputUnit::wakeup()
 
         if ((t_flit->get_type() == HEAD_) ||
             (t_flit->get_type() == HEAD_TAIL_)) {
-
+            if (virtualChannels[vc].get_state() == IDLE_){
+                DPRINTF(InputUnitDebug,
+                        "[InputUnit::wakeup] RouterID %d %s Flit %s\n",
+                        m_router->get_id(), m_direction, *t_flit);
+            }
             assert(virtualChannels[vc].get_state() == IDLE_);
             set_vc_active(vc, m_router->curCycle());
 
