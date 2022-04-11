@@ -286,11 +286,10 @@ bool NetworkInterface::readJQ() {
     Cycles latency = curCycle() - t_flit->get_msg_ptr()->getReqEnqueueTime();
     assert(latency >= m_net_ptr->upper_limit);
 
-    int vc = t_flit->get_vc();
     int vnet = t_flit->get_vnet();
 
     if (outNode_ptr[vnet]->areNSlotsAvailable(1, curTime)) {
-      outVcState[vc].setState(IDLE_, currentCycle);
+      // outVcState[vc].setState(IDLE_, currentCycle);
       outNode_ptr[vnet]->enqueue(t_flit->get_msg_ptr(), curTime,
                                  cyclesToTicks(Cycles(1)));
       sendCredit(t_flit, true);
@@ -696,8 +695,8 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
 
       if (m_net_ptr->jitter_all) {
         niOutVcs[vc].insert(fl);
-        if(fl->isAttackFlit && vnet == 1){
-            fl->target_latency = m_net_ptr->upper_limit;            
+        if (fl->isAttackFlit){ // removed vnet == 1 check?
+            fl->target_latency = m_net_ptr->upper_limit;
         }
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
 

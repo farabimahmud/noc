@@ -13,7 +13,7 @@ debug_flag_lists= ["JitterAllStats"]
 debug_flags     = ','.join(map(str, debug_flag_lists))
 debug_file      = "debug.out"
 
-sim_cycles      = 1000000000
+sim_cycles      = 10000000
 max_hpc         = 5
 lower_limit     = 20
 upper_limit     = 40
@@ -47,7 +47,7 @@ config_file     = os.path.join(base_dir, "configs/example/se.py")
 list_of_application = [
     'backprop',
     'b+tree',
-     'heartwall',
+     #'heartwall', (clobbered?)
     'kmeans',
     'lud',
     # 'nn',
@@ -167,14 +167,17 @@ def get_gem5_command(a, p):
     s += "--attack-node={} ".format(attacker_node)
     s += "--max-hpc={} ".format(max_hpc)
     # s += "--lower-limit={} ".format(lower_limit)
-    s += "--upper-limit={} ".format(upper_limit)
     s += "--cmd={} ".format(application_cmd[a][0])
     s += "--options=\"{}\" ".format(application_cmd[a][1])
     s += "--destination-list={} ".format(destination_list[0])
     if p == "jitter_all":
         s += "--target-latency={} ".format(jitter_target_latency)
+        s += "--upper-limit={} ".format(jitter_target_latency)
+
     elif p == "bypass_all_out":
         s += "--target-latency={} ".format(bypass_target_latency)
+        s += "--upper-limit={} ".format(bypass_target_latency)
+
     s += "--attack-rate={} ".format(attack_rate[0])
     return s
 
@@ -191,7 +194,7 @@ def create_bash_script():
                 print("#!/bin/bash", file=f)
                 print("#SBATCH --exclude=compute012,compute013,compute014",
                         file=f)
-                print("#SBATCH --partition=ada", file=f)
+                print("#SBATCH --partition=bigmo,dwc", file=f)
                 print("\n", file=f)
                 print("source ~/.bashrc", file=f)
                 print("mkdir -p {}".format(
