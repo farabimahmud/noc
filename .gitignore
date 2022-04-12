@@ -44,3 +44,6 @@ isca_scripts
 attack*
 *.o
 hpca_*
+binaries
+disks
+parsec_script_generator/*.rcS
