@@ -47,3 +47,4 @@ hpca_*
 binaries
 disks
 parsec_script_generator/*.rcS
+micro_results
