@@ -36,6 +36,14 @@ NetDest::NetDest()
 }
 
 void
+NetDest::addLocalL2FromID(MachineType machineType, int id)
+{
+    MachineID mach = {machineType, (NodeID) id};
+    add(mach);
+}
+
+
+void
 NetDest::add(MachineID newElement)
 {
     assert(bitIndex(newElement.num) < m_bits[vecIndex(newElement)].getSize());

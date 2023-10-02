@@ -6,8 +6,11 @@ import math
 exclude_nodes_list = ["compute{:03}".format(x) for x in range(50,118)]
 exclude_nodes    = ",".join(exclude_nodes_list)
 
+partitions_list = ["bigmo","isen","dwc"]
+partitions       = ",".join(partitions_list)
+
 attack_rate     = [1]
-policy          = ["bypass_none", "jitter_all", "bypass_all_out"]
+policy          = ["bypass_none", "jitter_all", "bypass_all_out","bypass_baseline"]
 # policy          = ['jitter_all']
 
 debug_flag_lists= ["JitterAllStats"]
@@ -16,10 +19,10 @@ debug_file      = "debug.out"
 input_sizes     = ["simmedium"]
 input_size      = 'simmedium'
 
-sim_cycles      = 'roi'
+sim_cycles      = 1000000
 max_hpc         = 5
-lower_limit     = 20
-upper_limit     = 40
+lower_limit     = 0
+upper_limit     = 100
 create_checkpoint = False
 
 l1d_size        = '32kB'
@@ -34,26 +37,25 @@ attacker_node = dest_list_all
 # attacker_node   = 0
 destination_list= [dest_list_all]
 target_latency  = upper_limit
-bypass_target_latency = 40
+bypass_target_latency = 20
 jitter_target_latency = 100
 
 
 
-run_case        = "timing_{}_all_all_{}_{}_{}_{}".format(input_size,
+run_case        = "parsec_timing_{}_all_all_{}_{}_{}_{}".format(input_size,
         jitter_target_latency, l1d_size, l2_size,sim_cycles)
-gem5_binary     = "build/X86_MESI_Two_Level/gem5.opt"
+gem5_binary     = "build/X86_MESIF_Two_Level/gem5.opt"
 benchmark_dir   = ""
 
 base_dir        = os.path.abspath(os.getcwd())
 results_dir     = os.path.join(base_dir,
-        os.path.join("ndss_results",run_case))
+        os.path.join("ndss22_results",run_case))
 checkpoint_dir  = os.path.join(base_dir,
     "ckpts/parsec_simmedium_all_all_100_32kB_2MB_ckpts")
 
 
-
 bash_scripts_dir = os.path.join(base_dir, os.path.join(
-    "ndss_scripts",run_case))
+    "ndss22_scripts",run_case))
 if not os.path.exists(bash_scripts_dir):
     try:
         os.makedirs(bash_scripts_dir)
@@ -69,7 +71,7 @@ list_of_application    = ['blackscholes', 'bodytrack',
         'ferret', 'fluidanimate', 'freqmine', 'streamcluster',
         'swaptions', 'vips', 'x264']
 
-# list_of_application    = ['blackscholes']
+# list_of_application    = ['bodytrack']
 
 job_command = "sh"
 if base_dir == "/home/grads/f/farabi/noc":
@@ -93,7 +95,10 @@ def get_out_dir(dir_name, a,p,i=input_size):
 
 def get_gem5_command(a, p ,i=input_size):
     outdir = get_out_dir(results_dir, a, p,i)
+    
     cur_ckpt_dir = get_out_dir(checkpoint_dir,a,p,i)
+    if p == "bypass_baseline":
+        cur_ckpt_dir = get_out_dir(checkpoint_dir,a,"bypass_all_out",i)
     s = os.path.join(base_dir,gem5_binary)
     #s += " --debug-flags={} ".format(debug_flags)
     #s += " --debug-file={} ".format(os.path.join(outdir,debug_file))
@@ -147,7 +152,10 @@ def get_gem5_command(a, p ,i=input_size):
     s += "--num-l2caches={} \\\n".format(n_cpus)
     s += "--l1d_size={} \\\n".format(l1d_size)
     s += "--l2_size={} \\\n".format(l2_size)
-    s += "--bypass={} \\\n".format(p)
+    if p == "bypass_baseline":
+        s += "--bypass={} \\\n".format("bypass_all_out")    
+    else:
+        s += "--bypass={} \\\n".format(p)
     s += "--attack-enabled \\\n"
     s += "--attack-node={} \\\n".format(attacker_node)
     s += "--max-hpc={} \\\n".format(max_hpc)
@@ -163,7 +171,9 @@ def get_gem5_command(a, p ,i=input_size):
     elif p == "bypass_all_out":
         s += "--target-latency={} \\\n".format(bypass_target_latency)
         s += "--upper-limit={} \\\n".format(bypass_target_latency)
-
+    elif p == "bypass_baseline":
+        s += "--target-latency={} \\\n".format(0)
+        s += "--upper-limit={} \\\n".format(bypass_target_latency)
 
     s += "--attack-rate={} ".format(attack_rate[0])
     return s
@@ -183,7 +193,7 @@ def create_bash_script():
                   if job_command == "sbatch":
                       print("#SBATCH --exclude={}".format(exclude_nodes),
                       file=f)
-                      print("#SBATCH --partition=bigmo,isen,dwc", file=f)
+                      print("#SBATCH --partition={}".format(partitions), file=f)
                   print("\n", file=f)
                   print("export M5_PATH={} ".format(base_dir), file=f)
 

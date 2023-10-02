@@ -43,6 +43,7 @@ all_protocols.extend([
     'MOESI_CMP_token',
     'MOESI_hammer',
     'Garnet_standalone',
+    'MESIF_Two_Level',
     'None'
     ])
 

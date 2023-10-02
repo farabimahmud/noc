@@ -89,6 +89,7 @@ structure (NetDest, external = "yes", non_obj="yes") {
   void addSet(Set);
   void addNetDest(NetDest);
   void setNetDest(MachineType, Set);
+  void addLocalL2FromID(MachineType, int);
   void remove(NodeID);
   void remove(MachineID);
   void removeSet(Set);

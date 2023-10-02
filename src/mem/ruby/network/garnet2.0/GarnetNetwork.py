@@ -52,6 +52,8 @@ class GarnetNetwork(RubyNetwork):
     bypass_none = Param.Bool(True, "Disable bypass for all aka baseline")
     jitter_all = Param.Bool(False, "Enable Jitter for all")
     bypass_x = Param.Bool(False, "Enable bypass for the x axis only")
+    bypass_baseline = Param.Bool(False, "Enable bypass baseline, \
+                                 i.e. bypass request and response both")
     optimized = Param.Bool(False, "Enable optimized bypass")
     optimization_rate = Param.UInt32(50, "rate of optimization, default 50")
     attack_enabled = Param.Bool(False, "whether attack is enabled in"

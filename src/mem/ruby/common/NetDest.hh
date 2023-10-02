@@ -48,7 +48,8 @@ class NetDest
 
     ~NetDest()
     { }
-
+    
+    void addLocalL2FromID(MachineType mtype, int id);
     void add(MachineID newElement);
     void addNetDest(const NetDest& netDest);
     void setNetDest(MachineType machine, const Set& set);

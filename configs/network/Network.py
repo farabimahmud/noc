@@ -80,7 +80,7 @@ def define_options(parser):
     parser.add_option("--bypass", type="choice", default="bypass_all",
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
                           'bypass_x','optimized','dynamic_delay',
-                          'bypass_all_out'],
+                          'bypass_all_out','bypass_baseline'],
                       help="'bypass_none normal'")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
@@ -162,6 +162,8 @@ def init_network(options, network, InterfaceClass):
             network.dynamic_delay = True
         elif options.bypass == "bypass_all_out":
             network.all_out_bypass = True 
+        elif options.bypass == "bypass_baseline":
+            network.bypass_baseline = True
 
         network.attack_enabled = options.attack_enabled
         

@@ -88,6 +88,7 @@ class NetworkInterface : public ClockedObject, public Consumer
     bool readBypassQueue();
     
     bool readOptimizedQueue();
+
   private:
     GarnetNetwork *m_net_ptr;
     const NodeID m_id;

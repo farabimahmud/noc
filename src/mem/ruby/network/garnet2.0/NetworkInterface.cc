@@ -277,6 +277,7 @@ void NetworkInterface::incrementStats(flit *t_flit) {
 }
 
 bool NetworkInterface::readJQ() {
+  m_net_ptr->sample_jitter_queue_length(jq->getSize());
   Cycles currentCycle = curCycle();
   Tick curTime = clockEdge();
   if (jq->isReady(currentCycle)) {
@@ -311,7 +312,7 @@ bool NetworkInterface::readBypassQueue() {
   bool read_from_bq = false;
   Cycles currentCycle = curCycle();
   Tick curTime = clockEdge();
-
+  m_net_ptr->sample_bypass_queue_length(bq->getSize());
   // Tick curTime = clockEdge();
   DPRINTF(Vanilla, "[NI:readBypassQueue] Current BQ addr %#x content %s\n", bq,
           *bq);
@@ -442,12 +443,18 @@ void NetworkInterface::wakeup() {
       }
     }
   }
-
+  bool bypass_queue_read_flag = false;
   if (m_net_ptr->all_out_bypass) {
-    bool bypass_queue_read_flag = readBypassQueue();
+    bypass_queue_read_flag = readBypassQueue();
     if (bypass_queue_read_flag) {
       DPRINTF(Vanilla, "[NI:Wakeup] Bypass Queue read in this Cycle\n");
     }
+  }
+  else if (m_net_ptr->bypass_baseline){
+    bypass_queue_read_flag = readBypassQueue();
+    if (bypass_queue_read_flag) {
+      DPRINTF(Vanilla, "[NI:Wakeup] Bypass Queue read in this Cycle\n");
+    }    
   }
 
   if (m_net_ptr->all_out_bypass || m_net_ptr->jitter_all) {
@@ -575,6 +582,7 @@ bool NetworkInterface::checkStallQueue() {
   Tick curTime = clockEdge();
 
   if (!m_stall_queue.empty()) {
+    m_net_ptr->sample_stall_count(m_stall_queue.size());
     for (auto stallIter = m_stall_queue.begin();
          stallIter != m_stall_queue.end();) {
       flit *stallFlit = *stallIter;
@@ -713,7 +721,12 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
                   "Created flit %s from Router %d to Router %d\n",
                   *fl, route.src_router, route.dest_router);
         }
-      } else {
+      }
+      else if(m_net_ptr->bypass_baseline){
+        use_bypass = sendAttackFlit(fl);
+        
+      }
+       else {
         niOutVcs[vc].insert(fl);
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
       }

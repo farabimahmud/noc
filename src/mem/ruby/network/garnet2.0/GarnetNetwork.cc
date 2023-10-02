@@ -105,6 +105,7 @@ int GarnetNetwork::PACKETID = 0;
     optimized = p->optimized;
     bypass_all = p->bypass_all;
     bypass_x = p->bypass_x;
+    bypass_baseline = p->bypass_baseline;
 
     if (p->optimized){
         optimization_rate = p->optimization_rate;
@@ -271,7 +272,7 @@ GarnetNetwork::init()
     }
 
     createOutputUnitTable(m_routers.size());
-    lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
+    // lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
 
 }
 
@@ -386,6 +387,26 @@ GarnetNetwork::regStats()
     Network::regStats();
 
     // Packets
+    m_bypass_queue_length
+      .init(0,100,5)
+      .name(name() + ".bypass_queue_length")
+      .flags(Stats::oneline)
+      .precision(12)
+      ;
+
+    m_jitter_queue_length
+      .init(0,100,5)
+      .name(name() + ".jitter_queue_length")
+      .flags(Stats::oneline)
+      .precision(12)
+      ;
+
+    m_ni_stall_count
+      .init(0, 100, 5)
+      .name(name() + ".ni_stall_count")
+      .flags(Stats::oneline)
+      .precision(12)       
+      ;
 
     m_packet_network_latency_dist
         .init(0, 50, 2 )

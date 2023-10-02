@@ -81,6 +81,7 @@ while( ! $found && ($line = <INFILE>) ) {
         print FILE "cd /parsec/install/bin\n";
       } else {
         print FILE "cd /parsec/install/bin.ckpts\n";
+        print FILE "/sbin/m5 checkpoint\n";
       }
       if( $checkpointing == 0 ) {
         print FILE "/sbin/m5 switchcpu\n";

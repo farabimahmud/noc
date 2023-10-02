@@ -55,7 +55,7 @@ class GarnetNetwork : public Network
 {
   public:
     static int PACKETID;
-    bool jitter_all, optimized, bypass_all, bypass_x;  
+    bool jitter_all, optimized, bypass_all, bypass_x, bypass_baseline;  
     bool all_out_bypass; 
     uint32_t optimization_rate;
     std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
@@ -196,6 +196,18 @@ class GarnetNetwork : public Network
         }
     }
 
+    void sample_stall_count(int x){
+      m_ni_stall_count.sample(x,1);
+    }
+
+    void sample_bypass_queue_length(int x){
+      m_bypass_queue_length.sample(x,1);
+    }
+
+    void sample_jitter_queue_length(int x){
+      m_jitter_queue_length.sample(x,1);
+    }
+
     void inc_attack_packet_count(){
         m_total_num_attack_packets++;
     }
@@ -236,7 +248,9 @@ class GarnetNetwork : public Network
     bool m_enable_fault_model;
 
     // Statistical variables
-    
+    Stats::Distribution m_jitter_queue_length;
+    Stats::Distribution m_bypass_queue_length;
+    Stats::Distribution m_ni_stall_count; 
     Stats::Distribution m_packet_network_latency_dist;
     Stats::Distribution m_attack_packet_latency;
     Stats::Distribution m_closest_dest_attack_packet_latency; 
