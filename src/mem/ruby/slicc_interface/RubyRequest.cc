@@ -59,6 +59,7 @@ RubyRequest::print(ostream& out) const
   out << "Prefetch = " << m_Prefetch << " ";
   out << "attackMsg = " << m_attackMessage << " ";
   out << "&attackMsg = " << &m_attackMessage << " ";
+  out << "Req Enqueue Time = " <<  m_req_enqueue_time << " ";
 //  out << "Time = " << getTime() << " ";
   out << "]";
 }

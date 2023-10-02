@@ -33,6 +33,8 @@
 
 #include "debug/RubyNetwork.hh"
 #include "debug/Naive.hh"
+#include "debug/Vanilla.hh"
+#include "debug/Vanilla_X86.hh"
 #include "mem/ruby/network/garnet2.0/CreditLink.hh"
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
@@ -101,7 +103,6 @@ void
 Router::wakeup()
 {
     DPRINTF(RubyNetwork, "Router %d woke up\n", m_id);
-
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
         m_input_unit[inport]->wakeup();
@@ -349,4 +350,30 @@ Router::printExpectedDelay(std::ostream& out)
     }
     out << " ]\n";
     out << flush;
+}
+
+int
+Router::outport_compute_XY(int src_id, int dest_id, PortDirection dirn){
+   return routingUnit.outportComputeXY(src_id, dest_id, dirn);
+}
+
+PortDirection
+Router::getInputDirection(PortDirection input){
+
+    // DPRINTF(Vanilla,"Router:getInputDirection %s\n", input);
+    if (input == "East"){
+        return "West";
+    }
+    else if (input== "West"){
+        return "East";
+    }
+    else if (input == "North"){
+        return "South";
+    }else if(input == "South"){
+        return "North";
+    }else{
+        assert(false &&  "Error! Should not Happen\n"); 
+        return "";
+    }
+   
 }

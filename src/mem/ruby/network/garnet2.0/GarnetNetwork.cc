@@ -31,11 +31,14 @@
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 
 #include <cassert>
+#include <string>
+#include <sstream>
 
 #include "base/cast.hh"
 #include "debug/AttackPacketGenerator.hh"
 #include "debug/Naive.hh"
 #include "debug/SK.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/common/NetDest.hh"
 #include "mem/ruby/network/MessageBuffer.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
@@ -54,8 +57,9 @@ int GarnetNetwork::PACKETID = 0;
  * (see configs/network/Network.py)
  */
 
-GarnetNetwork::GarnetNetwork(const Params *p)
-    : Network(p)
+
+    GarnetNetwork::GarnetNetwork(const Params *p)
+: Network(p)
 {
     m_num_rows = p->num_rows;
     m_ni_flit_size = p->ni_flit_size;
@@ -79,24 +83,24 @@ GarnetNetwork::GarnetNetwork(const Params *p)
 
     // record the routers
     for (vector<BasicRouter*>::const_iterator i =  p->routers.begin();
-         i != p->routers.end(); ++i) {
+            i != p->routers.end(); ++i) {
         Router* router = safe_cast<Router*>(*i);
         m_routers.push_back(router);
 
         // initialize the router's network pointers
         router->init_net_ptr(this);
     }
+    all_out_bypass = p->all_out_bypass;
 
     // record the network interfaces
     int tmp_i = 0;
     for (vector<ClockedObject*>::const_iterator i = p->netifs.begin();
-         i != p->netifs.end(); ++i) {
+            i != p->netifs.end(); ++i) {
         NetworkInterface *ni = safe_cast<NetworkInterface *>(*i);
         m_nis.push_back(ni);
         ni->init_net_ptr(this);
         DPRINTF(SK, "creating %d nis: %s\n", tmp_i++, *ni);
     }
-
     jitter_all = p->jitter_all;
     optimized = p->optimized;
     bypass_all = p->bypass_all;
@@ -117,24 +121,105 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     min_cycles = p->min_cycles;
     max_cycles = p->max_cycles;
     dynamic_delay = p->dynamic_delay; 
-    hasFixedTarget = p->fixed_target_enabled;
-    if (attack_enabled && hasFixedTarget ){
-        fixedTargetNearNode = p->fixed_target_near;
-        fixedTargetFarNode = p->fixed_target_far;
-        DPRINTF(AttackPacketGenerator, "assigned fixed taget near %d "
-        "and far %d node\n", fixedTargetNearNode, fixedTargetFarNode);
-    }
-    else if(p->randomly_selected_targets){
-      DPRINTF(AttackPacketGenerator, "Not implemented yet TODO\n");
-      fixedTargetNearNode = 1; 
-      fixedTargetFarNode = 51;
-    }
 
     // initialize expected_delay if scheme is dynamic
+    if (all_out_bypass){
+        DPRINTF(Vanilla, "All out bypass enabled\n");
+    }
+    max_hpc = p->max_hpc;
+    upper_limit = Cycles(p->upper_limit);
+    delta_s = Cycles(p->delta_s);
+    target_latency = Cycles(p->target_latency);
 
+    if (p->destination_list.length() > 0){
+        DPRINTF(Vanilla, "Setting Up Destination List\n");
+        std::stringstream stream(p->destination_list);
+        std::string token; 
+        while(std::getline(stream, token, ',')){
+            int dest_node = std::stoi(token);
+            assert(0 <= dest_node &&  dest_node < m_routers.size());
+            destination_list.push_back(dest_node);
+        }
+        DPRINTF(Vanilla, "[GN] Destination List is - \n");
+        for (auto d:destination_list){
+            DPRINTF(Vanilla, "%d\n", d);
+        }
+    }
+    if (p->attack_node_list.length() > 0){
+        std::stringstream stream(p->attack_node_list);
+        std::string token;
+        while (std::getline(stream, token, ',')){
+            int cur_attack_node = std::stoi(token);
+            assert(0 <= cur_attack_node &&  cur_attack_node < m_routers.size());
+            attack_node_list.push_back(cur_attack_node);
+        }
+        DPRINTF(Vanilla, "[GN] Attack Node List is - \n");
+        for (auto d:attack_node_list){
+            DPRINTF(Vanilla, "%d\n", d);
+        }
+    }
+    if (p->lower_limit != -1){
+        DPRINTF(Vanilla, "Overriding lower limit from the destinations\n");
+        lower_limit = Cycles(p->lower_limit);
+    }
+    closest_rt = Cycles(p->target_latency);
 }
 
-void
+int
+GarnetNetwork::get_bypass_cost(int src, int dest){
+    int x_src = src % m_num_cols;
+    int y_src = src / m_num_cols;
+    int x_dest = dest % m_num_cols;
+    int y_dest = dest / m_num_cols;  
+    int x_cost = abs(x_src - x_dest);
+    int y_cost = abs(y_src - y_dest);      
+    int bypass_cost = 0; 
+    bypass_cost = int(ceil( (float) (x_cost+y_cost)/ (float) max_hpc)); 
+    /*
+    DPRINTF(Vanilla,"Bypass cost from src %d to dest %d is %d\n",
+            src,
+            dest,
+            bypass_cost);
+    */
+    bypass_cost = std::max(bypass_cost,1);
+    assert(bypass_cost != 0 && "bypass cost cannot be 0");
+    return bypass_cost;
+}
+
+Cycles 
+GarnetNetwork::get_farthest_node_bypass_cost(std::vector<int>slist, std::vector<int> dlist){
+    std::vector<int> max_costs;
+    for (auto s:slist){
+        std::vector<int> bypass_cost_from_source;
+        bypass_cost_from_source.clear();
+        for (auto d:dlist){
+            bypass_cost_from_source.push_back(get_bypass_cost(s,d));
+        }
+        int max_value = *std::max_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end());
+
+        int closest_index = std::min_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end()
+                ) - bypass_cost_from_source.begin();
+        closest_dest  = dlist[closest_index];
+        closest_dest_from_src[s] = closest_dest;
+
+        int farthest_index = std::max_element(
+                bypass_cost_from_source.begin(),
+                bypass_cost_from_source.end()
+                ) - bypass_cost_from_source.begin();
+        farthest_dest = dlist[farthest_index];
+        farthest_dest_from_src[s] = farthest_dest;
+        DPRINTF(Vanilla, "Src %d Closest %d Farthest %d lower %d\n",
+                s, closest_dest, farthest_dest, max_value);
+        max_costs.push_back(get_bypass_cost(s, farthest_dest));
+    }
+    return Cycles(*std::max_element(max_costs.begin(), max_costs.end()));
+}
+
+    void
 GarnetNetwork::init()
 {
     Network::init();
@@ -164,14 +249,14 @@ GarnetNetwork::init()
     // FaultModel: declare each router to the fault model
     if (isFaultModelEnabled()) {
         for (vector<Router*>::const_iterator i= m_routers.begin();
-             i != m_routers.end(); ++i) {
+                i != m_routers.end(); ++i) {
             Router* router = safe_cast<Router*>(*i);
             int router_id M5_VAR_USED =
                 fault_model->declare_router(router->get_num_inports(),
-                                            router->get_num_outports(),
-                                            router->get_vc_per_vnet(),
-                                            getBuffersPerDataVC(),
-                                            getBuffersPerCtrlVC());
+                        router->get_num_outports(),
+                        router->get_vc_per_vnet(),
+                        getBuffersPerDataVC(),
+                        getBuffersPerCtrlVC());
             assert(router_id == router->get_id());
             router->printAggregateFaultProbability(cout);
             router->printFaultVector(cout);
@@ -184,6 +269,10 @@ GarnetNetwork::init()
             m_routers[i]->resetExpectedDelay();
         }
     }
+
+    createOutputUnitTable(m_routers.size());
+    lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
+
 }
 
 /*
@@ -191,11 +280,11 @@ GarnetNetwork::init()
  * into the Network.
  * It creates a Network Link from the NI to a Router and a Credit Link from
  * the Router to the NI
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
-                            const NetDest& routing_table_entry)
+        const NetDest& routing_table_entry)
 {
     assert(src < m_nodes);
 
@@ -218,11 +307,11 @@ GarnetNetwork::makeExtInLink(NodeID src, SwitchID dest, BasicLink* link,
  * This function creates a link from the Network to a NI.
  * It creates a Network Link from a Router to the NI and
  * a Credit Link from NI to the Router
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
-                             const NetDest& routing_table_entry)
+        const NetDest& routing_table_entry)
 {
     assert(dest < m_nodes);
     assert(src < m_routers.size());
@@ -240,21 +329,21 @@ GarnetNetwork::makeExtOutLink(SwitchID src, NodeID dest, BasicLink* link,
 
     PortDirection src_outport_dirn = "Local";
     m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);
+            routing_table_entry,
+            link->m_weight, credit_link);
     m_nis[dest]->addInPort(net_link, credit_link);
 }
 
 /*
  * This function creates an internal network link between two routers.
  * It adds both the network link and an opposite credit link.
-*/
+ */
 
-void
+    void
 GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
-                                const NetDest& routing_table_entry,
-                                PortDirection src_outport_dirn,
-                                PortDirection dst_inport_dirn)
+        const NetDest& routing_table_entry,
+        PortDirection src_outport_dirn,
+        PortDirection dst_inport_dirn)
 {
     GarnetIntLink* garnet_link = safe_cast<GarnetIntLink*>(link);
 
@@ -268,25 +357,30 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
 
     m_routers[dest]->addInPort(dst_inport_dirn, net_link, credit_link);
     m_routers[src]->addOutPort(src_outport_dirn, net_link,
-                               routing_table_entry,
-                               link->m_weight, credit_link);
+            routing_table_entry,
+            link->m_weight, credit_link);
+    src_r_link_dest_r_map[std::make_pair(src,net_link)] = dest;
+    // DPRINTF(Vanilla, "Router %d connected via %#x to Router %d\n",
+    //         src, net_link, dest);
 }
 
 // Total routers in the network
-int
+    int
 GarnetNetwork::getNumRouters()
 {
     return m_routers.size();
 }
 
 // Get ID of router connected to a NI.
-int
+    int
 GarnetNetwork::get_router_id(int ni)
 {
     return m_nis[ni]->get_router_id();
 }
 
-void
+
+
+    void
 GarnetNetwork::regStats()
 {
     Network::regStats();
@@ -297,6 +391,35 @@ GarnetNetwork::regStats()
         .init(0, 50, 2 )
         .name(name() + ".packet_network_latency_dist")
         .flags(Stats::oneline)
+        .precision(12)       
+        ;
+    
+    m_closest_dest_attack_packet_latency
+        .init(0,100,5)
+        .name(name() + ".closest_dest_attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+        ;
+
+    m_farthest_dest_attack_packet_latency
+        .init(0,100,5)
+        .name(name() + ".farthest_dest_attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+       ; 
+
+    m_attack_packet_latency
+        .init(0, 100, 5 )
+        .name(name() + ".attack_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)
+        ;
+
+    m_regular_packet_latency
+        .init(0, 100, 5 )
+        .name(name() + ".regular_packet_latency")
+        .flags(Stats::oneline)
+        .precision(12)        
         ;
 
     m_packets_received
@@ -429,6 +552,17 @@ GarnetNetwork::regStats()
         .name(name() + ".int_link_utilization");
     m_average_link_utilization
         .name(name() + ".avg_link_utilization");
+    
+    m_total_bypass_count 
+        .name(name() + ".total_bypass_count");
+    m_total_jitter_count
+      .name(name() + ".total_jitter_count");
+    m_total_num_attack_packets 
+        .name(name() + ".total_num_attack_packet");
+    m_total_normal_count
+        .name(name() + ".total_normal_count");
+    m_total_jitter_amount 
+        .name(name() + ".total_jitter_amount");
 
     m_average_vc_load
         .init(m_virtual_networks * m_vcs_per_vnet)
@@ -437,7 +571,7 @@ GarnetNetwork::regStats()
         ;
 }
 
-void
+    void
 GarnetNetwork::collateStats()
 {
     RubySystem *rs = params()->ruby_system;
@@ -475,13 +609,13 @@ GarnetNetwork::print(ostream& out) const
     out << "[GarnetNetwork]";
 }
 
-GarnetNetwork *
+    GarnetNetwork *
 GarnetNetworkParams::create()
 {
     return new GarnetNetwork(this);
 }
 
-uint32_t
+    uint32_t
 GarnetNetwork::functionalWrite(Packet *pkt)
 {
     uint32_t num_functional_writes = 0;
@@ -548,4 +682,64 @@ GarnetNetwork::get_ni_from_id(int id){
     return NULL;
 }
 
+
+
+void
+GarnetNetwork::createOutputUnitTable(int num_routers){
+    DPRINTF(Vanilla, "creating %dx%d matrix of OutputUnit*\n", num_routers, num_routers);
+    output_unit_table.resize(num_routers);
+    for (int i =0; i< num_routers; i++){
+        output_unit_table[i].resize(num_routers);
+        for (int j =0; j < num_routers; j++){
+            int src_id =  i;
+            int dest_id = j;
+            std::vector<OutputUnit*> ou_vector;
+
+            if (i==j){
+                ou_vector.clear();
+                output_unit_table[i][j] = ou_vector; 
+
+            } else{
+
+                int cur_router_id = src_id;
+                Router * cur_router = m_routers[cur_router_id];
+                PortDirection cur_dirn = "Local";
+
+                int cur_outport; 
+                OutputUnit* cur_output_unit; 
+
+                while(cur_router_id != dest_id){
+                    //DPRINTF(Vanilla, "createOutputUnitTable "
+                    //        "i %d j %d cur router %d\n", 
+                    //        i,j,
+                    //        cur_router_id);
+                    cur_outport = cur_router->outport_compute_XY(
+                            cur_router_id,
+                            dest_id,
+                            cur_dirn
+                            );
+
+                    cur_output_unit = cur_router->getOutputUnit(cur_outport);
+                    cur_dirn = cur_router->getInputDirection(
+                            cur_router->getOutportDirection(cur_outport));
+                   
+                    NetworkLink * cur_link = cur_output_unit->get_outlink();
+                    ou_vector.push_back(cur_output_unit);    
+                    cur_router_id  =  src_r_link_dest_r_map[
+                        std::make_pair(
+                                cur_router_id,
+                                cur_link
+                                )
+                                ];
+                    cur_router = m_routers[cur_router_id];
+                   
+                }
+                output_unit_table[i][j] = ou_vector;
+            }
+
+            
+        }   
+    }
+
+}
 

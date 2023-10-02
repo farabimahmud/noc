@@ -36,6 +36,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
 {
     m_size = size;
     m_msg_ptr = msg_ptr;
+    if(vnet==0) m_msg_ptr->setReqEnqueueTime(curTime);
     m_enqueue_time = curTime;
     m_dequeue_time = curTime;
     m_time = curTime;
@@ -45,6 +46,7 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
     m_route = route;
     m_stage.first = I_;
     m_stage.second = m_time;
+    isBypassFlagsReset = false;
 
     if (size == 1) {
         m_type = HEAD_TAIL_;
@@ -58,6 +60,9 @@ flit::flit(int id, int  vc, int vnet, RouteInfo route, int size,
         m_type = BODY_;
     isAttackFlit = false;
     jitter = false;
+    target_latency = Cycles(0);
+    ready_to_commit = Cycles(0);
+  
 }
 
 // set to determine attack flit
@@ -78,7 +83,23 @@ flit::print(std::ostream& out) const
     out << "[flit:: ";
     out << "Pid=" << m_pid << " ";
     out << "Id=" << m_id << " ";
-    out << "Type=" << m_type << " ";
+    out << "Type=";
+    switch(m_type){
+        case HEAD_: 
+            out << "HEAD_" <<" ";
+            break;
+        case HEAD_TAIL_: 
+            out << "HEAD_TAIL_" <<" ";
+            break;
+        case BODY_:
+            out << "BODY_" << " ";
+            break;
+        case TAIL_:
+            out << "TAIL_" << " ";
+            break;
+        default:
+            out << "ERROR_" << " "; 
+    };
     out << "Vnet=" << m_vnet << " ";
     out << "VC=" << m_vc << " ";
     out << "Src NI=" << m_route.src_ni << " ";
@@ -87,6 +108,8 @@ flit::print(std::ostream& out) const
     out << "Dest Router=" << m_route.dest_router << " ";
     out << "Enqueue Time=" << m_enqueue_time << " ";
     out << "Attack Flit=" << isAttackFlit << " ";
+    out << "RTC=" << ready_to_commit << " ";
+    out << "Target Latency=" << target_latency << " ";
     out << "]";
 }
 

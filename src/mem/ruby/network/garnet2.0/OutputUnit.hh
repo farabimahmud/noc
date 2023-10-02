@@ -43,6 +43,7 @@
 
 class CreditLink;
 class Router;
+class OutVcState;
 
 class OutputUnit : public Consumer
 {
@@ -62,30 +63,12 @@ class OutputUnit : public Consumer
 
     inline PortDirection get_direction() { return m_direction; }
     bool bypass_flag;
-
-    int
-    get_credit_count(int vc)
-    {
-        return outVcState[vc].get_credit_count();
-    }
-
-    inline int
-    get_outlink_id()
-    {
-        return m_out_link->get_id();
-    }
-
-    inline void
-    set_vc_state(VC_state_type state, int vc, Cycles curTime)
-    {
-      outVcState[vc].setState(state, curTime);
-    }
-
-    inline bool
-    is_vc_idle(int vc, Cycles curTime)
-    {
-        return (outVcState[vc].isInState(IDLE_, curTime));
-    }
+    
+    NetworkLink* get_outlink();    
+    int get_credit_count(int vc);
+    inline int get_outlink_id();
+    inline void set_vc_state(VC_state_type,int, Cycles);
+    inline bool is_vc_idle(int, Cycles);
 
     void insert_flit(flit *t_flit);
 
@@ -102,7 +85,7 @@ class OutputUnit : public Consumer
     // This is for the network link to consume
     flitBuffer outBuffer;
     // vc state of downstream router
-    std::vector<OutVcState> outVcState;
+    std::vector<OutVcState*> outVcState;
 };
 
 #endif // __MEM_RUBY_NETWORK_GARNET2_0_OUTPUTUNIT_HH__

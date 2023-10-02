@@ -79,10 +79,24 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                                       cacheMemory = cache,
                                       ruby_system = ruby_system)
 
-        cpu_seq = RubySequencer(icache = cache,
-                                dcache = cache,
-                                garnet_standalone = True,
-                                ruby_system = ruby_system)
+        attack_node_list = options.attack_node.split(",")
+        if i in attack_node_list:
+            cpu_seq = RubySequencer(icache = cache,
+                    dcache = cache,
+                    garnet_standalone = True,
+                    ruby_system = ruby_system,
+                    attack_rate = float(options.attack_rate))
+            if options.destination_list is not None:
+                cpu_seq.destination_list = options.destination_list 
+            cpu_seq.is_attack_node = True 
+        else:
+            cpu_seq = RubySequencer(icache = cache,
+                    dcache = cache,
+                    garnet_standalone = True,
+                    ruby_system = ruby_system,
+                    attack_rate = 0)
+            cpu_seq.is_attack_node = False 
+        cpu_seq.coreid = i 
 
         l1_cntrl.sequencer = cpu_seq
         exec("ruby_system.l1_cntrl%d = l1_cntrl" % i)
@@ -93,9 +107,15 @@ def create_system(options, full_system, system, dma_ports, bootmem,
 
         # Connect the L1 controllers and the network
         l1_cntrl.mandatoryQueue = MessageBuffer()
-        l1_cntrl.requestFromCache = MessageBuffer()
-        l1_cntrl.responseFromCache = MessageBuffer()
-        l1_cntrl.forwardFromCache = MessageBuffer()
+        l1_cntrl.requestOut     = MessageBuffer()
+        l1_cntrl.requestIn      = MessageBuffer()
+        l1_cntrl.responseOut    = MessageBuffer()
+        l1_cntrl.responseIn     = MessageBuffer()
+
+        l1_cntrl.requestOut.master  = ruby_system.network.slave
+        l1_cntrl.requestIn.slave    = ruby_system.network.master
+        l1_cntrl.responseOut.master = ruby_system.network.slave
+        l1_cntrl.responseIn.slave   = ruby_system.network.master
 
     mem_dir_cntrl_nodes, rom_dir_cntrl_node = create_directories(
         options, bootmem, ruby_system, system)

@@ -916,7 +916,8 @@ if not check_hdf5_pkg('hdf5-serial'):
 # include path and library path provided by pkg-config. We perform
 # this check even if there isn't a pkg-config configuration for hdf5
 # since some installations don't use pkg-config.
-have_hdf5 = check_hdf5()
+# have_hdf5 = check_hdf5()
+have_hdf5 = False
 if not have_hdf5:
     print("Warning: Couldn't find any HDF5 C++ libraries. Disabling")
     print("         HDF5 support.")

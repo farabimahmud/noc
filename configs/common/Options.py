@@ -116,6 +116,23 @@ def addNoISAOptions(parser):
 
     parser.add_option("--memchecker", action="store_true")
 
+
+    # Following Options for selecting one node to generate Attack Packet
+    parser.add_option("--attack-node", type="string", default=None,
+                    help="The node that is being attacked at this point \
+                            Default value None")
+    parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
+                    help="Attack rate in packets per cycle per node,\
+                            takes floating point value between 0 to 1 \
+                            default value is 0.1")
+    parser.add_option("--attack-enabled", action="store_true")
+
+    parser.add_option("--destination-list", type="string", 
+            default=None, action="store",
+            help= """list of destinations that the attacker will try to send
+            packets default is None """)
+
+
     # Cache Options
     parser.add_option("--external-memory-system", type="string",
                       help="use external ports of this port_type for caches")
@@ -159,10 +176,24 @@ def addNoISAOptions(parser):
              "Direct parameters of the root object are not accessible, "
              "only parameters of its children.")
 
+    # Attack options
+
 # Add common options that assume a non-NULL ISA.
 def addCommonOptions(parser):
     # start by adding the base options that do not assume an ISA
     addNoISAOptions(parser)
+
+
+    # Following options for selecting two nodes to receive attack packet
+    parser.add_option("--fixed-target-enabled", action="store_true")
+    parser.add_option("--fixed-target-near",type=int, default=-1,
+                    help="Fixed Target for destinations, near node")
+    parser.add_option("--fixed-target-far", type=int, default=-1,
+                    help="Fixed Target for destinations, far node")
+
+    parser.add_option("--randomly-selected-targets",action="store_true")
+
+
 
     # system options
     parser.add_option("--list-cpu-types",
@@ -408,7 +439,8 @@ def addSEOptions(parser):
     parser.add_option("--wait-gdb", default=False,
                       help="Wait for remote GDB to connect.")
 
-
+    parser.add_option("--rodinia-attack", action="store_true",
+                      help="this is useds for combination of rodinia with attack program")
 
 def addFSOptions(parser):
     from common.FSConfig import os_types

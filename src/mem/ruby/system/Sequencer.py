@@ -69,6 +69,13 @@ class RubySequencer(RubyPort):
    # id used by protocols that support multiple sequencers per controller
    # 99 is the dummy default value
    coreid = Param.Int(99, "CorePair core id")
+   is_attack_node = Param.Bool(False, "Whether this sequencer is added to \
+           attacking node, default is False")
+
+   attack_rate = Param.Float(0.01, "Attack Rate of the attacker node")
+   destination_list = Param.String("", "comma separated list of \
+            destinations that the attacker going to use and we have \
+            to protect from, Default is None")
 
 class DMASequencer(RubyPort):
    type = 'DMASequencer'

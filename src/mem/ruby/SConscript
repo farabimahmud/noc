@@ -58,6 +58,7 @@ DebugFlag('RubySystem')
 DebugFlag('RubyTester')
 DebugFlag('RubyStats')
 DebugFlag('RubyResourceStalls')
+DebugFlag('Vanilla_X86')
 
 CompoundFlag('Ruby', [ 'RubyQueue', 'RubyNetwork', 'RubyTester',
     'RubyGenerated', 'RubySlicc', 'RubySystem', 'RubyCache',
@@ -114,7 +115,10 @@ MakeInclude('slicc_interface/Message.hh')
 MakeInclude('slicc_interface/RubyRequest.hh')
 
 # added for externalizing protocols
-MakeInclude('slicc_interface/RequestMsg.hh')
+MakeInclude('slicc_interface/bug_fix/RequestMsg.hh')
+MakeInclude('slicc_interface/bug_fix/ResponseMsg.hh')
+MakeInclude('slicc_interface/bug_fix/SequencerMsg.hh')
+MakeInclude('slicc_interface/bug_fix/MemoryMsg.hh')
 
 # External types
 MakeInclude('common/Address.hh')

@@ -33,8 +33,10 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "mem/ruby/network/Network.hh"
+#include "mem/ruby/network/garnet2.0/OutputUnit.hh"
 #include "mem/ruby/network/fault_model/FaultModel.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "params/GarnetNetwork.hh"
@@ -46,28 +48,43 @@ class NetDest;
 class NetworkLink;
 class CreditLink;
 class flit;
+class OutputUnit; 
+class OutVcState; 
 
 class GarnetNetwork : public Network
 {
   public:
     static int PACKETID;
     bool jitter_all, optimized, bypass_all, bypass_x;  
+    bool all_out_bypass; 
     uint32_t optimization_rate;
+    std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
+    Cycles closest_rt;
+
+    int max_hpc; 
+    Cycles lower_limit, upper_limit, delta_s, target_latency;
+    std::vector<int> destination_list;
+    std::vector<int> attack_node_list; 
+    std::map<int, int> closest_dest_from_src; 
+    std::map<int, int> farthest_dest_from_src; 
+    int closest_dest, farthest_dest; 
+
+    Cycles get_farthest_node_bypass_cost(std::vector<int>, std::vector<int>);
+    int get_bypass_cost(int, int);
 
     // ATTACK parameters
     bool attack_enabled;
     int attack_node;
+
 
     // Window size
     int min_cycles;
     int max_cycles;
     bool dynamic_delay;
 
-    // Attack Targets
-    bool hasFixedTarget;
-    int fixedTargetNearNode;
-    int fixedTargetFarNode;
 
+    void createOutputUnitTable(int num_nis);
+    std::vector<std::vector<std::vector<OutputUnit*>>> output_unit_table;
 
     typedef GarnetNetworkParams Params;
     GarnetNetwork(const Params *p);
@@ -163,9 +180,40 @@ class GarnetNetwork : public Network
     NetworkInterface * get_ni_from_id(int id);
 
     void
-    sample_latency(Cycles x){
+    sample_latency(Cycles x, bool closest=false, bool attack=false){
         m_packet_network_latency_dist.sample(x, 1);
+        if (attack) {
+            m_attack_packet_latency.sample(x,1);
+            if (closest){
+                m_closest_dest_attack_packet_latency.sample(x,1);
+            }
+            else {
+                m_farthest_dest_attack_packet_latency.sample(x,1);
+            }
+        }
+        else {             
+            m_regular_packet_latency.sample(x,1);
+        }
     }
+
+    void inc_attack_packet_count(){
+        m_total_num_attack_packets++;
+    }
+    void inc_total_bypass_count(){
+        m_total_bypass_count++;
+    }
+    void inc_total_normal_count(){
+        m_total_normal_count++;
+    }
+
+    void inc_total_jitter_count(){
+        m_total_jitter_count++;
+    }
+
+    void inc_total_jitter_amount(int x){
+        m_total_jitter_amount += x; 
+    }
+
 
     bool 
     checkCongestion(int src_router, int dest_router, uint64_t pid);
@@ -190,6 +238,10 @@ class GarnetNetwork : public Network
     // Statistical variables
     
     Stats::Distribution m_packet_network_latency_dist;
+    Stats::Distribution m_attack_packet_latency;
+    Stats::Distribution m_closest_dest_attack_packet_latency; 
+    Stats::Distribution m_farthest_dest_attack_packet_latency; 
+    Stats::Distribution m_regular_packet_latency;
 
     Stats::Vector m_packets_received;
     Stats::Vector m_packets_injected;
@@ -221,8 +273,13 @@ class GarnetNetwork : public Network
 
     Stats::Scalar  m_total_hops;
     Stats::Formula m_avg_hops;
-
     
+    Stats::Scalar m_total_normal_count;
+    Stats::Scalar m_total_bypass_count; 
+    Stats::Scalar m_total_jitter_count; 
+    Stats::Scalar m_total_num_attack_packets;
+    Stats::Scalar m_total_jitter_amount; 
+   
 
   private:
     GarnetNetwork(const GarnetNetwork& obj);

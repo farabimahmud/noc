@@ -1,0 +1,242 @@
+Global frequency set at 1000000000000 ticks per second
+0: system.remote_gdb: listening for remote gdb on port 7000
+0: system.remote_gdb: listening for remote gdb on port 7001
+0: system.remote_gdb: listening for remote gdb on port 7002
+0: system.remote_gdb: listening for remote gdb on port 7003
+0: system.remote_gdb: listening for remote gdb on port 7004
+0: system.remote_gdb: listening for remote gdb on port 7005
+0: system.remote_gdb: listening for remote gdb on port 7006
+0: system.remote_gdb: listening for remote gdb on port 7007
+0: system.remote_gdb: listening for remote gdb on port 7008
+0: system.remote_gdb: listening for remote gdb on port 7009
+0: system.remote_gdb: listening for remote gdb on port 7010
+0: system.remote_gdb: listening for remote gdb on port 7011
+0: system.remote_gdb: listening for remote gdb on port 7012
+0: system.remote_gdb: listening for remote gdb on port 7013
+0: system.remote_gdb: listening for remote gdb on port 7014
+0: system.remote_gdb: listening for remote gdb on port 7015
+0: system.remote_gdb: listening for remote gdb on port 7016
+0: system.remote_gdb: listening for remote gdb on port 7017
+0: system.remote_gdb: listening for remote gdb on port 7018
+0: system.remote_gdb: listening for remote gdb on port 7019
+0: system.remote_gdb: listening for remote gdb on port 7020
+0: system.remote_gdb: listening for remote gdb on port 7021
+0: system.remote_gdb: listening for remote gdb on port 7022
+0: system.remote_gdb: listening for remote gdb on port 7023
+0: system.remote_gdb: listening for remote gdb on port 7024
+0: system.remote_gdb: listening for remote gdb on port 7025
+0: system.remote_gdb: listening for remote gdb on port 7026
+0: system.remote_gdb: listening for remote gdb on port 7027
+0: system.remote_gdb: listening for remote gdb on port 7028
+0: system.remote_gdb: listening for remote gdb on port 7029
+0: system.remote_gdb: listening for remote gdb on port 7030
+0: system.remote_gdb: listening for remote gdb on port 7031
+0: system.remote_gdb: listening for remote gdb on port 7032
+0: system.remote_gdb: listening for remote gdb on port 7033
+0: system.remote_gdb: listening for remote gdb on port 7034
+0: system.remote_gdb: listening for remote gdb on port 7035
+0: system.remote_gdb: listening for remote gdb on port 7036
+0: system.remote_gdb: listening for remote gdb on port 7037
+0: system.remote_gdb: listening for remote gdb on port 7038
+0: system.remote_gdb: listening for remote gdb on port 7039
+0: system.remote_gdb: listening for remote gdb on port 7040
+0: system.remote_gdb: listening for remote gdb on port 7041
+0: system.remote_gdb: listening for remote gdb on port 7042
+0: system.remote_gdb: listening for remote gdb on port 7043
+0: system.remote_gdb: listening for remote gdb on port 7044
+0: system.remote_gdb: listening for remote gdb on port 7045
+0: system.remote_gdb: listening for remote gdb on port 7046
+0: system.remote_gdb: listening for remote gdb on port 7047
+0: system.remote_gdb: listening for remote gdb on port 7048
+0: system.remote_gdb: listening for remote gdb on port 7049
+0: system.remote_gdb: listening for remote gdb on port 7050
+0: system.remote_gdb: listening for remote gdb on port 7051
+0: system.remote_gdb: listening for remote gdb on port 7052
+0: system.remote_gdb: listening for remote gdb on port 7053
+0: system.remote_gdb: listening for remote gdb on port 7054
+0: system.remote_gdb: listening for remote gdb on port 7055
+0: system.remote_gdb: listening for remote gdb on port 7056
+0: system.remote_gdb: listening for remote gdb on port 7057
+0: system.remote_gdb: listening for remote gdb on port 7058
+0: system.remote_gdb: listening for remote gdb on port 7059
+0: system.remote_gdb: listening for remote gdb on port 7060
+0: system.remote_gdb: listening for remote gdb on port 7061
+0: system.remote_gdb: listening for remote gdb on port 7062
+0: system.remote_gdb: listening for remote gdb on port 7063
+info: Entering event queue @ 0.  Starting simulation...
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall rt_sigaction(...)
+      (further warnings will be suppressed)
+warn: ignoring syscall rt_sigprocmask(...)
+      (further warnings will be suppressed)
+info: Increasing stack size by one page.
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall sched_getaffinity(...)
+info: Increasing stack size by one page.
+The file was not opened for reading
+The file was not opened for reading
+warn: PowerState: Already in the requested power state, request ignored
+info: Entering event queue @ 41737809.  Starting simulation...
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall mprotect(...)
+warn: ignoring syscall set_robust_list(...)
+warn: ignoring syscall set_robust_list(...)
+gem5.opt: build/X86_MESI_Two_Level/mem/ruby/network/garnet2.0/InputUnit.cc:87: virtual void InputUnit::wakeup(): Assertion `virtualChannels[vc].get_state() == IDLE_' failed.
+Program aborted at tick 363666381
+--- BEGIN LIBC BACKTRACE ---
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_Z15print_backtracev+0x19)[0xacf999]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_Z12abortHandleri+0x45)[0xae18d5]
+/lib64/libpthread.so.0(+0xf630)[0x7f3d9f2da630]
+/lib64/libc.so.6(gsignal+0x37)[0x7f3d9db51387]
+/lib64/libc.so.6(abort+0x148)[0x7f3d9db52a78]
+/lib64/libc.so.6(+0x2f1a6)[0x7f3d9db4a1a6]
+/lib64/libc.so.6(+0x2f252)[0x7f3d9db4a252]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_ZN9InputUnit6wakeupEv+0x95f)[0x134314f]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_ZN6Router6wakeupEv+0x55)[0x13550d5]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_ZN10EventQueue10serviceOneEv+0xb6)[0xad7376]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_Z9doSimLoopP10EventQueue+0x110)[0xaf6d00]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt(_Z8simulatem+0x9f8)[0xaf79e8]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt[0x19ac775]
+/home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt[0xa7be31]
+/lib64/libpython3.6m.so.1.0(PyCFunction_Call+0xa6)[0x7f3d9f5cda96]
+/lib64/libpython3.6m.so.1.0(_PyEval_EvalFrameDefault+0x68f4)[0x7f3d9f633f64]
+/lib64/libpython3.6m.so.1.0(+0x151317)[0x7f3d9f638317]
+/lib64/libpython3.6m.so.1.0(+0x151fea)[0x7f3d9f638fea]
+/lib64/libpython3.6m.so.1.0(+0x152273)[0x7f3d9f639273]
+/lib64/libpython3.6m.so.1.0(_PyEval_EvalFrameDefault+0x3a7)[0x7f3d9f62da17]
+/lib64/libpython3.6m.so.1.0(+0x151f3a)[0x7f3d9f638f3a]
+/lib64/libpython3.6m.so.1.0(+0x152273)[0x7f3d9f639273]
+/lib64/libpython3.6m.so.1.0(_PyEval_EvalFrameDefault+0x3a7)[0x7f3d9f62da17]
+/lib64/libpython3.6m.so.1.0(+0x1516d2)[0x7f3d9f6386d2]
+/lib64/libpython3.6m.so.1.0(+0x151fea)[0x7f3d9f638fea]
+/lib64/libpython3.6m.so.1.0(+0x152273)[0x7f3d9f639273]
+/lib64/libpython3.6m.so.1.0(_PyEval_EvalFrameDefault+0x3a7)[0x7f3d9f62da17]
+/lib64/libpython3.6m.so.1.0(PyEval_EvalCodeEx+0x22d)[0x7f3d9f6395ed]
+/lib64/libpython3.6m.so.1.0(PyEval_EvalCode+0x3b)[0x7f3d9f63a10b]
+/lib64/libpython3.6m.so.1.0(+0x145a5b)[0x7f3d9f62ca5b]
+/lib64/libpython3.6m.so.1.0(_PyCFunction_FastCallDict+0x9a)[0x7f3d9f5cd73a]
+/lib64/libpython3.6m.so.1.0(+0x15214f)[0x7f3d9f63914f]
+--- END LIBC BACKTRACE ---
+./test.sh: line 19: 34482 Aborted                 (core dumped) /home/grads/f/farabi/noc/build/X86_MESI_Two_Level/gem5.opt --debug-flags=Vanilla,InputUnitDebug --debug-file=/home/grads/f/farabi/noc/m5out/debug.out /home/grads/f/farabi/noc/configs/example/se.py --num-cpus=64 --num-dirs=64 --network=garnet2.0 --topology=Mesh_XY --mesh-row=8 --maxinsts=1000000 --ruby --caches --l2cache --num-l2caches=64 --l1d_size=128kB --l2_size=2MB --fast-forward=9223372036854775807 --bypass=jitter_all --attack-enabled --attack-node=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 --max-hpc=5 --upper-limit=100 --cmd=/home/grads/f/farabi/benchmarks/rodinia_3.0/openmp/myocyte/myocyte.out --options="100 1 0 64" --destination-list=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 --target-latency=100 --attack-rate=1

@@ -132,11 +132,11 @@ class Router : public BasicRouter, public Consumer
     int route_compute(RouteInfo route, int inport, PortDirection direction);
     void grant_switch(int inport, flit *t_flit);
     void schedule_wakeup(Cycles time);
-
+    int outport_compute_XY(int, int, PortDirection);
     std::string getPortDirectionName(PortDirection direction);
     void printFaultVector(std::ostream& out);
     void printAggregateFaultProbability(std::ostream& out);
-
+    PortDirection getInputDirection(PortDirection input);
     void regStats();
     void collateStats();
     void resetStats();

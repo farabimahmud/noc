@@ -69,20 +69,23 @@ class NetworkInterface : public ClockedObject, public Consumer
     void print(std::ostream& out) const;
     int get_vnet(int vc);
     int get_router_id() { return m_router_id; }
-    void init_net_ptr(GarnetNetwork *net_ptr) { m_net_ptr = net_ptr; }
-
+    void init_net_ptr(GarnetNetwork * );
     uint32_t functionalWrite(Packet *);
 
     Cycles flit_jitter_threshold;
     std::deque<flit*> jitter_queue;    
     flitBufferRTC * jq; 
+    flitBufferRTC * bq;
+
     std::deque<flit*> optimized_queue;
     bool readJitterQueue();
     bool readJQ();
     int get_id(){
         return m_id;
-
     }
+
+    int sendAttackFlit(flit*);
+    bool readBypassQueue();
     
     bool readOptimizedQueue();
   private:
@@ -128,6 +131,7 @@ class NetworkInterface : public ClockedObject, public Consumer
     void sendCredit(flit *t_flit, bool is_free);
 
     void incrementStats(flit *t_flit);
+    void incrementStatsForBypassFlit(flit *t_flit);
 
     void setBypassFlags(flit * t_flit);
     void resetBypassFlags(flit * t_flit);

@@ -53,3 +53,7 @@ Source('Credit.cc')
 
 
 DebugFlag('Naive')
+DebugFlag('Vanilla')
+DebugFlag('JitterAllStats')
+DebugFlag('Flitisize')
+DebugFlag('InputUnitDebug')

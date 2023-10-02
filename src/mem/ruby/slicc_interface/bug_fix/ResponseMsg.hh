@@ -1,0 +1,311 @@
+/** \file ResponseMsg.hh
+ *
+ *
+ * Auto generated C++ code started by /home/farabi/noc/src/mem/slicc/symbols/Type.py:191
+ */
+
+#ifndef __ResponseMsg_HH__
+#define __ResponseMsg_HH__
+
+#include <iostream>
+
+#include "mem/ruby/slicc_interface/RubySlicc_Util.hh"
+
+#include "mem/ruby/protocol/CoherenceResponseType.hh"
+#include "mem/ruby/protocol/MachineID.hh"
+#include "mem/ruby/protocol/NetDest.hh"
+#include "mem/ruby/protocol/DataBlock.hh"
+#include "mem/ruby/protocol/MessageSizeType.hh"
+#include "mem/ruby/protocol/Message.hh"
+class ResponseMsg :  public Message
+{
+  public:
+    ResponseMsg
+(Tick curTime) : Message(curTime) {
+        // m_addr has no default
+        m_Type = CoherenceResponseType_NUM; // default value of CoherenceResponseType
+        // m_Sender has no default
+        // m_Destination has no default
+        // m_DataBlk has no default
+        m_Dirty = false; // default for this field
+        m_AckCount = 0; // default for this field
+        m_MessageSize = MessageSizeType_NUM; // default value of MessageSizeType
+        m_req_enqueue_time = Cycles(0); // default value of Cycles
+    }
+    ResponseMsg(const ResponseMsg&other)
+        : Message(other)
+    {
+        m_addr = other.m_addr;
+        m_Type = other.m_Type;
+        m_Sender = other.m_Sender;
+        m_Destination = other.m_Destination;
+        m_DataBlk = other.m_DataBlk;
+        m_Dirty = other.m_Dirty;
+        m_AckCount = other.m_AckCount;
+        m_MessageSize = other.m_MessageSize;
+        m_attackMessage = other.m_attackMessage;
+        m_req_enqueue_time = other.m_req_enqueue_time; 
+       
+     }
+    ResponseMsg
+    &operator=(const ResponseMsg&) = default;
+    ResponseMsg(const Tick curTime, const Addr& local_addr, const CoherenceResponseType& local_Type, const MachineID& local_Sender, const NetDest& local_Destination, const DataBlock& local_DataBlk, const bool& local_Dirty, const int& local_AckCount, const MessageSizeType& local_MessageSize, const Cycles& local_req_enqueue_time)
+        : Message(curTime)
+    {
+        m_addr = local_addr;
+        m_Type = local_Type;
+        m_Sender = local_Sender;
+        m_Destination = local_Destination;
+        m_DataBlk = local_DataBlk;
+        m_Dirty = local_Dirty;
+        m_AckCount = local_AckCount;
+        m_MessageSize = local_MessageSize;
+        m_req_enqueue_time = local_req_enqueue_time;
+    }
+    MsgPtr
+    clone() const
+    {
+         return std::shared_ptr<Message>(new ResponseMsg(*this));
+    }
+    // Const accessors methods for each field
+    /** \brief Const accessor method for addr field.
+     *  \return addr field
+     */
+    const Addr&
+    getaddr() const
+    {
+        return m_addr;
+    }
+    /** \brief Const accessor method for Type field.
+     *  \return Type field
+     */
+    const CoherenceResponseType&
+    getType() const
+    {
+        return m_Type;
+    }
+    /** \brief Const accessor method for Sender field.
+     *  \return Sender field
+     */
+    const MachineID&
+    getSender() const
+    {
+        return m_Sender;
+    }
+    /** \brief Const accessor method for Destination field.
+     *  \return Destination field
+     */
+    const NetDest&
+    getDestination() const
+    {
+        return m_Destination;
+    }
+    /** \brief Const accessor method for DataBlk field.
+     *  \return DataBlk field
+     */
+    const DataBlock&
+    getDataBlk() const
+    {
+        return m_DataBlk;
+    }
+    /** \brief Const accessor method for Dirty field.
+     *  \return Dirty field
+     */
+    const bool&
+    getDirty() const
+    {
+        return m_Dirty;
+    }
+    /** \brief Const accessor method for AckCount field.
+     *  \return AckCount field
+     */
+    const int&
+    getAckCount() const
+    {
+        return m_AckCount;
+    }
+    /** \brief Const accessor method for MessageSize field.
+     *  \return MessageSize field
+     */
+    const MessageSizeType&
+    getMessageSize() const
+    {
+        return m_MessageSize;
+    }
+    /** \brief Const accessor method for req_enqueue_time field.
+     *  \return req_enqueue_time field
+     */
+    const Cycles&
+    getreq_enqueue_time() const
+    {
+        return m_req_enqueue_time;
+    }
+    // Non const Accessors methods for each field
+    /** \brief Non-const accessor method for addr field.
+     *  \return addr field
+     */
+    Addr&
+    getaddr()
+    {
+        return m_addr;
+    }
+    /** \brief Non-const accessor method for Type field.
+     *  \return Type field
+     */
+    CoherenceResponseType&
+    getType()
+    {
+        return m_Type;
+    }
+    /** \brief Non-const accessor method for Sender field.
+     *  \return Sender field
+     */
+    MachineID&
+    getSender()
+    {
+        return m_Sender;
+    }
+    /** \brief Non-const accessor method for Destination field.
+     *  \return Destination field
+     */
+    NetDest&
+    getDestination()
+    {
+        return m_Destination;
+    }
+    /** \brief Non-const accessor method for DataBlk field.
+     *  \return DataBlk field
+     */
+    DataBlock&
+    getDataBlk()
+    {
+        return m_DataBlk;
+    }
+    /** \brief Non-const accessor method for Dirty field.
+     *  \return Dirty field
+     */
+    bool&
+    getDirty()
+    {
+        return m_Dirty;
+    }
+    /** \brief Non-const accessor method for AckCount field.
+     *  \return AckCount field
+     */
+    int&
+    getAckCount()
+    {
+        return m_AckCount;
+    }
+    /** \brief Non-const accessor method for MessageSize field.
+     *  \return MessageSize field
+     */
+    MessageSizeType&
+    getMessageSize()
+    {
+        return m_MessageSize;
+    }
+    /** \brief Non-const accessor method for req_enqueue_time field.
+     *  \return req_enqueue_time field
+     */
+    Cycles&
+    getreq_enqueue_time()
+    {
+        return m_req_enqueue_time;
+    }
+    // Mutator methods for each field
+    /** \brief Mutator method for addr field */
+    void
+    setaddr(const Addr& local_addr)
+    {
+        m_addr = local_addr;
+    }
+    /** \brief Mutator method for Type field */
+    void
+    setType(const CoherenceResponseType& local_Type)
+    {
+        m_Type = local_Type;
+    }
+    /** \brief Mutator method for Sender field */
+    void
+    setSender(const MachineID& local_Sender)
+    {
+        m_Sender = local_Sender;
+    }
+    /** \brief Mutator method for Destination field */
+    void
+    setDestination(const NetDest& local_Destination)
+    {
+        m_Destination = local_Destination;
+    }
+    /** \brief Mutator method for DataBlk field */
+    void
+    setDataBlk(const DataBlock& local_DataBlk)
+    {
+        m_DataBlk = local_DataBlk;
+    }
+    /** \brief Mutator method for Dirty field */
+    void
+    setDirty(const bool& local_Dirty)
+    {
+        m_Dirty = local_Dirty;
+    }
+    /** \brief Mutator method for AckCount field */
+    void
+    setAckCount(const int& local_AckCount)
+    {
+        m_AckCount = local_AckCount;
+    }
+    /** \brief Mutator method for MessageSize field */
+    void
+    setMessageSize(const MessageSizeType& local_MessageSize)
+    {
+        m_MessageSize = local_MessageSize;
+    }
+    /** \brief Mutator method for req_enqueue_time field */
+    void
+    setreq_enqueue_time(const Cycles& local_req_enqueue_time)
+    {
+        m_req_enqueue_time = local_req_enqueue_time;
+    }
+    void print(std::ostream& out) const;
+  //private:
+    /** Physical address for this request */
+    Addr m_addr;
+    /** Type of response (Ack, Data, etc) */
+    CoherenceResponseType m_Type;
+    /** What component sent the data */
+    MachineID m_Sender;
+    /** Node to whom the data is sent */
+    NetDest m_Destination;
+    /** Data for the cache line */
+    DataBlock m_DataBlk;
+    /** Dirty bit */
+    bool m_Dirty;
+    /** number of acks in this message */
+    int m_AckCount;
+    /** size category of the message */
+    MessageSizeType m_MessageSize;
+    /** Enqueue time of the request message */
+    bool functionalRead(Packet* param_pkt);
+    bool functionalWrite(Packet* param_pkt);
+  public:
+    bool m_attackMessage =false;
+    Cycles m_req_enqueue_time; 
+
+    virtual bool isAttackMessage() { return m_attackMessage; }
+    virtual void AttackMessage() { m_attackMessage = true; }
+
+    virtual Cycles getReqEnqueueTime() { return m_req_enqueue_time; }
+    virtual void setReqEnqueueTime(Cycles c) { m_req_enqueue_time = c; }
+  
+};
+inline std::ostream&
+operator<<(std::ostream& out, const ResponseMsg& obj)
+{
+    obj.print(out);
+    out << std::flush;
+    return out;
+}
+
+#endif // __ResponseMsg_HH__

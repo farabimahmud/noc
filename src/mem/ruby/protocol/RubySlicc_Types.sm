@@ -189,6 +189,7 @@ structure(RubyRequest, desc="...", interface="Message", external="yes") {
   HSASegment segment,        desc="HSA segment";
   PacketPtr pkt,             desc="Packet associated with this request";
   bool attackMessage,        desc="Whether this is attack message or not Rubyslicctypes";
+  Cycles req_enqueue_time,   desc="When was the request enqueued in Sequencer";
 }
 
 structure(AbstractCacheEntry, primitive="yes", external = "yes") {

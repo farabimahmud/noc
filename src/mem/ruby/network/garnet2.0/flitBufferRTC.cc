@@ -31,6 +31,9 @@ void
 flitBufferRTC::print(std::ostream& out) const
 {
     out << "[flitBuffer: " << m_buffer.size() << "] " << std::endl;
+    for(auto flit:m_buffer){
+        out << *flit << std::endl;
+    }
 }
 
 bool

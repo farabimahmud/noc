@@ -79,13 +79,33 @@ def define_options(parser):
             default=False, help="Enable Bypass Queue")
     parser.add_option("--bypass", type="choice", default="bypass_all",
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
-                          'bypass_x','optimized','dynamic_delay'],
+                          'bypass_x','optimized','dynamic_delay',
+                          'bypass_all_out'],
                       help="'bypass_none normal'")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
     parser.add_option("--optimization_rate", type="int", default=50,
                       help="""Rate at which optimized queue will"
                        be used, default 50""")
+    parser.add_option("--max-hpc", type="int", default=3,
+                      help="""Maximum hops a bypass packet can travel per
+                      cycles, default=3""")
+    
+    parser.add_option("--delta-s", type="int", default=4,
+            help="""Number of cycles beyond which we cannot differentiate
+            default is 4""")
+
+    parser.add_option("--lower-limit", type="int", default=-1,
+            help="""Number of cycles it takes to reach the farthest node 
+            using bypass Default is 10""")
+
+    parser.add_option("--upper-limit", type="int", default=40,
+            help="""Number of cycles it takes to reach the farthest node 
+            using normal path Default is 40 cycles""")
+    parser.add_option("--target-latency", type="int", default=20,
+    help="""Number of cycles it takes to reach the farthest node 
+    using Camouflage Default is 20""")
+
 
 def create_network(options, ruby):
 
@@ -124,6 +144,7 @@ def init_network(options, network, InterfaceClass):
         network.bypass_none = False
         network.bypass_x = False
         network.jitter_all = False
+        network.all_out_bypass = False 
 
         if options.bypass == "bypass_all":
             network.bypass_all = True
@@ -139,13 +160,30 @@ def init_network(options, network, InterfaceClass):
                     int(options.optimization_rate)))
         elif options.bypass == "dynamic_delay":
             network.dynamic_delay = True
+        elif options.bypass == "bypass_all_out":
+            network.all_out_bypass = True 
+
         network.attack_enabled = options.attack_enabled
-        network.attack_node = options.attack_node
+        
+        network.attack_node_list = options.attack_node
 
         network.fixed_target_enabled = options.fixed_target_enabled
         network.fixed_target_near = options.fixed_target_near
         network.fixed_target_far  = options.fixed_target_far
         network.randomly_selected_targets = options.randomly_selected_targets
+
+        network.max_hpc = options.max_hpc
+        network.lower_limit = options.lower_limit 
+        network.upper_limit = options.upper_limit 
+        network.target_latency = options.target_latency
+        network.delta_s = options.delta_s
+
+        if options.destination_list is not None:
+            s = options.destination_list.split(",")
+            print("Destinations of Attack/Secure LDs are")
+            for d in s:
+                print(d, end=" ")
+            network.destination_list = options.destination_list
 
 
 

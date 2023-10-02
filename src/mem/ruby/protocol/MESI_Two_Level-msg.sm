@@ -57,7 +57,7 @@ enumeration(CoherenceResponseType, desc="...") {
 }
 
 // RequestMsg
-structure(RequestMsg, desc="...", interface="Message") {
+structure(RequestMsg, desc="...", interface="Message", external="yes") {
   Addr addr,              desc="Physical address for this request";
   CoherenceRequestType Type,    desc="Type of request (GetS, GetX, PutX, etc)";
   RubyAccessMode AccessMode,    desc="user/supervisor access type";
@@ -68,6 +68,8 @@ structure(RequestMsg, desc="...", interface="Message") {
   int Len;
   bool Dirty, default="false",  desc="Dirty bit";
   PrefetchBit Prefetch,         desc="Is this a prefetch request";
+  bool attackMessage,           desc="whether the message is attack message";
+  Cycles req_enqueue_time,      desc="Enqueue time of the request message";
 
   bool functionalRead(Packet *pkt) {
     // Only PUTX messages contains the data block
@@ -86,7 +88,7 @@ structure(RequestMsg, desc="...", interface="Message") {
 }
 
 // ResponseMsg
-structure(ResponseMsg, desc="...", interface="Message") {
+structure(ResponseMsg, desc="...", interface="Message", external='yes') {
   Addr addr,              desc="Physical address for this request";
   CoherenceResponseType Type,   desc="Type of response (Ack, Data, etc)";
   MachineID Sender,             desc="What component sent the data";
@@ -95,6 +97,9 @@ structure(ResponseMsg, desc="...", interface="Message") {
   bool Dirty, default="false",  desc="Dirty bit";
   int AckCount, default="0",  desc="number of acks in this message";
   MessageSizeType MessageSize,  desc="size category of the message";
+  bool attackMessage,          desc="whether the message is attack message";
+  Cycles req_enqueue_time,      desc="Enqueue time of the request message";
+
 
   bool functionalRead(Packet *pkt) {
     // Valid data block is only present in message with following types

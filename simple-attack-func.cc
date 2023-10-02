@@ -5,6 +5,11 @@
 #include <cstring>
 
 #define LLC_SIZE (2 << 20)
+
+#ifdef GEM5_SE
+#include <gem5/m5ops.h>
+#endif
+
 // 8 x 8
 // prog. is runing core 0
 // A is mapped to l2 bank 0
@@ -17,22 +22,22 @@
 size_t size = 4;
 uint8_t arr1[256 * 64];
 uint8_t arr2[512 * 64];  // idx 0 * 64 -> node 2
-                         // idx 1 * 64 -> node 3
-                         // idx 2 * 64 -> node 4
-                         // idx 61 * 64-> node 63
-                         // idx 62 * 64-> node 0
-                         // ...
-                         // idx 125 * 64-> node 63
-                         // idx 126 * 64-> node 0
-uint8_t secret = 123;
+// idx 1 * 64 -> node 3
+// idx 2 * 64 -> node 4
+// idx 61 * 64-> node 63
+// idx 62 * 64-> node 0
+// ...
+// idx 125 * 64-> node 63
+// idx 126 * 64-> node 0
+uint8_t secret = 0b00001111;// 0b1111011
 
-void victim(int idx)
+void static inline victim(int idx)
 {
     uint8_t s = secret & idx;
     if (s == 0) {
-        s ^= arr2[125 * 64];
+        s ^= arr2[117 * 64];
     } else {
-        s ^= arr2[126 * 64];
+        s ^= arr2[118 * 64];
     }
 }
 
@@ -42,30 +47,32 @@ int main()
     uint8_t x;
     unsigned int junk;
     //printf("first loop\n");
-    for (int i = 0; i < 512; i++) {
-        //printf("&arr2[%d*64] = %#x\n", i, &(arr2[i * 64]));
-        junk ^= arr2[i * 64];
-    }
-
-    _mm_mfence();
 
     int mask = 1;
-    unsigned long t1, t2;
-    for (int i = 0; i < 8; i++) {
-        t1 = __rdtscp(&junk);
-        victim(mask);
-        t2 = __rdtscp(&junk) - t1;
-        if (t2 > 100) {
-            printf("lat: %d --> BIT[%d]: %d\n", t2, i, 0);
-        } else {
-            printf("lat: %d --> BIT[%d]: %d\n", t2, i, 1);
-        }
+    unsigned long t1, t2;    
+    int iteration = 1;
+    while( iteration -- ){
+        mask = 1;
+        for (int i = 0; i< 8; i++) {
 
-        for (int i = 0; i < 512; i++) {
-            junk ^= arr2[i * 64];
-        }
+            for (int j = 0; j < 512; j++) {
+                junk ^= arr2[j * 64];
+            }
+            _mm_mfence();
 
-        mask <<= 1;
+            junk ^= arr2[0 * 64];
+
+            t1 = __rdtscp(&junk);
+            victim(mask);
+            t2 = __rdtscp(&junk);
+            _mm_mfence();
+
+            printf("%lu\t",t2-t1);
+            mask <<= 1;
+
+        }
+        printf("\n");
     }
+
 }
 

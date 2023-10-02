@@ -111,17 +111,10 @@ class flit
         m_pid = x;
     }
 
-    void set_optimized(bool x){
-        optimized = x;
-    }
-
-    bool is_optimized(){
-        return optimized;
-    }
-
     void set_jittered(bool x){
         jitter = x;
     }
+
     bool is_jittered(){
         return jitter; 
     }
@@ -134,17 +127,32 @@ class flit
         return jitter_amount;
     }
 
+    void set_bypass_flag(bool x){
+        bypass = x;
+    }
+    
+    bool get_bypass_flag(){
+        return bypass;
+    } 
+
     void setAttackFlit(bool x);
     bool getAttackFlit();
 
     bool isAttackFlit; 
     bool jitter;
+    bool bypass;
+
     Cycles jitter_amount;
     Cycles ready_to_commit;
+    Cycles target_latency;
+
+    Cycles lb, ln, tc;
+    MsgPtr m_msg_ptr;
+
+    bool isBypassFlagsReset; 
 
 
   protected:
-    bool optimized;
     uint64_t m_pid;
     int m_id;
     int m_vnet;
@@ -153,7 +161,6 @@ class flit
     int m_size;
     Cycles m_enqueue_time, m_dequeue_time, m_time;
     flit_type m_type;
-    MsgPtr m_msg_ptr;
     int m_outport;
     Cycles src_delay;
     std::pair<flit_stage, Cycles> m_stage;

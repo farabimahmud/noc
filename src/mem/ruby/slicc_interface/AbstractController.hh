@@ -166,6 +166,7 @@ class AbstractController : public ClockedObject, public Consumer
      * @return the MachineID of the destination
      */
     MachineID mapAddressToMachine(Addr addr, MachineType mtype) const;
+    MachineID mapAddressToL1Cache(Addr addr) const;
 
   protected:
     //! Profiles original cache requests including PUTs

@@ -68,6 +68,7 @@ class RoutingUnit
     int outportComputeCustom(RouteInfo route,
                              int inport,
                              PortDirection inport_dirn);
+    int outportComputeXY(int,int, PortDirection);
 
   private:
     Router *m_router;

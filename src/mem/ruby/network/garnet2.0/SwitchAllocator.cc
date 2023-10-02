@@ -32,6 +32,7 @@
 #include "mem/ruby/network/garnet2.0/SwitchAllocator.hh"
 
 #include "debug/RubyNetwork.hh"
+#include "debug/Vanilla.hh"
 #include "mem/ruby/network/garnet2.0/GarnetNetwork.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/network/garnet2.0/OutputUnit.hh"
@@ -301,6 +302,13 @@ SwitchAllocator::send_allowed(int inport, int invc, int outport, int outvc)
         }
     } else {
         has_credit = output_unit->has_credit(outvc);
+    }
+
+    if (output_unit->bypass_flag){
+        DPRINTF(Vanilla, "[SA:send_allowed] "
+        "Cannot send the flit OutputUnit %#x is used by bypass\n",
+        &output_unit
+        );
     }
 
     // cannot send if no outvc or no credit.

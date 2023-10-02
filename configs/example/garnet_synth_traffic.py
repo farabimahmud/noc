@@ -82,15 +82,15 @@ parser.add_option("--inj-vnet", type="int", default=-1,
                   help="Only inject in this vnet (0, 1 or 2).\
                         0 and 1 are 1-flit, 2 is 5-flit.\
                         Set to -1 to inject randomly in all vnets.")
-# Following Options for selecting one node to generate Attack Packet
-parser.add_option("--attack-node", type="int", default=0,
-                  help="The node that is being attacked at this point \
-                        Default value node 0")
-parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
-                  help="Attack rate in packets per cycle per node,\
-                        takes floating point value between 0 to 1 \
-                        default value is 0.1")
-parser.add_option("--attack-enabled", action="store_true")
+# # Following Options for selecting one node to generate Attack Packet
+# parser.add_option("--attack-node", type="int", default=0,
+#                   help="The node that is being attacked at this point \
+#                         Default value node 0")
+# parser.add_option("--attack-rate", type="float", default=0.1, metavar="I",
+#                   help="Attack rate in packets per cycle per node,\
+#                         takes floating point value between 0 to 1 \
+#                         default value is 0.1")
+# parser.add_option("--attack-enabled", action="store_true")
 
 # Following options for selecting two nodes to receive attack packet
 parser.add_option("--fixed-target-enabled", action="store_true")
@@ -132,10 +132,7 @@ cpus = [ GarnetSyntheticTraffic(
      attack_node = options.attack_node,
      attack_enabled = options.attack_enabled,
      attack_rate = options.attack_rate,
-     fixed_target_enabled = options.fixed_target_enabled,
-     fixed_target_near = options.fixed_target_near,
-     fixed_target_far = options.fixed_target_far,
-     randomly_selected_targets = options.randomly_selected_targets,
+     destination_list = options.destination_list,
      num_cpus = options.num_cpus,
                      ) \
          for i in range(options.num_cpus) ]
