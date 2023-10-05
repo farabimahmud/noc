@@ -1,0 +1,26 @@
+#!/bin/bash
+/home/sungkeun/workspace/noc/build/X86_MESI_Two_Level/gem5.opt \
+--debug-flags=JitterAllStats \
+--debug-file=trace.txt \
+/home/sungkeun/workspace/noc/configs/example/se.py \
+--cpu-type=DerivO3CPU \
+--num-l2caches=64 \
+--num-cpus=64 \
+--num-dirs=64 \
+--ruby \
+--network=garnet2.0 \
+--topology=Mesh_XY \
+--mesh-rows=8 \
+--cmd=/home/sungkeun/workspace/noc/covert_channel \
+--attack-enabled \
+--bypass=jitter_all \
+--target-latency=300 \
+--lower-limit=300 \
+--upper-limit=300 \
+--attack-node=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 \
+--destination-list=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+
+#--bypass=jitter_all \
+#--cmd=/home/sungkeun/workspace/dont_mesh_around-gem5-23.0.1.0/covert_channel2 > log.txt 2>&1
+#--debug-flags=CovertChannel \
+#--debug-file=trace.txt \

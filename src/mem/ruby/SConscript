@@ -42,6 +42,7 @@ Import('*')
 if env['PROTOCOL'] == 'None':
     Return()
 
+DebugFlag('CovertChannel')
 DebugFlag('ProtocolTrace')
 DebugFlag('SK')
 DebugFlag('RubyCache')

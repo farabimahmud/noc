@@ -50,6 +50,7 @@
 #include "base/random.hh"
 #include "base/str.hh"
 #include "cpu/testers/rubytest/RubyTester.hh"
+#include "debug/CovertChannel.hh"
 #include "debug/Naive.hh"
 #include "debug/Vanilla.hh"
 #include "debug/Vanilla_X86.hh"
@@ -817,6 +818,11 @@ void Sequencer::issueRequest(PacketPtr pkt, RubyRequestType secondary_type)
     {
         pc = pkt->req->getPC();
     }
+
+    //if (pkt->req->hasVaddr() && pkt->req->hasPaddr()) {
+    //    DPRINTF(CovertChannel,"vaddr %#x -> paddr %#x\n",
+    //            pkt->req->getVaddr(), pkt->req->getPaddr());
+    //}
 
     // check if the packet has data as for example prefetch and flush
     // requests do not

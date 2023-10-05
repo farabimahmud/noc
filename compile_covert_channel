@@ -1,0 +1,2 @@
+#!/bin/bash
+gcc covert_channel.c -lpthread -o covert_channel
