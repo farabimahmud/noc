@@ -64,7 +64,11 @@
 using namespace std;
 
 // Use an separate stack for fatal signal handlers
-static uint8_t fatalSigStack[2 * SIGSTKSZ];
+//
+// SIGSTKSZ is no longer a compile-time constant on newer glibc (it became a
+// sysconf() call), so a fixed size comfortably larger than any observed
+// SIGSTKSZ value is used instead.
+static uint8_t fatalSigStack[2 * 32768];
 
 static bool
 setupAltStack()

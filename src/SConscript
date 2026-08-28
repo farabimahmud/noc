@@ -42,11 +42,11 @@ from __future__ import print_function
 import array
 import bisect
 import functools
-import imp
 import os
 import re
 import six
 import sys
+import types
 import zlib
 
 from os.path import basename, dirname, exists, isdir, isfile, join as joinpath
@@ -719,7 +719,11 @@ SimObject.fixed = True
 
 class DictImporter(object):
     '''This importer takes a dictionary of arbitrary module names that
-    map to arbitrary filenames.'''
+    map to arbitrary filenames.
+
+    Implemented against the PEP 451 finder/loader protocol
+    (find_spec/exec_module): Python 3.12 dropped support for the older
+    PEP 302 find_module/load_module protocol this used to use.'''
     def __init__(self, modules):
         self.modules = modules
         self.installed = set()
@@ -730,35 +734,47 @@ class DictImporter(object):
             del sys.modules[module]
         self.installed = set()
 
-    def find_module(self, fullname, path):
-        if fullname == 'm5.defines':
-            return self
-
+    def _is_package(self, fullname):
         if fullname == 'm5.objects':
-            return self
+            return True
+        if fullname == 'm5.defines':
+            return False
+        source = self.modules.get(fullname, None)
+        return source is not None and source.modname == '__init__'
 
-        if fullname.startswith('_m5'):
+    def find_spec(self, fullname, path, target=None):
+        if fullname == 'm5.defines':
+            handled = True
+        elif fullname == 'm5.objects':
+            handled = True
+        elif fullname.startswith('_m5'):
+            handled = False
+        else:
+            source = self.modules.get(fullname, None)
+            handled = source is not None and fullname.startswith('m5.objects')
+
+        if not handled:
             return None
 
-        source = self.modules.get(fullname, None)
-        if source is not None and fullname.startswith('m5.objects'):
-            return self
+        import importlib.util
+        return importlib.util.spec_from_loader(
+            fullname, self, is_package=self._is_package(fullname))
 
+    def create_module(self, spec):
         return None
 
-    def load_module(self, fullname):
-        mod = imp.new_module(fullname)
-        sys.modules[fullname] = mod
+    def exec_module(self, mod):
+        fullname = mod.__name__
         self.installed.add(fullname)
 
         mod.__loader__ = self
         if fullname == 'm5.objects':
             mod.__path__ = fullname.split('.')
-            return mod
+            return
 
         if fullname == 'm5.defines':
             mod.__dict__['buildEnv'] = m5.util.SmartDict(build_env)
-            return mod
+            return
 
         source = self.modules[fullname]
         if source.modname == '__init__':
@@ -767,8 +783,6 @@ class DictImporter(object):
 
         compiled = compile(open(source.abspath).read(), source.abspath, 'exec')
         exec(compiled, mod.__dict__)
-
-        return mod
 
 import m5.SimObject
 import m5.params

@@ -1,0 +1,10 @@
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+warn: Unknown operating system; assuming Linux.
+warn: Sockets disabled, not accepting gdb connections
+info: Entering event queue @ 0.  Starting simulation...
+warn: ignoring syscall sched_getaffinity(...)
+info: Increasing stack size by one page.
+info: Increasing stack size by one page.
+warn: instruction 'fsubrp' unimplemented
+warn: instruction 'fsubrp' unimplemented
+warn: instruction 'fcomip' unimplemented

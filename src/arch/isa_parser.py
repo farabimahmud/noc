@@ -1551,6 +1551,11 @@ class LineTracker(object):
 class ISAParser(Grammar):
     def __init__(self, output_dir):
         super(ISAParser, self).__init__()
+        # t_NEWFILE/t_ENDFILE below rely on '^' matching just after each
+        # '\n' (not only at the very start of the flattened multi-file
+        # ISA description), which requires the lexer's master regex to be
+        # compiled with re.MULTILINE.
+        self.setupLexerFactory(reflags=re.MULTILINE)
         self.output_dir = output_dir
 
         self.filename = None # for output file watermarking/scaremongering
@@ -1838,7 +1843,10 @@ class ISAParser(Grammar):
     # String literal.  Note that these use only single quotes, and
     # can span multiple lines.
     def t_STRLIT(self, t):
-        r"(?m)'([^'])+'"
+        # Note: (?m) dropped -- it was a no-op here (no ^/$ used) and
+        # PLY concatenates rule patterns into one master regex, where
+        # Python 3.11+ rejects inline flags that aren't at position 0.
+        r"'([^'])+'"
         # strip off quotes
         t.value = t.value[1:-1]
         t.lexer.lineno += t.value.count('\n')
@@ -1848,7 +1856,8 @@ class ISAParser(Grammar):
     # "Code literal"... like a string literal, but delimiters are
     # '{{' and '}}' so they get formatted nicely under emacs c-mode
     def t_CODELIT(self, t):
-        r"(?m)\{\{([^\}]|}(?!\}))+\}\}"
+        # See note in t_STRLIT above re: dropping the (?m) flag.
+        r"\{\{([^\}]|}(?!\}))+\}\}"
         # strip off {{ & }}
         t.value = t.value[2:-2]
         t.lexer.lineno += t.value.count('\n')

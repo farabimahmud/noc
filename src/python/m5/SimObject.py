@@ -956,7 +956,7 @@ def cxxMethod(*args, **kwargs):
         return_value_policy = kwargs.get("return_value_policy", None)
         static = kwargs.get("static", False)
 
-        args, varargs, keywords, defaults = inspect.getargspec(func)
+        args, varargs, keywords, defaults = inspect.getfullargspec(func)[:4]
         if varargs or keywords:
             raise ValueError("Wrapped methods must not contain variable " \
                              "arguments")

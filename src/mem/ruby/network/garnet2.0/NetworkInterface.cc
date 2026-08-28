@@ -443,7 +443,7 @@ void NetworkInterface::wakeup() {
     }
   }
 
-  if (m_net_ptr->all_out_bypass) {
+  if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x) {
     bool bypass_queue_read_flag = readBypassQueue();
     if (bypass_queue_read_flag) {
       DPRINTF(Vanilla, "[NI:Wakeup] Bypass Queue read in this Cycle\n");
@@ -700,7 +700,7 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
         }
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
 
-      } else if (m_net_ptr->all_out_bypass) {
+      } else if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x) {
 
         if (fl->isAttackFlit) {  // vnet 0 for request
           use_bypass = sendAttackFlit(fl);
@@ -791,6 +791,18 @@ int NetworkInterface::sendAttackFlit(flit *fl) {
   // add jitter to make at least lower
   if (case_1) {
     niOutVcs[vc].insert(fl);
+    if (m_net_ptr->bypass_x) {
+      // BASELINE_BYPASS: no delay queue. A naturally-fast packet is sent
+      // exactly as it would be under the undefended BASELINE -- no
+      // target-latency padding, since this policy isolates the router
+      // bypass mechanism's own effect from BoundNoC's security-driven
+      // convergence-to-target-latency logic (see paper Table II).
+      DPRINTF(Vanilla,
+              "[NI:sendAttackflit] baseline_bypass: sending %s from Router "
+              "%d to Router %d with no delay (case 1)\n",
+              *fl, route.src_router, route.dest_router);
+      return 0;
+    }
     fl->target_latency = lower + Cycles(fl->get_id());
     fl->ready_to_commit = curCycle() + fl->target_latency;
 
@@ -807,7 +819,16 @@ int NetworkInterface::sendAttackFlit(flit *fl) {
     }
     NetworkInterface *dest_ni = m_net_ptr->get_ni_from_id(destID);
 
-    fl->target_latency = m_net_ptr->closest_rt + Cycles(fl->get_id());
+    // BASELINE_BYPASS (bypass_x): target_latency = 0 means the arrival-side
+    // convergence check in wakeup() (`latency < t_flit->target_latency`)
+    // and the bypass-queue re-jitter check in readBypassQueue() both
+    // evaluate false unconditionally, so this flit is delivered as soon as
+    // the bypass hardware gets it there -- no delay queue applied. Under
+    // BOUNDNOC_BYPASS (all_out_bypass), keep the original convergence
+    // target (closest_rt) so it still pads up if it arrives early.
+    fl->target_latency = m_net_ptr->bypass_x
+                              ? Cycles(0)
+                              : (m_net_ptr->closest_rt + Cycles(fl->get_id()));
     fl->ready_to_commit = curCycle() + latency_b + Cycles(fl->get_id());
 
     dest_ni->bq->insert(fl);

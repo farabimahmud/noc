@@ -382,6 +382,15 @@ if main['GCC'] or main['CLANG']:
     main.Append(CCFLAGS=['-Werror',
                          '-Wno-error=deprecated-declarations',
                          '-Wno-error=deprecated',
+                         # Bundled SystemC/TLM code (src/systemc/ext,
+                         # third-party Accellera sources) triggers this
+                         # on newer compilers.
+                         '-Wno-error=overloaded-virtual',
+                         '-Wno-error=misleading-indentation',
+                         # GCC false positive from deep inlining of the
+                         # intrusive-refcounting smart pointer used by the
+                         # O3 CPU model.
+                         '-Wno-error=free-nonheap-object',
                         ])
 else:
     error('\n'.join((

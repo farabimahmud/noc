@@ -31,6 +31,9 @@ from __future__ import absolute_import
 # code objects.  The keys are the module path, and the items are the
 # filename and bytecode of the file.
 class CodeImporter(object):
+    '''Implemented against the PEP 451 finder/loader protocol
+    (find_spec/exec_module): Python 3.12 dropped support for the older
+    PEP 302 find_module/load_module protocol this used to use.'''
     def __init__(self):
         self.modules = {}
 
@@ -40,28 +43,32 @@ class CodeImporter(object):
 
         self.modules[modpath] = (filename, abspath, code)
 
-    def find_module(self, fullname, path):
-        if fullname in self.modules:
-            return self
+    def _is_package(self, fullname):
+        import os
+        srcfile, abspath, code = self.modules[fullname]
+        return os.path.basename(srcfile) == '__init__.py'
 
+    def find_spec(self, fullname, path, target=None):
+        if fullname not in self.modules:
+            return None
+
+        import importlib.util
+        return importlib.util.spec_from_loader(
+            fullname, self, is_package=self._is_package(fullname))
+
+    def create_module(self, spec):
         return None
 
-    def load_module(self, fullname):
+    def exec_module(self, mod):
         # Because the importer is created and initialized in its own
         # little sandbox (in init.cc), the globals that were available
         # when the importer module was loaded and CodeImporter was
-        # defined are not available when load_module is actually
+        # defined are not available when exec_module is actually
         # called. Soooo, the imports must live here.
-        import imp
         import os
         import sys
 
-        try:
-            mod = sys.modules[fullname]
-        except KeyError:
-            mod = imp.new_module(fullname)
-            sys.modules[fullname] = mod
-
+        fullname = mod.__name__
         try:
             mod.__loader__ = self
             srcfile,abspath,code = self.modules[fullname]
@@ -82,8 +89,6 @@ class CodeImporter(object):
         except Exception:
             del sys.modules[fullname]
             raise
-
-        return mod
 
 # Create an importer and add it to the meta_path so future imports can
 # use it.  There's currently nothing in the importer, but calls to

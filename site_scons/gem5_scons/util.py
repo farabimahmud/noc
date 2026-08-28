@@ -44,9 +44,19 @@ import SCons.Script
 
 import m5.util.terminal
 
+def _get_option(name):
+    # Newer SCons raises AttributeError instead of returning None when the
+    # option hasn't been registered with AddOption()/AddLocalOption() yet
+    # (this helper can run before SConstruct's own AddLocalOption calls,
+    # while site_scons tools are still being loaded).
+    try:
+        return SCons.Script.GetOption(name)
+    except AttributeError:
+        return None
+
 def ignore_style():
     """Determine whether we should ignore style checks"""
-    return SCons.Script.GetOption('ignore_style') or not sys.stdin.isatty()
+    return _get_option('ignore_style') or not sys.stdin.isatty()
 
 def get_termcap():
-    return m5.util.terminal.get_termcap(SCons.Script.GetOption('use_colors'))
+    return m5.util.terminal.get_termcap(_get_option('use_colors'))

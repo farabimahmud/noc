@@ -81,7 +81,15 @@ def define_options(parser):
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
                           'bypass_x','optimized','dynamic_delay',
                           'bypass_all_out'],
-                      help="'bypass_none normal'")
+                      help="""'bypass_none' = undefended BASELINE.
+                      'jitter_all' = BOUNDNOC_DELAY (delay queue only).
+                      'bypass_all_out' = BOUNDNOC_BYPASS (router bypass +
+                      delay queue, converges to a target latency).
+                      'bypass_x' = BASELINE_BYPASS (router bypass ONLY, no
+                      delay queue / target-latency convergence -- isolates
+                      the bypass mechanism's own effect, per paper Table
+                      II). 'bypass_all', 'optimized', 'dynamic_delay' are
+                      unimplemented/dead in NetworkInterface.cc.""")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
     parser.add_option("--optimization_rate", type="int", default=50,
@@ -165,7 +173,8 @@ def init_network(options, network, InterfaceClass):
 
         network.attack_enabled = options.attack_enabled
         
-        network.attack_node_list = options.attack_node
+        if options.attack_node is not None:
+            network.attack_node_list = options.attack_node
 
         network.fixed_target_enabled = options.fixed_target_enabled
         network.fixed_target_near = options.fixed_target_near

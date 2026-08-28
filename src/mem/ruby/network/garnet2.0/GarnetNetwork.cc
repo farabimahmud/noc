@@ -271,7 +271,9 @@ GarnetNetwork::init()
     }
 
     createOutputUnitTable(m_routers.size());
-    lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
+    if (!attack_node_list.empty() && !destination_list.empty()) {
+        lower_limit  = get_farthest_node_bypass_cost(attack_node_list, destination_list);
+    }
 
 }
 
