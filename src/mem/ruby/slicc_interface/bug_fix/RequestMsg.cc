@@ -27,9 +27,11 @@ RequestMsg::print(ostream& out) const
 bool
 RequestMsg::functionalRead(Packet* param_pkt)
 {
+#ifndef GARNET_STANDALONE_NO_COHERENCE_TYPES
     if ((m_Type == CoherenceRequestType_PUTX)) {
         return (testAndRead(m_addr, m_DataBlk, param_pkt));
     }
+#endif
     return (false);
 
 }

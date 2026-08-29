@@ -31,8 +31,19 @@ Import('*')
 if env['PROTOCOL'] == 'None':
     Return()
 
+# Garnet_standalone's own CoherenceRequestType enum (see
+# Garnet_standalone-msg.sm) has no PUTX value -- it's a traffic-only
+# protocol with no real coherence states -- so RequestMsg's functionalRead()
+# below can't reference CoherenceRequestType_PUTX for that build. Its
+# CoherenceResponseType doesn't exist at all (no ResponseMsg declared), and
+# nothing in core Ruby or its generated protocol code references ResponseMsg,
+# so it's skipped entirely for that protocol.
+request_append = None
+if env['PROTOCOL'] == 'Garnet_standalone':
+    request_append = {'CPPDEFINES': ['GARNET_STANDALONE_NO_COHERENCE_TYPES']}
 
-Source('RequestMsg.cc')
-Source('ResponseMsg.cc')
+Source('RequestMsg.cc', append=request_append)
+if env['PROTOCOL'] != 'Garnet_standalone':
+    Source('ResponseMsg.cc')
 Source('MemoryMsg.cc')
 Source('SequencerMsg.cc')
