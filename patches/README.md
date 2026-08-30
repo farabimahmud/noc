@@ -24,7 +24,47 @@ MUSL_CXX=~/opt/x86_64-linux-musl-native/bin/x86_64-linux-musl-g++
 ```
 
 The toolchain is a standalone download from musl.cc (no root required); reuse
-whatever copy already exists on the machine rather than re-downloading.
+whatever copy already exists on the machine rather than re-downloading. If
+setting up fresh: download the `x86_64-linux-musl-native` toolchain tarball
+from `musl.cc`, extract anywhere (e.g. `~/opt/`), and use
+`<extract-dir>/bin/x86_64-linux-musl-gcc` / `-g++` in place of the host
+compiler for every guest binary below (including facesim).
+
+## Benchmark source
+
+- **Rodinia 3.0** (OpenMP variants, `~/benchmarks/rodinia_3.0/openmp/`):
+  cloned from the `yuhc/gpu-rodinia` GitHub mirror. That mirror's own `data/`
+  directory is empty upstream (just a `.gitkeep`) for several benchmarks --
+  where noted below, the input file was synthetically generated instead of
+  using Rodinia's original dataset (fine for this project's purposes, since
+  only the network timing side-channel is being measured, not solution
+  correctness).
+- **PARSEC 3.0** (`~/benchmarks/parsec-3.0/`): cloned from the
+  `cirosantilli/parsec-benchmark` GitHub mirror, tag `3.0` (same source used
+  for facesim above). Its release assets include prebuilt input tarballs
+  (`parsec-3.0-input-sim.tar.gz`, ~490MB for every benchmark) -- extract only
+  the specific benchmark's `inputs/` subdirectory needed, not the whole
+  archive.
+
+None of the 15 benchmarks below use PARSEC's `parsecmgmt` build harness or
+`m4`-macro-expanded portability wrappers (that pattern applies to some other
+PARSEC apps not used here, e.g. `blackscholes`) -- every one is built by
+invoking `make`/the compiler directly against the musl toolchain. Where a
+benchmark's own Makefile hardcodes `gcc`/`g++` in its recipes rather than
+using a `$(CC)`/`$(CXX)` variable, the command below is a direct compiler
+invocation (bypassing `make`) rather than a `make CC=...` override, since the
+latter would silently do nothing for those Makefiles.
+
+**Two data-provenance caveats**, flagged rather than guessed at: the exact
+source of `heartwall`'s `test.avi`, `leukocyte`'s `testfile.avi`, and
+`b+tree`'s `mil.txt` isn't captured in this project's own notes (they exist
+on the machine these results were produced on but predate the record-keeping
+below) -- likely Rodinia's separate official data release
+(`rodinia.cs.virginia.edu` / the `rodinia_3.1` data tarball) rather than the
+source-only GitHub mirror, but not verified. If reproducing from scratch and
+these aren't available, regenerate synthetic equivalents following the same
+approach used for `cfd`/`bfs`/`hotspot` below (matching each program's own
+input-parsing format).
 
 ## facesim (PARSEC)
 
@@ -102,6 +142,207 @@ count automatically (`face_simulation_<N>.tet` for `-threads N`); the
 `simsmall` input ships partitions for `N` in `{1,2,3,4,6,8,16,32,64,128}`. We
 run at `-threads 64` to match the 64-node mesh, which the `simsmall` tarball
 covers (`face_simulation_64.tet`).
+
+## The other 15 benchmarks
+
+All built the same way: musl toolchain, `-static -no-pie`, plus `-fopenmp`
+for the OpenMP ones. Commands below bypass `make` for benchmarks whose
+Makefile hardcodes the host compiler (noted per-benchmark); for the rest,
+`make <VAR>=<musl-compiler> ...` works directly. `$MUSL_CC` /
+`$MUSL_CXX` below stand for
+`~/opt/x86_64-linux-musl-native/bin/x86_64-linux-musl-{gcc,g++}`.
+
+### Rodinia (openmp/)
+
+**leukocyte** -- has a nested dependency, the Meschach matrix library, built
+via its own `configure`/`make`. Build that first with the musl toolchain so
+the final static link is ABI-consistent, then the main binary (its Makefile
+uses `$(CC)`, override works):
+```
+cd openmp/leukocyte/meschach_lib
+CC=$MUSL_CC ./configure --with-all && make all && make clean
+cd ../OpenMP
+make CC=$MUSL_CC CC_FLAGS="-g -O3 -Wall -fopenmp -I../meschach_lib -static -no-pie"
+```
+Input: `testfile.avi` (see data-provenance caveat above), args
+`20 64 <path-to-testfile.avi>`.
+
+**heartwall** -- Makefile hardcodes `gcc`; also has a nested `AVI/` static
+lib with its own Makefile (uses `$(CC)`, override works there). Build AVI
+first, then compile+link main directly:
+```
+cd openmp/heartwall/AVI && make CC=$MUSL_CC
+cd ..
+$MUSL_CC -DOUTPUT main.c -I./AVI -c -O3 -fopenmp -static -no-pie
+$MUSL_CC main.o ./AVI/avilib.o ./AVI/avimod.o -lm -fopenmp -static -no-pie -o heartwall.out
+```
+Input: `test.avi` (see data-provenance caveat above), args
+`<path-to-test.avi> 20 64`.
+
+**lud** -- Makefile uses `$(CC)`/`$(CXX)`, override works:
+```
+cd openmp/lud/omp
+make CC=$MUSL_CC CXX=$MUSL_CXX COMMON_CFLAGS="-fopenmp -static -no-pie" COMMON_LDFLAGS="-fopenmp -static -no-pie"
+```
+Self-contained (`-s <size>` generates a synthetic matrix internally, `-n
+<threads>` sets thread count) -- no input file. GOTCHA: matrix size must be
+a multiple of the internal block size (`BS=16` in `lud.c`) or it segfaults;
+`4096` works, `1000` does not. Args used: `-n 64 -s 4096`. By far the most
+network-heavy workload in this set -- ran at `--maxinsts=10000000`, not
+100M, since even 10M produces more attack samples than any other benchmark
+gets at 100M (see `EXPERIMENTS_COMMANDS.txt`).
+
+**srad** -- Makefile (`openmp/srad/srad_v1/makefile`) hardcodes `gcc`:
+```
+cd openmp/srad/srad_v1
+$MUSL_CC main.c -c -O3 -fopenmp -static -no-pie
+$MUSL_CC main.o -lm -fopenmp -static -no-pie -o srad
+```
+Self-contained (`100 0.5 502 458 64` = iterations, lambda, rows, cols,
+threads via CLI) -- no input file.
+
+**backprop** -- Makefile uses `$(CC)`, override works:
+```
+cd openmp/backprop
+make CC=$MUSL_CC CC_FLAGS="-g -fopenmp -O2 -static -no-pie"
+```
+Self-contained (`65536` = layer size via CLI, synthetic training data
+generated internally). GOTCHA: takes no thread-count CLI argument -- relies
+on OpenMP's default, which must be forced with an `OMP_NUM_THREADS=64`
+environment variable passed to gem5 (`--env=<path-to-env-file>` in
+`se.py`), or it under-parallelizes.
+
+**nn** (nearest-neighbor) -- Makefile uses `$(CC)`, override works. Needs a
+synthetic dataset generated first with `hurricane_gen.c`, built with the
+**host's normal gcc** (native one-shot data-prep tool, never runs under
+gem5, no musl needed):
+```
+cd rodinia_3.0/data/nn
+gcc -O3 -Wall -o hurricane_gen hurricane_gen.c -lm
+mkdir -p data && ./hurricane_gen 42760 4    # writes data/cane4_{0..3}.db
+cd ../../openmp/nn
+make CC=$MUSL_CC CFLAGS="-lm -fopenmp -Wall -static -no-pie"
+```
+Args: `<absolute-path-to-filelist_4> 5 30 90` (`filelist_4` must list
+absolute paths to the generated `cane4_*.db` files -- results dir uses key
+`nn2` to avoid confusion with the unrelated `nw` benchmark). No CLI
+thread-count arg -- needs `OMP_NUM_THREADS` via `--env` like backprop, and
+the env value must match `--num-cpus` exactly (gem5 SE-mode can't multiplex
+more OS threads than simulated cores).
+
+**b+tree** -- Makefile uses `$(C_C)`, override works:
+```
+cd openmp/b+tree
+make C_C=$MUSL_CC OMP_FLAG="-fopenmp -static -no-pie"
+```
+Input: `mil.txt` (data file, see provenance caveat above) + `command.txt`
+(single line, `k60000` -- a find-key command). Args:
+`core 64 file <path-to-mil.txt> command <path-to-command.txt>`.
+
+**particlefilter** -- Makefile hardcodes `gcc`:
+```
+cd openmp/particlefilter
+$MUSL_CC -O3 -ffast-math -fopenmp ex_particle_OPENMP_seq.c -o particle_filter -lm -static -no-pie
+```
+Self-contained (`-x 128 -y 128 -z 10 -np 10000` = frame width/height, frame
+count, particle count, all via CLI synthetic generation) -- no input file,
+no `--env` needed (plain `#pragma omp parallel for`, no explicit
+thread-count argument, works fine without one).
+
+**lavaMD** -- Makefile uses `$(C_C)`, override works:
+```
+cd openmp/lavaMD
+make C_C=$MUSL_CC OMP_FLAG="-fopenmp -static -no-pie"
+```
+GOTCHA: `util/timer/timer.c` is missing `#include <sys/time.h>` in this
+source tree -- fix by adding `-include sys/time.h` to the compile line
+rather than patching the file (e.g. append to `CC_FLAGS`/the `main.o` rule).
+Note upstream's own Makefile deliberately compiles `main.c` *without*
+`-fopenmp` (only `kernel_cpu.c` gets it) -- keep that asymmetry. Self-
+contained (`-cores 64 -boxes1d 20` sets threads and generates the
+neighbor-box grid internally) -- no input file.
+
+**nw** (Needleman-Wunsch) -- Makefile uses `$(CC)`, override works:
+```
+cd openmp/nw
+make CC=$MUSL_CXX CC_FLAGS="-g -O3 -fopenmp -static -no-pie"
+```
+Self-contained (`4096 10 64` = matrix dimension, penalty, thread count, all
+via CLI, synthetic scoring matrix generated internally) -- no input file,
+no `--env` needed (explicit thread-count CLI arg).
+
+**cfd** (`euler3d_cpu`) -- Makefile hardcodes `g++`, and thread count is
+compile-time (`-Dblock_length=N`):
+```
+cd openmp/cfd
+$MUSL_CXX -O3 -Dblock_length=64 -fopenmp euler3d_cpu.cpp -o euler3d_cpu -static -no-pie
+```
+Needs an external mesh file; the original Rodinia dataset
+(`fvcorr.domn.193K`) isn't available from the source-only mirror, so a
+synthetic one was generated instead (`synth.domn`, 50,000 elements) matching
+the exact token format `euler3d_cpu.cpp`'s `main()` reads via `ifstream >>`:
+first token `nel` (element count), then per element `area`(float) followed
+by 4 repetitions of `{neighbor_id(int, 1-based, -1 sentinel) normal_x
+normal_y normal_z(floats)}`. 2 "local" neighbors (`i-1`/`i+1`) + 2 random
+long-range neighbors per element, chosen specifically to maximize cross-node
+traffic (not physically meaningful as a real CFD mesh -- fine, since only
+the timing side-channel is measured). GOTCHA: despite the compile-time
+thread count, runtime parallelism is still gated by `OMP_NUM_THREADS` --
+needs `--env` set to 64 like backprop. Args: `<path-to-synth.domn>`.
+
+**bfs** -- Makefile hardcodes `g++`:
+```
+cd openmp/bfs
+$MUSL_CXX -g -fopenmp -O2 bfs.cpp -o bfs -static -no-pie
+```
+Needs an external CSR graph file; the original (`graph1MW_6.txt`) isn't
+available, so a synthetic one was generated instead (`synth_graph.txt`,
+100,000 nodes, average degree 6, random edge targets) matching `bfs.cpp`'s
+`fscanf` format: `no_of_nodes`, then per-node `"start_edge_index
+no_of_edges"` pairs, then `source_node`, then `edge_list_size`, then
+per-edge `"id cost"` pairs. Args: `64 <path-to-synth_graph.txt>` (explicit
+thread-count CLI arg, no `--env` needed).
+
+### PARSEC (pkgs/.../src/)
+
+**canneal** (`pkgs/kernels/canneal`) -- self-contained Makefile (no
+PARSEC-harness dependency, no `m4` step -- unlike some other PARSEC apps),
+uses `$(CXX)`:
+```
+cd pkgs/kernels/canneal/src
+make CXX=$MUSL_CXX version=pthreads CXXFLAGS="-DENABLE_THREADS -pthread -static -no-pie"
+```
+Input: `.nets` netlist files from the PARSEC input-sim release tarball
+(`inputs/400000.nets`, extracted per "Benchmark source" above). Args:
+`64 15000 2000 <path-to-400000.nets> 128` (threads, swaps/temp-step,
+temp-steps, netlist, max-temp-scale).
+
+**fluidanimate** (`pkgs/apps/fluidanimate`) -- use the `pthreads` variant
+Makefile (no TBB needed), uses `$(CXX)`:
+```
+cd pkgs/apps/fluidanimate/src
+make -f Makefile.pthreads CXX=$MUSL_CXX pthreads CXXFLAGS="-pthread -D_GNU_SOURCE -D__XOPEN_SOURCE=600 -static -no-pie"
+```
+Input: `in_100K.fluid` (simmedium-size, from the PARSEC input-sim release
+tarball). Args: `64 5 <path-to-in_100K.fluid> <output-path>` (threads,
+sim-steps, infile, outfile).
+
+**freqmine** (`pkgs/apps/freqmine`) -- uses `$(CXX)`, but the Makefile
+itself never adds `-fopenmp` even though `fp_tree.cpp` uses `#pragma omp
+parallel for` -- must be added manually to both compile and link:
+```
+cd pkgs/apps/freqmine/src
+make CXX=$MUSL_CXX CXXFLAGS="-Wno-deprecated -O2 -fopenmp -static -no-pie" LDFLAGS="-fopenmp -static -no-pie"
+```
+Needs an external transaction-database file; the real PARSEC input
+(`kosarak_500k.dat`) isn't available, so a synthetic one was generated
+instead (`synth_trans.dat`: 100,000 transactions, item vocabulary 10,000,
+4-15 items/transaction, one whitespace-separated line of integer item IDs
+per transaction -- format confirmed via `data.cpp`'s character-at-a-time
+parser; no header needed, `ITEM_NO` grows dynamically). Args:
+`<path-to-synth_trans.dat> 82` (datafile, `MINSUP` -- scaled down
+proportionally from the real `kosarak_500k` config's `MINSUP=410` at 500K
+transactions).
 
 ## Attack-signal density note (why facesim is a thin-signal benchmark)
 

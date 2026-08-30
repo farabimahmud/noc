@@ -30,9 +30,9 @@ tried and abandoned" below) but produced none of the results in `results/`.
 
 Guest benchmark binaries are built separately, outside this repo (source
 lives in `~/benchmarks/` on the machine these results were produced on, not
-under git) — see `patches/README.md` for the musl toolchain recipe used for
-all of them, and the facesim-specific build steps (four additional fixes
-needed beyond the standard recipe).
+under git) — see `patches/README.md` for the source locations, the musl
+toolchain recipe, and the exact build command + input-data notes for every
+one of the 16 benchmarks below, including facesim's four additional fixes.
 
 ## The four defense policies
 
