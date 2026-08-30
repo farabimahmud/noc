@@ -1,0 +1,222 @@
+warn: CheckedInt already exists in allParams. This may be caused by the Python 2.7 compatibility layer.
+warn: Enum already exists in allParams. This may be caused by the Python 2.7 compatibility layer.
+warn: ScopedEnum already exists in allParams. This may be caused by the Python 2.7 compatibility layer.
+Global frequency set at 1000000000000 ticks per second
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+warn: Unknown operating system; assuming Linux.
+warn: Sockets disabled, not accepting gdb connections
+info: Entering event queue @ 0.  Starting simulation...
+warn: Unsupported ioctl call (return ENOTTY): ioctl(1, 0x5413, ...) @ 
+<bad format>
+PARSEC Benchmark Suite
+info: Increasing stack size by one page.
+Creating directory "Storytelling/output"...Successful!
+Simulation                                        warn: Unsupported ioctl call (return ENOTTY): ioctl(3, 0x5413, ...) @ 
+<bad format>
+warn: ignoring syscall rt_sigprocmask(...)
+      (further warnings will be suppressed)
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: PowerState: Already in the requested power state, request ignored
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+warn: ignoring syscall mprotect(...)
+warn: Unknown operating system; assuming Linux.
+Reading simulation model : ./Face_Data/Eftychis_840k/Front_370k/face_simulation_64.tet
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.0.0.0
+gem5 compiled Aug 24 2026 20:25:47
+gem5 started Aug 29 2026 16:50:11
+gem5 executing on csce-509zp54.engr.tamu.edu, pid 1211726
+command line: /home/harpreetsc/noc/build/X86_MESI_Two_Level/gem5.opt --outdir=/home/harpreetsc/noc/results/facesim-singlepair-bypass_none /home/harpreetsc/noc/configs/example/se.py --num-cpus=64 --num-dirs=64 --network=garnet2.0 --topology=Mesh_XY --mesh-rows=8 --maxinsts=20000000 --ruby --caches --l2cache --num-l2caches=64 --bypass=bypass_none --attack-enabled --cmd=/home/harpreetsc/benchmarks/parsec-3.0/pkgs/apps/facesim/src/Benchmarks/facesim/facesim '--options=-timing -threads 64' --attack-rate=1 --attack-node=0 --destination-list=0,63
+
+info: Standard input is not a terminal, disabling listeners.
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+Destinations of Attack/Secure LDs are
+0 63 **** REAL SIMULATION ****
+Exiting @ tick 35877243264 because a thread reached the max instruction count

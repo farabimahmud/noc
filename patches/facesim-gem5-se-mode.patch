@@ -1,0 +1,55 @@
+Patch: make PARSEC facesim buildable and runnable under gem5 SE-mode
+Applies to: parsec-3.0/pkgs/apps/facesim/src/Public_Library/Read_Write/FILE_UTILITIES.cpp
+(source: https://github.com/cirosantilli/parsec-benchmark, tag 3.0)
+
+Root cause: Create_Directory() shells out via system("mkdir -p ...") to
+create its output directory. gem5 SE-mode syscall emulation does not
+support the fork()+exec() sequence a real system() call requires; the
+guest process decodes garbage after the call and gem5 panics
+("Tried to read unmapped address ..."). Directory_Exists() was also
+broken independent of this (std::ifstream on a directory path fails to
+open on Linux, so it always returned false and system() always ran,
+even when the directory already existed).
+
+Fix: replace both with direct stat()/mkdir() syscalls -- no subprocess,
+no shell involved. This is a real behavioral difference (the function no
+longer just runs `mkdir -p` and inherits its shell semantics) but the
+recursive mkdir() loop below reproduces the same effect.
+
+Apply with:
+  cd parsec-3.0/pkgs/apps/facesim/src
+  patch -p1 < /path/to/facesim-gem5-se-mode.patch
+
+Then build per patches/README.md in this repo before running under gem5.
+
+--- a/Public_Library/Read_Write/FILE_UTILITIES.cpp
++++ b/Public_Library/Read_Write/FILE_UTILITIES.cpp
+@@ -99,15 +99,24 @@
+ 
+ bool Directory_Exists (const std::string& dirname)
+ {
+-	return !!std::ifstream (dirname.c_str());
++	struct stat st;
++	return stat (dirname.c_str(), &st) == 0 && S_ISDIR (st.st_mode);
+ }
+ 
+ bool Create_Directory (const std::string& dirname, bool exit_on_fail)
+ {
+ 	if (!Directory_Exists (dirname))
+ 	{
+-		std::string command = STRING_UTILITIES::string_sprintf ("mkdir -p %s", dirname.c_str());
+-		std::cerr << "Creating directory using system(\"" << command << "\")...";
+-		system (command.c_str());
++		// mkdir -p via direct mkdir() calls, one path component at a time --
++		// avoid system()/fork()+exec(), which gem5 SE-mode can't emulate.
++		std::cerr << "Creating directory \"" << dirname << "\"...";
++		std::string path;
++		size_t pos = 0;
++		while (pos != std::string::npos)
++		{
++			pos = dirname.find ('/', pos + 1);
++			path = (pos == std::string::npos) ? dirname : dirname.substr (0, pos);
++			if (!path.empty()) mkdir (path.c_str(), 0755);
++		}
+ 
+ 		if (!Directory_Exists (dirname))

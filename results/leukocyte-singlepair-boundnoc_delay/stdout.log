@@ -1,0 +1,81 @@
+Global frequency set at 1000000000000 ticks per second
+Num of threads: 64
+Redirecting stdout to /home/harpreetsc/noc/results/leukocyte-singlepair-boundnoc_delay/stdout.log
+Redirecting stderr to /home/harpreetsc/noc/results/leukocyte-singlepair-boundnoc_delay/stderr.log
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 20.0.0.0
+gem5 compiled Aug 24 2026 20:25:47
+gem5 started Aug 30 2026 00:23:41
+gem5 executing on csce-509zp54.engr.tamu.edu, pid 1264540
+command line: /home/harpreetsc/noc/build/X86_MESI_Two_Level/gem5.opt --outdir=/home/harpreetsc/noc/results/leukocyte-singlepair-boundnoc_delay --redirect-stdout --redirect-stderr --stdout-file=/home/harpreetsc/noc/results/leukocyte-singlepair-boundnoc_delay/stdout.log --stderr-file=/home/harpreetsc/noc/results/leukocyte-singlepair-boundnoc_delay/stderr.log ./configs/example/se.py --num-cpus=64 --num-dirs=64 --network=garnet2.0 --topology=Mesh_XY --mesh-row=8 --maxinsts=100000000 --ruby --caches --l2cache --num-l2caches=64 --bypass=jitter_all --upper-limit=100 --attack-enabled --attack-rate=1 --attack-node=0 --destination-list=1,63 --target-latency=20 --cmd=/home/harpreetsc/benchmarks/rodinia_3.0/openmp/leukocyte/OpenMP/leukocyte.out '--options=20 64 /home/harpreetsc/benchmarks/rodinia_3.0/data/leukocyte/testfile.avi'
+
+info: Standard input is not a terminal, disabling listeners.
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+['0']
+Destinations of Attack/Secure LDs are
+1 63 **** REAL SIMULATION ****
+Exiting @ tick 211247594385 because a thread reached the max instruction count

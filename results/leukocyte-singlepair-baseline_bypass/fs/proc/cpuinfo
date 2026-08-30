@@ -1,0 +1,1216 @@
+processor       : 0
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 0
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 1
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 1
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 2
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 2
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 3
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 3
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 4
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 4
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 5
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 5
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 6
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 6
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 7
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 7
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 8
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 8
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 9
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 9
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 10
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 10
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 11
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 11
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 12
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 12
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 13
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 13
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 14
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 14
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 15
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 15
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 16
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 16
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 17
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 17
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 18
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 18
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 19
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 19
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 20
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 20
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 21
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 21
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 22
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 22
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 23
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 23
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 24
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 24
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 25
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 25
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 26
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 26
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 27
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 27
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 28
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 28
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 29
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 29
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 30
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 30
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 31
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 31
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 32
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 32
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 33
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 33
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 34
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 34
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 35
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 35
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 36
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 36
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 37
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 37
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 38
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 38
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 39
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 39
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 40
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 40
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 41
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 41
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 42
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 42
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 43
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 43
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 44
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 44
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 45
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 45
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 46
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 46
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 47
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 47
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 48
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 48
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 49
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 49
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 50
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 50
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 51
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 51
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 52
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 52
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 53
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 53
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 54
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 54
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 55
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 55
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 56
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 56
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 57
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 57
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 58
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 58
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 59
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 59
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 60
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 60
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 61
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 61
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 62
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 62
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
+processor       : 63
+vendor_id       : Generic
+cpu family      : 0
+model           : 0
+model name      : Generic
+stepping        : 0
+cpu MHz         : 2000.000
+cache size:     : 2048.0K
+physical id     : 0
+siblings        : 64
+core id         : 63
+cpu cores       : 64
+fpu             : yes
+fpu exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu
+cache alignment : 64
+
