@@ -55,19 +55,31 @@ class GarnetNetwork : public Network
 {
   public:
     static int PACKETID;
-    bool jitter_all, optimized, bypass_all, bypass_x;  
-    bool all_out_bypass; 
+    bool jitter_all, optimized, bypass_all, bypass_x;
+    bool all_out_bypass;
+    bool boundnoc_variable;
     uint32_t optimization_rate;
     std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
     Cycles closest_rt;
 
-    int max_hpc; 
+    int max_hpc;
     Cycles lower_limit, upper_limit, delta_s, target_latency;
     std::vector<int> destination_list;
-    std::vector<int> attack_node_list; 
-    std::map<int, int> closest_dest_from_src; 
-    std::map<int, int> farthest_dest_from_src; 
-    int closest_dest, farthest_dest; 
+    std::vector<int> attack_node_list;
+    std::map<int, int> closest_dest_from_src;
+    std::map<int, int> farthest_dest_from_src;
+    int closest_dest, farthest_dest;
+
+    // BOUNDNOC_VARIABLE: randomize the per-access convergence target,
+    // uniformly drawn from [lower_limit, upper_limit] once per access (keyed
+    // on attacker router + the access's ReqEnqueueTime, same correlation key
+    // used elsewhere) and reused for both request and response legs.
+    // lower_limit is the proven-achievable floor (farthest-node bypass
+    // cost), so any drawn target is guaranteed physically reachable via the
+    // existing bypass mechanism -- the "pad up to target" arithmetic in
+    // NetworkInterface never needs to pad by a negative amount.
+    std::map<std::pair<int, Cycles>, Cycles> m_variable_target_assignment;
+    Cycles get_or_assign_variable_target(int key_router, Cycles req_time);
 
     Cycles get_farthest_node_bypass_cost(std::vector<int>, std::vector<int>);
     int get_bypass_cost(int, int);
@@ -239,9 +251,10 @@ class GarnetNetwork : public Network
     
     Stats::Distribution m_packet_network_latency_dist;
     Stats::Distribution m_attack_packet_latency;
-    Stats::Distribution m_closest_dest_attack_packet_latency; 
-    Stats::Distribution m_farthest_dest_attack_packet_latency; 
+    Stats::Distribution m_closest_dest_attack_packet_latency;
+    Stats::Distribution m_farthest_dest_attack_packet_latency;
     Stats::Distribution m_regular_packet_latency;
+    Stats::Distribution m_variable_target_dist;
 
     Stats::Vector m_packets_received;
     Stats::Vector m_packets_injected;

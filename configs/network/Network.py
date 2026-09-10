@@ -80,7 +80,7 @@ def define_options(parser):
     parser.add_option("--bypass", type="choice", default="bypass_all",
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
                           'bypass_x','optimized','dynamic_delay',
-                          'bypass_all_out'],
+                          'bypass_all_out', 'boundnoc_low_up'],
                       help="""'bypass_none' = undefended BASELINE.
                       'jitter_all' = BOUNDNOC_DELAY (delay queue only).
                       'bypass_all_out' = BOUNDNOC_BYPASS (router bypass +
@@ -88,7 +88,15 @@ def define_options(parser):
                       'bypass_x' = BASELINE_BYPASS (router bypass ONLY, no
                       delay queue / target-latency convergence -- isolates
                       the bypass mechanism's own effect, per paper Table
-                      II). 'bypass_all', 'optimized', 'dynamic_delay' are
+                      II). 'boundnoc_low_up' = BOUNDNOC_VARIABLE (low-to-
+                      upper range): same bypass mechanism as bypass_all_out,
+                      but each access converges to a randomly drawn target
+                      latency, uniform in [lower_limit, upper_limit], instead
+                      of a single fixed target, to reintroduce latency
+                      variability. (A narrower-range sibling,
+                      boundnoc_low_closest -- [lower_limit, closest_rt] --
+                      is planned but not yet implemented.)
+                      'bypass_all', 'optimized', 'dynamic_delay' are
                       unimplemented/dead in NetworkInterface.cc.""")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
@@ -152,7 +160,8 @@ def init_network(options, network, InterfaceClass):
         network.bypass_none = False
         network.bypass_x = False
         network.jitter_all = False
-        network.all_out_bypass = False 
+        network.all_out_bypass = False
+        network.boundnoc_variable = False
 
         if options.bypass == "bypass_all":
             network.bypass_all = True
@@ -161,7 +170,7 @@ def init_network(options, network, InterfaceClass):
         elif options.bypass == "jitter_all":
             network.jitter_all = True
         elif options.bypass == "bypass_x":
-            network.bypass_x = True 
+            network.bypass_x = True
         elif options.bypass == "optimized":
             network.optimized = True
             network.optimization_rate = max(0,min(100,
@@ -169,7 +178,9 @@ def init_network(options, network, InterfaceClass):
         elif options.bypass == "dynamic_delay":
             network.dynamic_delay = True
         elif options.bypass == "bypass_all_out":
-            network.all_out_bypass = True 
+            network.all_out_bypass = True
+        elif options.bypass == "boundnoc_low_up":
+            network.boundnoc_variable = True
 
         network.attack_enabled = options.attack_enabled
         

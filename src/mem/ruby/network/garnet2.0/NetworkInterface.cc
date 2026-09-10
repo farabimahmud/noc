@@ -284,7 +284,16 @@ bool NetworkInterface::readJQ() {
     flit_type t_flit_type = t_flit->get_type();
     assert(t_flit_type == HEAD_TAIL_ || t_flit_type == TAIL_);
     Cycles latency = curCycle() - t_flit->get_msg_ptr()->getReqEnqueueTime();
-    assert(latency >= m_net_ptr->upper_limit);
+    // This invariant assumes every flit reaching jq was targeting the
+    // fixed upper_limit (true for jitter_all, and true for all_out_bypass's
+    // case_1 flits only by coincidence -- queueing backlog in a busy run
+    // tends to push actual delivery latency past upper_limit anyway before
+    // such a flit reaches the front of jq). BOUNDNOC_VARIABLE's flits
+    // legitimately converge to a lower, per-access target_latency instead,
+    // so the invariant doesn't apply to them.
+    if (!m_net_ptr->boundnoc_variable) {
+      assert(latency >= m_net_ptr->upper_limit);
+    }
 
     int vnet = t_flit->get_vnet();
 
@@ -443,14 +452,16 @@ void NetworkInterface::wakeup() {
     }
   }
 
-  if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x) {
+  if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x ||
+      m_net_ptr->boundnoc_variable) {
     bool bypass_queue_read_flag = readBypassQueue();
     if (bypass_queue_read_flag) {
       DPRINTF(Vanilla, "[NI:Wakeup] Bypass Queue read in this Cycle\n");
     }
   }
 
-  if (m_net_ptr->all_out_bypass || m_net_ptr->jitter_all) {
+  if (m_net_ptr->all_out_bypass || m_net_ptr->jitter_all ||
+      m_net_ptr->boundnoc_variable) {
     bool read_from_jq = readJQ();
     if (read_from_jq) {
       DPRINTF(Naive, "[NI:Wakeup] Read flit from JQ\n");
@@ -488,11 +499,23 @@ void NetworkInterface::wakeup() {
         m_net_ptr->inc_total_jitter_count();
         m_net_ptr->inc_total_jitter_amount(m_net_ptr->upper_limit - latency);
         scheduleEvent(m_net_ptr->upper_limit - latency);
-      } else if (m_net_ptr->all_out_bypass && t_flit->getAttackFlit() &&
+      } else if ((m_net_ptr->all_out_bypass || m_net_ptr->boundnoc_variable) &&
+                 t_flit->getAttackFlit() &&
                  isResponse &&
                  latency < t_flit->target_latency) {  // vnet 2 for response
         DPRINTF(Vanilla, "[NI:Wakeup] flit %s latency %d target %d\n", *t_flit,
                 latency, t_flit->target_latency);
+        if (m_net_ptr->boundnoc_variable) {
+          // BOUNDNOC_VARIABLE's randomized target isn't grounded in an
+          // EWMA of real observed RTTs the way closest_rt is, so the
+          // creation-time ready_to_commit stamped in sendAttackFlit() can
+          // already be stale (in the past) by the time this response
+          // actually finishes its real network transit and reaches here.
+          // Recompute it fresh, relative to actual arrival time, so jq's
+          // ready-ordering is never based on a stale snapshot.
+          t_flit->ready_to_commit =
+              curCycle() + (t_flit->target_latency - latency);
+        }
         jq->insert(t_flit);
         m_net_ptr->inc_total_jitter_count();
         m_net_ptr->inc_total_jitter_amount(m_net_ptr->upper_limit - latency);
@@ -700,7 +723,8 @@ bool NetworkInterface::flitisizeMessage(MsgPtr msg_ptr, int vnet) {
         }
         DPRINTF(Naive, "Created flit %s at NI\n", *fl);
 
-      } else if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x) {
+      } else if (m_net_ptr->all_out_bypass || m_net_ptr->bypass_x ||
+                 m_net_ptr->boundnoc_variable) {
 
         if (fl->isAttackFlit) {  // vnet 0 for request
           use_bypass = sendAttackFlit(fl);
@@ -744,6 +768,19 @@ int NetworkInterface::sendAttackFlit(flit *fl) {
   Cycles target = m_net_ptr->target_latency > m_net_ptr->closest_rt
                       ? m_net_ptr->target_latency
                       : m_net_ptr->closest_rt;
+
+  // BOUNDNOC_VARIABLE: this access's randomized convergence target, used
+  // below in place of the fixed lower_limit/closest_rt wherever this leg
+  // sets fl->target_latency. Keyed on the attacker's router (src on the
+  // request leg, dest on the response leg) + ReqEnqueueTime so both legs of
+  // the same access agree on one target.
+  Cycles variable_target = Cycles(0);
+  if (m_net_ptr->boundnoc_variable) {
+    int key_router =
+        (fl->get_vnet() == 0) ? route.src_router : route.dest_router;
+    variable_target = m_net_ptr->get_or_assign_variable_target(
+        key_router, fl->get_msg_ptr()->getReqEnqueueTime());
+  }
 
   std::vector<OutputUnit *> ou_units_req =
       m_net_ptr->output_unit_table[m_router_id][route.dest_router];
@@ -803,7 +840,9 @@ int NetworkInterface::sendAttackFlit(flit *fl) {
               *fl, route.src_router, route.dest_router);
       return 0;
     }
-    fl->target_latency = lower + Cycles(fl->get_id());
+    fl->target_latency = (m_net_ptr->boundnoc_variable ? variable_target
+                                                        : lower) +
+                          Cycles(fl->get_id());
     fl->ready_to_commit = curCycle() + fl->target_latency;
 
     DPRINTF(Vanilla,
@@ -826,9 +865,13 @@ int NetworkInterface::sendAttackFlit(flit *fl) {
     // the bypass hardware gets it there -- no delay queue applied. Under
     // BOUNDNOC_BYPASS (all_out_bypass), keep the original convergence
     // target (closest_rt) so it still pads up if it arrives early.
-    fl->target_latency = m_net_ptr->bypass_x
-                              ? Cycles(0)
-                              : (m_net_ptr->closest_rt + Cycles(fl->get_id()));
+    // BOUNDNOC_VARIABLE uses this access's randomized target instead.
+    fl->target_latency =
+        m_net_ptr->bypass_x
+            ? Cycles(0)
+            : ((m_net_ptr->boundnoc_variable ? variable_target
+                                              : m_net_ptr->closest_rt) +
+               Cycles(fl->get_id()));
     fl->ready_to_commit = curCycle() + latency_b + Cycles(fl->get_id());
 
     dest_ni->bq->insert(fl);

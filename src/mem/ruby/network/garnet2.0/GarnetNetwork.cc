@@ -35,6 +35,7 @@
 #include <sstream>
 
 #include "base/cast.hh"
+#include "base/random.hh"
 #include "debug/AttackPacketGenerator.hh"
 #include "debug/Naive.hh"
 #include "debug/SK.hh"
@@ -105,6 +106,7 @@ int GarnetNetwork::PACKETID = 0;
     optimized = p->optimized;
     bypass_all = p->bypass_all;
     bypass_x = p->bypass_x;
+    boundnoc_variable = p->boundnoc_variable;
 
     if (p->optimized){
         optimization_rate = p->optimization_rate;
@@ -186,7 +188,26 @@ GarnetNetwork::get_bypass_cost(int src, int dest){
     return bypass_cost;
 }
 
-Cycles 
+// BOUNDNOC_VARIABLE: assign a random convergence target the first time an
+// access is seen (keyed by attacker router + its request's ReqEnqueueTime --
+// reliably propagated request->response by the coherence protocol, already
+// relied on elsewhere for round-trip-latency stats) and reuse the same
+// target for the response leg. Drawn from [lower_limit, upper_limit] so it
+// is always physically achievable via the existing bypass mechanism.
+Cycles
+GarnetNetwork::get_or_assign_variable_target(int key_router, Cycles req_time){
+    auto key = std::make_pair(key_router, req_time);
+    auto it = m_variable_target_assignment.find(key);
+    if (it != m_variable_target_assignment.end()){
+        return it->second;
+    }
+    Cycles target = Cycles(random_mt.random((int)lower_limit, (int)upper_limit));
+    m_variable_target_assignment[key] = target;
+    m_variable_target_dist.sample(target, 1);
+    return target;
+}
+
+Cycles
 GarnetNetwork::get_farthest_node_bypass_cost(std::vector<int>slist, std::vector<int> dlist){
     std::vector<int> max_costs;
     for (auto s:slist){
@@ -421,7 +442,14 @@ GarnetNetwork::regStats()
         .init(0, 100, 5 )
         .name(name() + ".regular_packet_latency")
         .flags(Stats::oneline)
-        .precision(12)        
+        .precision(12)
+        ;
+
+    m_variable_target_dist
+        .init(0, 100, 5)
+        .name(name() + ".variable_target_dist")
+        .flags(Stats::oneline)
+        .precision(12)
         ;
 
     m_packets_received
