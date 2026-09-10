@@ -1,0 +1,186 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage[normalem]{ulem}
+\usepackage{mathptmx} % This is Times font
+
+\usepackage{fancyhdr}
+\usepackage{makecell}
+\usepackage{array}
+\usepackage{ifthen}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{color,soul}
+\usepackage{caption}
+\usepackage{commath}
+\usepackage{comment}
+\usepackage{paralist}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{float}
+\usepackage[hyphens]{url}
+\usepackage{tabularx}
+\usepackage{cleveref}
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+\definecolor{Alizarin}{rgb}{0.93, 0.13, 0.13}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=C
+}
+
+\newcommand{\allowcomments}{0} %set allowcomments to 1 to see comments
+
+
+\ifthenelse{\equal{\allowcomments}{0}}{
+\newcommand{\fm}[1]{\textcolor{blue}{}}
+\newcommand{\am}[1]{\textcolor{red}{}}
+\newcommand{\cc}[1]{\textcolor{green}{}}
+\newcommand{\sk}[1]{\textcolor{cyan}{}}
+\newcommand{\ej}[1]{\textcolor{violet}{}}
+\newcommand{\hs}[1]{\textcolor{olive}{}}
+\newcommand{\prit}[1]{\textcolor{orange}{}}
+\newcommand{\pranati}[1]{\textcolor{brown}{}}
+\newcommand{\jw}[1]{\textcolor{Alizarin}{}}
+\newcommand{\sabuj}[1]{\textcolor{purple}{}}
+}{
+\newcommand{\fm}[1]{\textcolor{blue}{FM: #1}}
+\newcommand{\am}[1]{\textcolor{red}{AM: #1}}
+\newcommand{\cc}[1]{\textcolor{green}{CC: #1}}
+\newcommand{\sk}[1]{\textcolor{cyan}{SK: #1}}
+\newcommand{\ej}[1]{\textcolor{violet}{EJ: #1}}
+\newcommand{\hs}[1]{\textcolor{olive}{HS: #1}}
+\newcommand{\prit}[1]{\textcolor{orange}{PM: #1}}
+\newcommand{\pranati}[1]{\textcolor{brown}{P: #1}}
+\newcommand{\jw}[1]{\textcolor{Alizarin}{JW: #1}}
+\newcommand{\sabuj}[1]{\textcolor{purple}{SL: #1}}
+}
+
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+\newcommand{\scheme}{\textsc{BoundNoC}}
+\newcommand{\cpumodel}{Intel Xeon Phi 7290}
+\newcommand{\opensslver}{1.1.0f}
+\newcommand{\bscheme}{\textsc{B\-o\-u\-n\-d\-N\-o\-C\textsubscript{bypass}}}
+\newcommand{\jscheme}{\textsc{B\-o\-u\-n\-d\-N\-o\-C\textsubscript{delay}}}
+\newcommand{\basebscheme}{\textsc{B\-a\-s\-e\-l\-i\-n\-e\-\textsubscript{bypass}}}
+\newcommand{\basescheme}{\textsc{B\-a\-s\-e\-l\-i\-n\-e\-}}
+\begin{document}
+
+\title{
+\scheme: A Low-Overhead Defense Against Network-On-Chip Side Channels}
+
+\date{}
+
+\author{\IEEEauthorblockN{Farabi Mahmud, Harpreet Singh Chawla, Chia-Che Tsai, EJ Kim, Abdullah Muzahid}\\
+\IEEEauthorblockA{\textit{Department of Computer Science and Engineering, Texas A\&M University, College Station, TX, USA}} \\
+\{farabi, harpreetsc, chiache, ejkim, abdullah.muzahid\}@tamu.edu}
+
+% The paper headers
+\markboth{IEEE Transactions on Computers}%
+{BoundNoC}
+
+\IEEEpubid{0000--0000/00\$00.00~\copyright~2026 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Computer Architecture, Multi-core System, Network-on-chip, Non Uniform Cache Access
+\end{IEEEkeywords}
+
+
+\section{Introduction}
+\label{sec:intro}
+\input{introduction}
+
+
+\section{Background and Related Work}
+\label{sec:back}
+\input{background}
+
+
+\section{Threat Model and Assumptions}
+\label{sec:threatmodel}
+\input{threat_model}
+
+
+% \section{A Distance-Based NUCA Side Channel}
+% \label{sec:attack}
+% \input{attack}
+
+\section{Attack Overview}
+\label{sec:attack-overview}
+\input{attack_overview}
+
+\section{\scheme{}: A Timing-Based Defense} % with \scheme}
+\label{sec:desc}
+\input{description}
+
+\section{Implementation Details}
+\label{sec:impl}
+\input{implementation}
+
+%\section{Discussion}
+%\label{sec:discuss}
+%\input{discussion}
+\section{Security Analysis}
+\label{sec:security}
+\input{security2}
+
+
+\section{Evaluation}
+\label{sec:eval}
+\input{experiment}
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
+
+
+
+
+\section{Biography Section}
+\input{biography}
+
+\newpage
+\appendix
+\input{appendix.tex}
+
+\end{document}

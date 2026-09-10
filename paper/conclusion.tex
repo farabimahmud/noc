@@ -1,0 +1,5 @@
+In this paper, we presented \scheme{}, an architectural defense against timing-based side-channel attacks in NUCA architectures.
+We analyzed existing distance-based and contention-based NUCA side-channel attacks and established the conditions necessary for an effective defense.
+Based on this analysis, we proposed two defense techniques, \jscheme{} and \bscheme{}, that enforce a constant round-trip latency for Security Sensitive LLC-hit accesses using a combination of delay and router bypass mechanisms, converting the distributed LLC into an effectively oblivious cache.
+To the best of our knowledge, this is the first use of router bypass as a cache security primitive.
+Evaluated on applications from the PARSEC and Rodinia benchmark suites, \jscheme{} incurs a $17.04\%$ average performance overhead over the insecure baseline while \bscheme{} introduces no measurable overhead, both with minimal NoC hardware modifications.

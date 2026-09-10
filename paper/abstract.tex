@@ -1,0 +1,6 @@
+Distributed last-level cache (LLC) architectures in modern many-core processors introduce non-uniform memory access latencies exploitable as side-channel attacks.
+These attacks capitalize on either physical distance or network congestion to leak sensitive information.
+We discuss a concrete distance-based attack on an \cpumodel{} CPU, successfully extracting AES secret keys from OpenSSL \opensslver{}.
+To counter such attacks, we propose \scheme{}, an efficient architectural defense that creates an oblivious LLC by eliminating observable LLC access time differences for security-sensitive memory instructions.
+We present two variants: \jscheme{}, which uses calibrated delays, and \bscheme{}, which uses router bypass mechanisms.
+Implemented in the Gem5 simulator and evaluated across applications from the PARSEC and Rodinia benchmark suites, \jscheme{} incurs 17.04\% overhead while \bscheme{} introduces no measurable performance impact over the insecure baseline.

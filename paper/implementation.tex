@@ -1,0 +1,49 @@
+In this section, we describe the design choices made to implement \scheme{} hardware.
+
+\subsection{Changes in the Network Interface} \label{sec-ni-changes}
+We extend the Network Interface (NI) to control the timing of packet ejection, which is central to the defense mechanism of \scheme{}.
+NI extensions have previously been used to provide security features such as malware detection~\cite{novo2020flow} and network intrusion detection~\cite{mirsky2018kitsune}.
+We extend NI capability to detect packets that require delay or bypass based on their expected latency, following the \scheme{} logic described in Section~\ref{sec-overview}.
+
+When the NI receives a load request, it sets flags to decide between the two available networks (normal or bypass) or to add delay (for \jscheme{}).
+The bypass network uses the same physical links as the normal network.
+We use virtual channel (VC) separation to isolate bypass traffic from regular network traffic~\cite{duato2001general}.
+Bypass packets use a dedicated VC, ensuring that bypass traffic does not interfere with normal network operation.
+
+The NI uses a 1-bit flag \texttt{bypass\_flag} on each output port of the router.
+When the NI sends any flit through an output port, it checks whether \texttt{bypass\_flag} is enabled for that cycle.
+If the flag is disabled, the NI cannot send the flit on that cycle.
+When \bscheme{} needs to send a flit via the bypass path, the NI first checks and sets this flag.
+If the flag is already set, the NI stalls the flit and retries on subsequent cycles.
+
+In the common case, the attacker targets only two distinct LLC banks.
+Since XY routing produces non-overlapping bypass paths for different source-destination pairs in a mesh, bypass contention is unlikely in practice.
+However, collisions can be resolved by pipelining the bypass mechanism.
+
+When an NI sends a flit through either the bypass or regular path, it sets a timestamp in the header flit.
+For request flits, the timestamp records the flit creation time.
+For response flits, the timestamp records the creation time of the corresponding request flit.
+This timestamp is used by the \scheme{} logic in the NI.
+\scheme{} uses a comparator and multiplexer (MUX) in the NI to implement the defense.
+Figure~\ref{fig:block-diagram} illustrates the bypass operation using the existing NI buffers.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/NI Block Diagram 2.pdf}
+\caption{Block diagram of bypass operations in the extended Network Interface.}
+\label{fig:block-diagram}
+\end{figure}
+
+\subsection{Delay Implementation} \label{sub:jitter}
+To implement dynamic delay, each NI includes a Delay Queue (DQ) that buffers flits associated with Security Sensitive instructions until their target latency is met.
+Every flit carries a Target Latency (TL) field in its header, set to either $T_{worst}$ (\jscheme{}) or $T_{low}$ (\bscheme{}) based on the defense scheme in use.
+
+When the tail flit of a Security Sensitive response arrives at the source NI, the NI computes the Round-Trip Latency (RTL) of the request using the stored timestamp and compares it to TL using a comparator.
+There are two cases:
+\begin{compactenum}
+    \item \textbf{RTL $\geq$ TL:} No delay is needed.
+    The flit is forwarded to the ejection queue of the NI immediately, or placed in the stall queue if the ejection queue is unavailable.
+
+    \item \textbf{RTL $<$ TL:} The flit is placed in the DQ at the source NI with a delay of $TL - RTL$ cycles.
+    A counter wakes up the NI to eject the flit after the specified delay has elapsed.
+\end{compactenum}

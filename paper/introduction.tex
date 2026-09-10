@@ -1,0 +1,75 @@
+Large-scale multicore architectures have become the backbone of high performance computing systems.
+To meet the demand of so many cores, large-scale multicores are equipped with a large last level cache (LLC).
+For example, AMD EPYC Genoa-X 9648X comes with 1.2GB 3D V-Cache as LLC, whereas Intel's Granite Rapids comes with more than 512 MB of LLC~\cite{intel-hotchips-23} in a 144-core processor.
+Such LLCs are typically distributed over multiple banks connected through a network-on-chip (NoC) to reduce access latency, ease manufacturing complexities, and improve core isolation.
+Distributed LLC improves memory level parallelism by allowing multiple concurrent requests to different banks.
+However, accesses to different banks incur different latencies, which is why this type of architecture is referred to as a Non-Uniform Cache Access (NUCA) architecture.
+
+A side channel is a security vulnerability where an attacker infers secrets through observable physical characteristics of a system, such as timing.
+NUCA architectures have been subject to numerous security vulnerabilities that exploit the non-uniformity of access latencies.
+For example, Don't Mesh Around~\cite{dont-mess-around} and MeshUp~\cite{meshup} showed a contention-based cache side channel attack in the mesh interconnect of a NUCA architecture.
+Following the trend of earlier works, Attack of Knights (AoK) introduced a distance-based cache side channel attack in a similar architecture~\cite{mahmud2022distancebased}.
+These attacks pose a significant threat to security-sensitive applications running on NUCA architectures.
+Therefore, it is imperative to defend against these vulnerabilities caused by the side channel in caches of NUCA architecture.
+
+\IEEEpubidadjcol
+
+While several defense mechanisms have been proposed, there are a few existing techniques to defend against NoC-based cache side channel attacks.
+For example, SurfNoc~\cite{wassel2013surfnoc} proposed to separate packets based on their application domains and forward packets from the same domain at the same time.
+Gossip Noc~\cite{reinbrecht2016gossip} proposed to filter out attack packets and change their routing functions.
+Kar et al.~\cite{remapping-llc} proposed to remap LLC banks dynamically to defend against contention-based cache side channel attacks.
+However, these solutions have performance, area, and power overhead.
+Moreover, these techniques do not defend against distance-based side channel attacks in NUCA architectures (like AoK~\cite{mahmud2022distancebased}).
+A related line of research, Oblivious RAM (ORAM)~\cite{oram,phantom,sanctum}, addresses these attacks by hiding memory access patterns entirely.
+However, hardware ORAM implementations incur prohibitive overhead.
+For example, one such configuration, Phantom~\cite{phantom} has $6\times$ performance overhead compared to the baseline system.
+Therefore, our goal is to devise a low-overhead defense mechanism against any side channel in a NUCA architecture's cache.
+
+We believe that a side channel (whether based on congestion, contention or distance) in the NUCA architecture can be prevented if we could turn the LLC into essentially an oblivious cache, i.e., make the latency of all relevant cache accesses constant so that the attacker cannot infer any access pattern from the latency differences.
+Based on this intuition, in this paper, we propose two defense techniques---\jscheme\ and \bscheme---which make the latency of cache accesses constant regardless of congestion, contention or distance difference.
+Collectively, we refer to the proposed techniques as \scheme.
+
+\jscheme\ aims to make the latency of accessing {\em any} LLC bank to be as long as the longest LLC latency, so that the LLC does not exhibit any timing difference.
+To make any LLC bank latency equal to the longest LLC latency (say, $T_{worst}$), \jscheme\ adds some delay to the original access latency (say, $T_{orig}$).
+An appropriate amount of delay (i.e., $T_{worst}-T_{orig}$) is added right before the LLC bank sends the requested data back to the core.
+\jscheme\ is simple and intuitive but hurts performance as it slows down LLC accesses significantly.
+
+To reduce the performance overhead, we must not make the constant latency of LLC accesses equal to $T_{worst}$.
+Therefore, we propose \bscheme.
+Here, we make the following observation---{\em instead of making every LLC access have the latency $T_{worst}$, we can reduce the worst case latency to a much lower latency and then make every LLC access latency equal to that}.
+There have been studies on reducing packet latency in NoC designs.
+One class of techniques, called Router Bypass~\cite{krishna2013breaking,chen2013smart,krishna2013single,kwon2017opensmart,yang2017task,perez2019smart++,zong2016doart,ma2021latency}, opens up an opportunity for speeding up accesses to the farthest banks, thereby reducing the worst case latency.
+For instance, by applying the router bypass technique to the farthest bank, we can reduce $T_{worst}$ latency to a much lower latency $T_{low}$.
+\bscheme\ eliminates LLC access latency differences by making every latency equal to $T_{low}$.
+\bscheme\ works by adding delay to accesses to nearby LLC banks (since the access latency of nearby banks is presumably lower than $T_{low}$) and a combination of router bypass and delay (if needed) to accesses to the distant LLC banks.
+Delay and router bypass mechanisms are applied by modifying the NoC router hardware.
+Although router bypass has been proposed before, to the best of our knowledge, this is the {\em first} work that uses it as a security solution.
+
+We implement our proposed techniques using Gem5~\cite{binkert2011gem5} and Garnet~\cite{agarwal2009garnet} simulators.
+We show the impact of both \jscheme\ and \bscheme\ using different workloads from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites.
+Finally, we also show how both schemes defend against a NUCA cache side channel attack (whether it is congestion, contention or distance-based) by eliminating latency differences of LLC accesses.
+
+We make the following contributions:
+\begin{compactitem}
+    \item We analyze existing NUCA cache side channel attacks---including
+    congestion, contention, and distance-based variants---and
+    establish the necessary and sufficient conditions for an effective defense.
+
+    \item We propose two defense techniques against NUCA cache side channel attacks---\jscheme\ and \bscheme.
+    Both techniques ensure constant-time LLC accesses (with a combination of router bypass and delay), essentially converting the LLC into an oblivious one.
+    {\em This is the first use of router bypass mechanism for cache security}.
+
+    \item We implement our proposed defenses in the Gem5~\cite{binkert2011gem5} architectural simulator and evaluate them using benchmarks from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites.
+    Our results indicate that, on average, with minimal NoC hardware modification,
+    \jscheme\ adds $17.04\%$ runtime overhead compared to a baseline vulnerable system while \bscheme\ does not cause any runtime degradation at all.
+\end{compactitem}
+
+The remainder of this paper is organized as follows.
+Section~\ref{sec:back} provides background and related work.
+Section~\ref{sec:threatmodel} describes our threat model.
+Section~\ref{sec:attack-overview} presents an overview of NUCA side channel attacks.
+Section~\ref{sec:desc} describes \scheme{} in detail.
+Section~\ref{sec:impl} presents implementation details.
+Section~\ref{sec:security} provides a security analysis.
+Section~\ref{sec:eval} presents our evaluation results.
+Section~\ref{sec:conclusion} concludes the paper.

@@ -1,0 +1,154 @@
+NUCA architectures introduce performance and security trade-offs that motivate the design of \scheme{}.
+This section provides the necessary background on these trade-offs and surveys related work.
+
+\subsection{NUCA Architecture}
+Modern multicore processors employ increasingly large cache hierarchies to bridge the performance gap between CPU cores and main memory~\cite{muralimanohar2007interconnect, jaleel2006last}.
+As core counts and bandwidth demands increase, last-level caches (LLCs) are often physically distributed into multiple banks or slices rather than implemented as a single monolithic structure.
+These LLC banks are connected through an on-chip interconnect or network-on-chip (NoC), which allows multiple cores to access different cache banks concurrently.
+This physical distribution gives rise to Non-Uniform Cache Access (NUCA) architectures, where the latency of an LLC access depends on the physical and network distance between the requesting core and the target LLC bank~\cite{kim2002adaptive}.
+For example, an access to a nearby LLC bank may traverse only a few NoC hops, while an access to a distant bank may traverse many more.
+Consequently, even when two accesses both hit in the LLC, they may exhibit different access latencies due solely to their locations in the on-chip network.
+
+On-chip interconnects can be organized using several topologies, including crossbars, rings, meshes, tori, and 3D tori~\cite{jerger2009chip}.
+A typical NoC consists of nodes connected by physical links.
+Each node may contain one or more CPU cores, private caches, shared LLC banks, a router, a network interface, coherence-directory state, or memory-controller logic.
+A typical NoC router consists of input buffers, a crossbar switch, routing logic, and flow-control logic.
+Packets traverse the network hop-by-hop, spending at least one cycle per router for arbitration and switching.
+Communication between nodes occurs through packets routed according to the network routing protocol and regulated by flow-control mechanisms.
+
+Among commercial processors, Intel Nehalem used a ring-based interconnect for Xeon processors with up to eight cores, while later Intel Skylake-SP and Skylake-X processors adopted mesh interconnects~\cite{kommrusch2021optimizing,dont-mess-around}.
+In distributed LLC designs, an address is typically mapped to an LLC slice and associated coherence metadata.
+In Intel manycore systems, this metadata is maintained by Caching and Homing Agents (CHAs), which track the location, ownership, and coherence state of cache lines.
+Since CHAs and LLC banks are physically distributed across the chip, accesses to different CHAs or LLC banks can incur different NoC traversal latencies.
+This non-uniformity is beneficial for scalability and performance, but it also creates a timing signal that can be exploited by NUCA side-channel attacks.
+
+\subsection{Cache Side-Channel Attacks}
+\label{sec:back_sidechannel}
+Hardware side-channel attacks exploit observable microarchitectural effects to infer secret-dependent behavior.
+Examples of such observable effects include cache hits and misses, access latency in TLBs, caches, and DRAM, and contention in shared hardware structures.
+In a typical side-channel attack, the victim performs secret-dependent operations that modify the state or timing behavior of a shared resource, and the attacker observes these changes to infer information about the victim's secret.
+
+Cache side-channel attacks are among the most widely studied hardware side channels.
+They are commonly categorized based on how the attacker prepares the cache state and how the attacker measures the victim-induced change.
+
+\textbf{Prime+Probe~\cite{liu2015last,schwarz2017malware, brasser2017software,kayaalp2016high,aciiccmez2008vulnerability,tromer2010efficient,osvik2006cache,neve2006advances}:}
+In Prime+Probe, the attacker first fills selected cache sets with its own cache lines during the prime phase.
+After the victim executes, the attacker probes the same sets and measures whether its cache lines were evicted.
+Evictions reveal that the victim accessed data mapping to the same cache sets, allowing the attacker to infer secret-dependent memory behavior.
+
+\textbf{Flush+Reload~\cite{gullasch2011cache,gruss2015cache,zhang2014cross,yarom2014recovering,van2015just,irazoqui2014wait,yarom2014flush+}:}
+Flush+Reload uses the \texttt{CLFLUSH} instruction to evict a shared cache line and later reloads the same line to determine whether the victim accessed it.
+A fast reload indicates that the victim brought the line back into the cache.
+This attack provides high spatial and temporal resolution, but it requires the attacker and victim to share memory at cache-line granularity.
+
+\textbf{Flush+Flush~\cite{gruss2016flush+}:}
+Flush+Flush exploits the execution-time difference of the \texttt{CLFLUSH} instruction itself.
+Because flushing a cached line can take a different amount of time than flushing an uncached line, the attacker can infer whether the victim accessed the target line without explicitly reloading it.
+This makes Flush+Flush stealthier than attacks that rely on measuring reload latency.
+
+Recent microarchitectural attacks further show that timing leakage extends beyond traditional cache-set contention; these works are complementary to \scheme{} and target different leakage sources.
+For example, HertzBleed~\cite{hertzbleed} demonstrates that dynamic voltage and frequency scaling can translate data-dependent power behavior into timing leakage, GoFetch~\cite{gofetch} shows that hardware prefetching can undermine constant-time cryptographic implementations, and
+SQUIP~\cite{squip} exploits contention in shared microarchitectural queues.
+Recent defenses such as ClepsydraCache~\cite{clepsydra}, randomized caches, and Goldilocks~\cite{goldilocks} address specific leakage sources such as cache eviction behavior, randomized cache mapping, or frequency-induced timing variation.
+
+\subsection{Existing Defenses and Their Limitations} \label{sec:back_defenses}
+Several classes of defenses have been proposed against cache side-channel attacks.
+Timing obfuscation techniques perturb or reduce the precision of timing measurements, making it harder for the attacker to decode secret-dependent behavior~\cite{zhang2011predictive,godfrey2013server}.
+Partitioning and isolation mechanisms prevent attackers and victims from sharing the same cache
+resources~\cite{kiriansky2018dawg,liu2016catalyst,wang2007new,kim2012stealthmem}.
+Oblivious RAM (ORAM)~\cite{oram,phantom,sanctum} can mitigate a broad range of access-pattern side channels by hiding memory access patterns, but it generally incurs significant performance and storage overhead due to memory reshuffling and metadata management.
+For example, Phantom~\cite{phantom} has $6\times$ performance overhead compared to the baseline system.
+
+Prior defenses against NoC-based side-channel attacks generally attempt to segregate, schedule, or distribute network traffic.
+SurfNoc~\cite{wassel2013surfnoc} separates packets based on their application domains and forwards packets from the same domain at the same time.
+Reinbrecht et al.~\cite{reinbrecht2016gossip} proposed GossipNoC, which dynamically changes the routing algorithm when abnormal network behavior is detected.
+Kar et al.~\cite{remapping-llc} proposed dynamic remapping of LLC banks to defend against contention-based cache side-channel attacks.
+Such defenses can reduce interference-based channels because those attacks depend on shared NoC resources or traffic contention.
+However, they do not eliminate the fundamental non-uniformity of LLC access latency in NUCA architectures.
+In particular, even if contention is removed, a victim access to a nearby LLC bank or CHA can still complete faster than an access to a distant bank or CHA.
+This distance-dependent timing signal motivates the need for a defense that equalizes LLC-hit latency rather than only reducing network interference.
+
+\subsection{NoC-Based Side-Channel Attacks}
+NoC-based side channels exploit timing or throughput variations in the on-chip interconnect.
+In Multi-Processor System-on-Chips (MPSoCs), Reinbrecht \textit{et al.} showed that NoC behavior can be leveraged for Prime+Probe-style cache side-channel attacks~\cite{reinbrecht2016side}.
+In this attack, the attacker monitors throughput changes to detect when a cryptographic victim accesses cache lines for key-dependent lookups, and then uses this information to initiate the probe phase.
+
+More recent attacks have demonstrated that timing channels also exist in commercial CPU interconnects.
+Paccagnella \textit{et al.} developed timing side-channel attacks on CPU ring interconnects by exploiting NoC and cache contention~\cite{paccagnella2021lotr}.
+Dai \textit{et al.} showed that contention in a 2D mesh interconnect of a NUCA system can create measurable timing differences, enabling both covert and side-channel attacks~\cite{dont-mess-around}.
+In their attack, the transmitter creates traffic contention on shared NoC paths to encode information, while the attacker detects the transmitted value by measuring access latency.
+Similarly, MeshUp exploits mesh-interconnect behavior to construct a stateless cache side channel on modern CPU meshes~\cite{meshup}.
+
+Distance-based NUCA attacks do not rely solely on cache-set conflicts, replacement policies, or eviction behavior.
+Instead, they exploit observable latency differences among LLC-hit accesses to different LLC banks or CHAs, where the latency variation arises from NoC distance, congestion, or both.
+\scheme{} specifically targets this class of leakage by equalizing the latency of security-sensitive LLC-hit accesses in distributed LLC architectures using delay and/or router-bypass mechanisms.
+
+\subsection{Comparison of Cache Side-Channel Attack Models}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figs/attack-comparison.pdf}
+    \caption{Comparison of communication models between the transmitter (victim) and receiver (attacker) in three cache side-channel attacks: (a) Prime+Probe~\cite{percival2005cache}, (b) Dai et al.~\cite{dont-mess-around}, and (c) the distance-based NUCA attack of     AoK~\cite{mahmud2022distancebased}.}
+    \label{fig:attack-comparison}
+\end{figure}
+
+\begin{table}[t]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2.5pt}
+    \renewcommand{\arraystretch}{1.18}
+    \begin{tabularx}{\columnwidth}{|P{0.58in}|Y|Y|Y|}
+        \hline
+        \textbf{Property}
+        & \makecell[c]{\textbf{Prime+Probe}~\cite{percival2005cache}}
+        & \makecell[c]{\textbf{Dai et al.}~\cite{dont-mess-around}}
+        & \makecell[c]{\textbf{AoK}~\cite{mahmud2022distancebased}} \\
+        \hline \hline
+        Target arch.
+        & Any cache or NUCA
+        & Ring-based mesh
+        & Multi-hop mesh \\
+        \hline
+        Covert?
+        & No
+        & Yes
+        & No \\
+        \hline
+        Attack model
+        & Eviction-based contention
+        & Traffic-based contention
+        & Distance-based timing \\
+        \hline
+        Exploit target
+        & Shared cache sets
+        & Shared NoC paths/rings
+        & LLC bank/CHA distance \\
+        \hline
+        Defenses
+        & ORAM; partitioning
+        & ORAM; clustering; scheduling
+        & ORAM; delay/bypass \\
+        \hline
+    \end{tabularx}
+    \caption{Comparison of representative cache and NoC side-channel attacks and their applicable defense categories.}
+    \label{tab:attack_differences}
+\end{table}
+
+We now compare the communication models of three representative cache side-channel attacks: Prime+Probe~\cite{percival2005cache}, the NoC-contention attack by Dai \textit{et al.}~\cite{dont-mess-around}, and the distance-based NUCA attack demonstrated by Attack of Knights (AoK)~\cite{mahmud2022distancebased}.
+Figure~\ref{fig:attack-comparison} illustrates the communication relationship between the transmitter (victim) and the receiver (attacker) in these attacks, while Table~\ref{tab:attack_differences} summarizes their key differences.
+
+Prime+Probe is an eviction-based contention channel.
+The victim transmits information implicitly by evicting the attacker's cache lines from shared cache sets, and the attacker decodes the information by measuring which of its lines were evicted.
+In contrast, the attack by Dai \textit{et al.} is a traffic-based contention channel.
+The transmitter generates NoC traffic on paths shared with the receiver, and the receiver detects the transmitted value by measuring the latency increase caused by network contention.
+
+AoK follows a different communication model.
+Rather than relying on eviction-based cache contention or deliberate NoC traffic contention, AoK exploits distance-dependent timing differences in NUCA architectures.
+The attacker observes the timing of victim operations and infers whether the victim accessed a near or far LLC bank or CHA.
+Therefore, a distance-based NUCA attack requires an architecture in which LLC-hit accesses to different banks or CHAs produce distinguishable timing differences, such as a multi-hop mesh-based manycore processor.
+
+This distinction has important implications for defenses.
+Because Prime+Probe and the attack by Dai \textit{et al.} rely on shared resources, they can be mitigated by partitioning, clustering, scheduling, or otherwise reducing resource sharing between the attacker and victim.
+However, distance-based NUCA attacks cannot be fully eliminated by partitioning or clustering alone, as long as the attacker can time victim operations.
+Their success depends on the observability of latency differences, not necessarily on direct contention over a shared cache set or NoC path.
+ORAM~\cite{oram} can mitigate all three classes of attacks by hiding memory access patterns, but it generally incurs high overhead.
+\scheme{} therefore takes a more targeted approach: it removes the timing signal exploited by NUCA attacks by enforcing constant latency for security-sensitive LLC-hit accesses, without requiring memory access pattern shuffling or the associated storage overhead.
