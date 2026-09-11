@@ -80,7 +80,8 @@ def define_options(parser):
     parser.add_option("--bypass", type="choice", default="bypass_all",
                       choices=['bypass_all', 'bypass_none', 'jitter_all',
                           'bypass_x','optimized','dynamic_delay',
-                          'bypass_all_out', 'boundnoc_low_up'],
+                          'bypass_all_out', 'boundnoc_low_up',
+                          'boundnoc_low_closest'],
                       help="""'bypass_none' = undefended BASELINE.
                       'jitter_all' = BOUNDNOC_DELAY (delay queue only).
                       'bypass_all_out' = BOUNDNOC_BYPASS (router bypass +
@@ -88,16 +89,16 @@ def define_options(parser):
                       'bypass_x' = BASELINE_BYPASS (router bypass ONLY, no
                       delay queue / target-latency convergence -- isolates
                       the bypass mechanism's own effect, per paper Table
-                      II). 'boundnoc_low_up' = BOUNDNOC_VARIABLE (low-to-
-                      upper range): same bypass mechanism as bypass_all_out,
-                      but each access converges to a randomly drawn target
-                      latency, uniform in [lower_limit, upper_limit], instead
-                      of a single fixed target, to reintroduce latency
-                      variability. (A narrower-range sibling,
-                      boundnoc_low_closest -- [lower_limit, closest_rt] --
-                      is planned but not yet implemented.)
-                      'bypass_all', 'optimized', 'dynamic_delay' are
-                      unimplemented/dead in NetworkInterface.cc.""")
+                      II). 'boundnoc_low_up' and 'boundnoc_low_closest' are
+                      both BOUNDNOC_VARIABLE: same bypass mechanism as
+                      bypass_all_out, but each access converges to a
+                      randomly drawn target latency instead of a single
+                      fixed target, to reintroduce latency variability --
+                      'boundnoc_low_up' draws uniformly from [lower_limit,
+                      upper_limit], 'boundnoc_low_closest' from the
+                      narrower [lower_limit, closest_rt]. 'bypass_all',
+                      'optimized', 'dynamic_delay' are unimplemented/dead
+                      in NetworkInterface.cc.""")
     parser.add_option("--flit_jitter_threshold", type="int", default=40,
                       help="Minimum flit jitter threshold, default 40")
     parser.add_option("--optimization_rate", type="int", default=50,
@@ -162,6 +163,7 @@ def init_network(options, network, InterfaceClass):
         network.jitter_all = False
         network.all_out_bypass = False
         network.boundnoc_variable = False
+        network.boundnoc_variable_narrow = False
 
         if options.bypass == "bypass_all":
             network.bypass_all = True
@@ -181,6 +183,9 @@ def init_network(options, network, InterfaceClass):
             network.all_out_bypass = True
         elif options.bypass == "boundnoc_low_up":
             network.boundnoc_variable = True
+        elif options.bypass == "boundnoc_low_closest":
+            network.boundnoc_variable = True
+            network.boundnoc_variable_narrow = True
 
         network.attack_enabled = options.attack_enabled
         

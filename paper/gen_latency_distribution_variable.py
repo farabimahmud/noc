@@ -28,17 +28,22 @@ def get_last_line(path, prefix):
                 last = line
     return last
 
-# Only the three policies that are actually informative for this comparison:
+# Only the four policies that are actually informative for this comparison:
 # BASELINE and BOUNDNOC_DELAY are already well-understood (natural variance /
 # full collapse to T_worst respectively) and don't help evaluate whether
 # BOUNDNOC_VARIABLE's randomized target lands usefully between the two
-# existing defended policies.
+# existing defended policies. BOUNDNOC_LOW_UP draws from [lower_limit,
+# upper_limit]; BOUNDNOC_LOW_CLOSEST from the narrower [lower_limit,
+# closest_rt] -- both shown side by side to make the latency-vs-
+# distinguishability tradeoff between them visible.
 results = {
     'baseline_bypass': 'leukocyte-singlepair-baseline_bypass',
     'boundnoc_bypass': 'leukocyte-singlepair-boundnoc_bypass',
-    'boundnoc_variable': 'leukocyte-singlepair-boundnoc_variable_target',
+    'boundnoc_low_up': 'leukocyte-singlepair-boundnoc_variable_target',
+    'boundnoc_low_closest': 'leukocyte-singlepair-boundnoc_low_closest',
 }
-titles = ['(a) BASELINE_BYPASS', '(b) BOUNDNOC_BYPASS', '(c) BOUNDNOC_VARIABLE']
+titles = ['(a) BASELINE_BYPASS', '(b) BOUNDNOC_BYPASS',
+          '(c) BOUNDNOC_LOW_UP', '(d) BOUNDNOC_LOW_CLOSEST']
 
 data = {}
 for key, dirname in results.items():
@@ -54,7 +59,7 @@ n_bins = len(data['baseline_bypass']['closest'])
 bucket_size = 5
 edges = np.arange(0, bucket_size*(n_bins), bucket_size)
 
-fig, axes = plt.subplots(1, 3, figsize=(15.0, 4.2), dpi=200, sharey=True)
+fig, axes = plt.subplots(1, 4, figsize=(24.0, 4.4), dpi=200, sharey=True)
 
 for ax, key, title in zip(axes, results.keys(), titles):
     closest = data[key]['closest']
@@ -81,7 +86,7 @@ for ax, key, title in zip(axes, results.keys(), titles):
     xlab.set_path_effects(BOLD_STROKE)
     ax.set_title('')
     ttl = ax.text(0.5, -0.42, title, transform=ax.transAxes, ha='center', va='top',
-            fontsize=25, fontweight='bold')
+            fontsize=22, fontweight='bold')
     ttl.set_path_effects(BOLD_STROKE)
 
 axes[0].set_yticks([0,20,40,60,80,100])
@@ -103,7 +108,7 @@ for t in leg.get_texts():
     t.set_path_effects(BOLD_STROKE)
 
 fig.tight_layout(rect=[0, 0.07, 1, 1])
-fig.subplots_adjust(wspace=0.24)
+fig.subplots_adjust(wspace=0.3)
 out = "/home/harpreetsc/noc/paper/figs_new/boundnoc_latency_distribution_variable.png"
 fig.savefig(out, facecolor='white', bbox_inches='tight')
 plt.close(fig)

@@ -54,8 +54,12 @@ class GarnetNetwork(RubyNetwork):
     bypass_x = Param.Bool(False, "Enable bypass for the x axis only")
     boundnoc_variable = Param.Bool(False, "Randomize the per-access \
             convergence target latency (uniform draw from \
-            [lower_limit, upper_limit]) instead of a single fixed target, \
+            [lower_limit, upper_limit], or [lower_limit, closest_rt] if \
+            boundnoc_variable_narrow) instead of a single fixed target, \
             reusing the bypass mechanism unchanged")
+    boundnoc_variable_narrow = Param.Bool(False, "With boundnoc_variable, \
+            draw the randomized target from [lower_limit, closest_rt] \
+            instead of [lower_limit, upper_limit]")
     optimized = Param.Bool(False, "Enable optimized bypass")
     optimization_rate = Param.UInt32(50, "rate of optimization, default 50")
     attack_enabled = Param.Bool(False, "whether attack is enabled in"

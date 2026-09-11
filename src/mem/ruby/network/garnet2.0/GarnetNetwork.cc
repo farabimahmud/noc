@@ -107,6 +107,7 @@ int GarnetNetwork::PACKETID = 0;
     bypass_all = p->bypass_all;
     bypass_x = p->bypass_x;
     boundnoc_variable = p->boundnoc_variable;
+    boundnoc_variable_narrow = p->boundnoc_variable_narrow;
 
     if (p->optimized){
         optimization_rate = p->optimization_rate;
@@ -192,8 +193,13 @@ GarnetNetwork::get_bypass_cost(int src, int dest){
 // access is seen (keyed by attacker router + its request's ReqEnqueueTime --
 // reliably propagated request->response by the coherence protocol, already
 // relied on elsewhere for round-trip-latency stats) and reuse the same
-// target for the response leg. Drawn from [lower_limit, upper_limit] so it
-// is always physically achievable via the existing bypass mechanism.
+// target for the response leg. Drawn from [lower_limit, upper_limit]
+// (boundnoc_low_up) so it is always physically achievable via the existing
+// bypass mechanism, or from the narrower [lower_limit, closest_rt]
+// (boundnoc_low_closest, boundnoc_variable_narrow) -- closest_rt is the
+// same EWMA-grounded quantity BOUNDNOC_BYPASS itself converges every
+// access to, so capping there keeps the draw within an already-proven-
+// achievable, tighter range instead of reaching all the way to T_worst.
 Cycles
 GarnetNetwork::get_or_assign_variable_target(int key_router, Cycles req_time){
     auto key = std::make_pair(key_router, req_time);
@@ -201,7 +207,10 @@ GarnetNetwork::get_or_assign_variable_target(int key_router, Cycles req_time){
     if (it != m_variable_target_assignment.end()){
         return it->second;
     }
-    Cycles target = Cycles(random_mt.random((int)lower_limit, (int)upper_limit));
+    Cycles hi = boundnoc_variable_narrow
+                    ? std::max(closest_rt, lower_limit)
+                    : upper_limit;
+    Cycles target = Cycles(random_mt.random((int)lower_limit, (int)hi));
     m_variable_target_assignment[key] = target;
     m_variable_target_dist.sample(target, 1);
     return target;

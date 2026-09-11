@@ -58,6 +58,11 @@ class GarnetNetwork : public Network
     bool jitter_all, optimized, bypass_all, bypass_x;
     bool all_out_bypass;
     bool boundnoc_variable;
+    // BOUNDNOC_VARIABLE sibling: when set (boundnoc_low_closest), the
+    // randomized target is drawn from [lower_limit, closest_rt] instead of
+    // [lower_limit, upper_limit] (boundnoc_low_up) -- see
+    // get_or_assign_variable_target().
+    bool boundnoc_variable_narrow;
     uint32_t optimization_rate;
     std::map<std::pair<int,NetworkLink*>, int> src_r_link_dest_r_map;
     Cycles closest_rt;
