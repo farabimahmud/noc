@@ -1,16 +1,15 @@
 In this section, we provide a security analysis of the effectiveness and robustness of \scheme{}.
 We define security in this context as follows: \scheme{} succeeds if an attacker cannot distinguish, with non-negligible advantage, between a Security Sensitive access to a near-tile LLC bank and one to a far-tile LLC bank based on observed latency.
 
-\begin{figure*}[t]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.85\linewidth]{figs_new/boundnoc_roundtrip_latency_syn.png}
-    %{figs/attack-packet.pdf}
     \caption{Impact of different policies on Secure Load round-trip latency for a synthetic workload.
     (a)~\basescheme{}: near-tile and far-tile latencies are clearly separable.
     (b)~\jscheme{}: latencies are indistinguishable but elevated.
     (c)~\bscheme{}: latencies are indistinguishable with near-optimal absolute latency.}
     \label{fig:impact-on-latency-syn}
-\end{figure*}
+\end{figure}
 
 \subsection{\jscheme} \label{sec-security-jscheme}
 In \jscheme{}, the timing difference between a nearby LLC access and a faraway LLC access is mitigated by adding delays to sensitive LLC accesses at the source NI.
@@ -26,22 +25,57 @@ We observe that the network saturates at injection rate 0.357, where the round-t
 Therefore, 100 cycles is a safe delay threshold for \jscheme{}.
 
 \subsection{\bscheme} \label{sec-security-bscheme}
-In \bscheme{}, the timing difference is mitigated by enforcing a lower target latency $T_{low}$, defined in Equation~\ref{eq:tlow}, rather than $T_{worst}$.
-$T_{low}$ combines the worst-case latency from the source to the CHA, the worst-case latency from the CHA to the destination, and the minimum achievable latency from the destination back to the source using bypass.
-For a Security Sensitive packet $p$, there are three scenarios:
-
-\begin{compactenum}[(1)]
-    \item The expected round-trip latency without bypass (${EL}_{p}$) is at most $T_{low}$.
-    No bypass is needed; \bscheme{} delivers the packet after adding delay to match $T_{low}$.
-
-    \item ${EL}_{p}$ exceeds $T_{low}$, but after applying bypass the actual round-trip latency falls below $T_{low}$.
-    This is the common case: \bscheme{} uses router bypass to expedite delivery of $p$ and then adds delay to match $T_{low}$.
-
-    \item ${EL}_{p}$ exceeds $T_{low}$ and the round-trip latency remains above $T_{low}$ even after bypass, which occurs only under network saturation.
-    In this case, the observed latency is dominated by non-deterministic congestion rather than distance-dependent LLC access patterns, so an attacker cannot reliably distinguish near-tile from far-tile accesses.
-\end{compactenum}
+In \bscheme{}, the timing difference is mitigated by enforcing a lower target latency $T_{low}$ (Equation~\ref{eq:tlow}) instead of $T_{worst}$.
+Algorithm~\ref{alg:defense} (Section~\ref{sec-bscheme}) ensures every Security Sensitive packet is delivered at $T_{low}$, using delay alone or a combination of bypass and delay depending on the expected latency.
+Only under network saturation can the round-trip latency exceed $T_{low}$ even after bypass.
+In that case, the observed latency is dominated by non-deterministic congestion rather than distance-dependent LLC access patterns, so an attacker cannot reliably distinguish near-tile from far-tile accesses.
 
 Figure~\ref{fig:impact-on-latency-syn}(c) shows the round-trip latency of a Security Sensitive load with \bscheme{}, confirming no observable difference based on distance at injection rates 0.000 to 0.357.
+
+\subsection{A Randomized-Target Variant and Its Limits} \label{sec-security-rand}
+\rscheme{} (Section~\ref{sec-rscheme}) trades determinism for lower average latency by drawing a random target $T_{rand} \in [T_{floor}, T_{low}]$ per access instead of always converging to $T_{low}$.
+Because delay can only be added, never subtracted below the real transit time of a packet, whether the two distance classes remain indistinguishable now depends on where the real transit time of each destination falls inside this window -- a property of the specific tile pair rather than of \rscheme{} itself.
+When the real transit time of a destination sits close to $T_{low}$, only the upper part of the range is ever valid, so its latencies concentrate near $T_{low}$.
+When it sits close to $T_{floor}$, the full range is available, and latencies spread across the window.
+If the near-tile and far-tile destinations differ enough in real transit time, the two distributions occupy different parts of the window and only partially overlap, reopening a partial distance signal.
+
+We observe exactly this in Figure~\ref{fig:impact-on-latency-real}(c).
+The near/far pair of leukocyte falls well inside the window, so the two distributions of \rscheme{} still overlap substantially.
+Visual Wake Words and canneal do not share this property. 
+Their near-tile transit time already sits close to $T_{low}$, so the two distributions end up nearly as separable as under \basebscheme{}.
+This is not an inherent property of ML workloads; it is an artifact of which tiles the working set of an application makes available as near/far destinations.
+\rscheme{} lowers average latency relative to \bscheme{} (Section~\ref{sec:eval-rand}), but its security margin is workload- and destination-pair-dependent rather than guaranteed, so we do not recommend it as a drop-in replacement for \bscheme{}.
+
+\begin{figure}[t]
+   \centering
+    \includegraphics[width=\linewidth]{figs_new/boundnoc_latency_distribution_singlepair.png}
+    \caption{Secure Load latency distribution for leukocyte (Rodinia).
+    Both \bscheme{} and \jscheme{} produce overlapping distributions for the closest~(0,1) and farthest~(0,63) node pairs, unlike \basescheme{} and \basebscheme{} where the two remain visibly separated.}
+    \label{fig:impact-on-latency}
+\end{figure}
+
+\subsection{Validation on Real Workloads} \label{sec-security-real}
+The synthetic-traffic results in \S\ref{sec-security-jscheme} and \S\ref{sec-security-bscheme} show that \jscheme{} and \bscheme{} eliminate the distance signal under controlled, uniform injection.
+Real applications generate non-uniform, application-specific memory traffic, and not every tile in the mesh is equally represented in the working set of an application.
+To validate \scheme{} under realistic conditions, we select one representative benchmark from each suite in our evaluation -- leukocyte (Rodinia), canneal (PARSEC), and Visual Wake Words (VWW, MLPerf Tiny) -- and instrument a single core as the attacker.
+For each benchmark, we first profile which tiles the Security Sensitive accesses of the application actually target, since a near or far tile is only a meaningful probe point if the data of the application maps there.
+We then fix the destination list to the best-represented near-tile and far-tile pair and record the round-trip latency the attacker observes for each.
+
+Figure~\ref{fig:impact-on-latency} shows the Secure Load latency distribution for leukocyte under \basescheme{}, \basebscheme{}, \jscheme{}, and \bscheme{}.
+The distributions correspond to LLC hits at the closest node pair~(0,1) and the farthest node pair~(0,63).
+Both \bscheme{} and \jscheme{} produce overlapping latency distributions for the closest and farthest node pairs on this real application, confirming that neither delay-based nor bypass-based enforcement is distinguishable, matching the two mechanisms' synthetic-traffic results (\S\ref{sec-security-jscheme}, \S\ref{sec-security-bscheme}).
+Figure~\ref{fig:impact-on-latency-real} reports the resulting closest-dest and farthest-dest latency distributions under \basebscheme{}, \bscheme{}, and \rscheme{} (\S\ref{sec-security-rand}).
+Under \basebscheme{}, the two distributions remain cleanly separable in all three applications, as expected in the absence of any distance-hiding mechanism.
+Under \bscheme{}, the two distributions collapse onto the same latency band in all three applications, confirming that the security guarantee established under synthetic traffic (\S\ref{sec-security-bscheme}) continues to hold under real, non-uniform application traffic, including the memory-access patterns of MLPerf Tiny inference workloads.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figs_new/boundnoc_latency_distribution_leukocyte_singlepair.png}\\[2pt]
+    \includegraphics[width=\linewidth]{figs_new/boundnoc_latency_distribution_canneal_singlepair.png}\\[2pt]
+    \includegraphics[width=\linewidth]{figs_new/boundnoc_latency_distribution_vww_singlepair.png}
+    \caption{Round-trip latency observed by a single attacker probing a near-tile (\emph{closest-dest}) and a far-tile (\emph{farthest-dest}) Security Sensitive destination in three representative real applications: leukocyte (top, Rodinia), canneal (middle, PARSEC), and Visual Wake Words (bottom, MLPerf Tiny).}
+    \label{fig:impact-on-latency-real}
+\end{figure}
 
 \subsection{Defense Against Congestion-Based Attacks}
 \scheme{} defends against congestion-based attacks by ensuring all Security Sensitive packets are delivered within $T_{low}$, regardless of network congestion.

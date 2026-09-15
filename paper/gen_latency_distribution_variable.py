@@ -43,7 +43,7 @@ results = {
     'boundnoc_low_closest': 'leukocyte-singlepair-boundnoc_low_closest',
 }
 titles = ['(a) BASELINE_BYPASS', '(b) BOUNDNOC_BYPASS',
-          '(c) BOUNDNOC_LOW_UP', '(d) BOUNDNOC_LOW_CLOSEST']
+          '(c) BOUNDNOC_LOW_UP', '(d) BOUNDNOC_RAND']
 
 data = {}
 for key, dirname in results.items():

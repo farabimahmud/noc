@@ -155,3 +155,24 @@ When the source router experiences congestion, it may be unable to forward bypas
 To detect congestion early, \bscheme{} monitors the credit flow from downstream routers, which indicates the number of free buffers available~\cite{dally1993deadlock,kim2005low,gratz2008regional}.
 If no credits are received from a downstream router within a threshold time $T_{cong}$, congestion is assumed on that path.
 Upon detecting congestion, \bscheme{} switches from static XY routing to adaptive routing~\cite{duato2001general,gratz2008regional,kim2005low} to avoid the congested path, and combines adaptive routing with bypass to ensure packet delivery within $T_{low}$.
+
+\subsection{\rscheme} \label{sec-rscheme}
+\bscheme{} converges every Security Sensitive access to the same fixed target $T_{low}$, applied deterministically to every access.
+\rscheme{} keeps the same enforcement mechanism but randomizes this target per access instead.
+
+We define $T_{floor}$ as the minimum round-trip latency achievable via bypass, analogous to $T_{low}$ in Equation~\ref{eq:tlow} but using the best case for the first two legs:
+\begin{equation}
+\label{eq:tfloor}
+T_{floor} = T_{src \to CHA}^{best} +
+            T_{CHA \to dest}^{best} +
+            T_{dest \to src}^{bypass}
+\end{equation}
+For each Security Sensitive access, \rscheme{} draws a fresh target $T_{rand}$ uniformly at random from $[T_{floor}, T_{low}]$.
+
+\rscheme{} reuses Algorithm~\ref{alg:defense} without modification, substituting $T_{rand}$ for $T_{low}$ in the bypass decision (Line~11) and the delay decision (Line~17).
+The same $T_{rand}$ must be used at both Dest and Src for a given access, so \rscheme{} correlates the draw using the identifying information already carried by the request.
+No new hardware is required beyond a per-access random target draw at the NI.
+
+Since $T_{rand} \le T_{low}$ always, the worst-case latency of \rscheme{} never exceeds that of \bscheme{}.
+The average target, however, is lower than $T_{low}$.
+This is why \rscheme{} reduces average latency compared to \bscheme{}, as we show in Section~\ref{sec:eval}.

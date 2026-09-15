@@ -1,6 +1,6 @@
 Large-scale multicore architectures have become the backbone of high performance computing systems.
 To meet the demand of so many cores, large-scale multicores are equipped with a large last level cache (LLC).
-For example, AMD EPYC Genoa-X 9648X comes with 1.2GB 3D V-Cache as LLC, whereas Intel's Granite Rapids comes with more than 512 MB of LLC~\cite{intel-hotchips-23} in a 144-core processor.
+For example, AMD EPYC Genoa-X 9648X comes with 1.2GB 3D V-Cache as LLC, whereas the Intel Granite Rapids comes with more than 512 MB of LLC~\cite{intel-hotchips-23} in a 144-core processor.
 Such LLCs are typically distributed over multiple banks connected through a network-on-chip (NoC) to reduce access latency, ease manufacturing complexities, and improve core isolation.
 Distributed LLC improves memory level parallelism by allowing multiple concurrent requests to different banks.
 However, accesses to different banks incur different latencies, which is why this type of architecture is referred to as a Non-Uniform Cache Access (NUCA) architecture.
@@ -23,7 +23,7 @@ Moreover, these techniques do not defend against distance-based side channel att
 A related line of research, Oblivious RAM (ORAM)~\cite{oram,phantom,sanctum}, addresses these attacks by hiding memory access patterns entirely.
 However, hardware ORAM implementations incur prohibitive overhead.
 For example, one such configuration, Phantom~\cite{phantom} has $6\times$ performance overhead compared to the baseline system.
-Therefore, our goal is to devise a low-overhead defense mechanism against any side channel in a NUCA architecture's cache.
+Therefore, our goal is to devise a low-overhead defense mechanism against any side channel in the cache of a NUCA architecture.
 
 We believe that a side channel (whether based on congestion, contention or distance) in the NUCA architecture can be prevented if we could turn the LLC into essentially an oblivious cache, i.e., make the latency of all relevant cache accesses constant so that the attacker cannot infer any access pattern from the latency differences.
 Based on this intuition, in this paper, we propose two defense techniques---\jscheme\ and \bscheme---which make the latency of cache accesses constant regardless of congestion, contention or distance difference.
@@ -45,9 +45,14 @@ For instance, by applying the router bypass technique to the farthest bank, we c
 Delay and router bypass mechanisms are applied by modifying the NoC router hardware.
 Although router bypass has been proposed before, to the best of our knowledge, this is the {\em first} work that uses it as a security solution.
 
+\bscheme\ converges every access to the same fixed target latency $T_{low}$.
+We further explore \rscheme, a variant that draws a random target latency per access instead.
+This keeps every access within the same bound but reintroduces some latency variability.
+\rscheme\ lowers average latency further, especially on MLPerf Tiny.
+
 We implement our proposed techniques using Gem5~\cite{binkert2011gem5} and Garnet~\cite{agarwal2009garnet} simulators.
-We show the impact of both \jscheme\ and \bscheme\ using different workloads from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites.
-Finally, we also show how both schemes defend against a NUCA cache side channel attack (whether it is congestion, contention or distance-based) by eliminating latency differences of LLC accesses.
+We show the impact of \jscheme, \bscheme, and \rscheme\ using workloads from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites, and from MLPerf Tiny~\cite{banbury2021mlperf}.
+Finally, we also show how \jscheme\ and \bscheme\ defend against a NUCA cache side channel attack (whether it is congestion, contention or distance-based) by eliminating latency differences of LLC accesses.
 
 We make the following contributions:
 \begin{compactitem}
@@ -58,10 +63,14 @@ We make the following contributions:
     \item We propose two defense techniques against NUCA cache side channel attacks---\jscheme\ and \bscheme.
     Both techniques ensure constant-time LLC accesses (with a combination of router bypass and delay), essentially converting the LLC into an oblivious one.
     {\em This is the first use of router bypass mechanism for cache security}.
+    We further introduce \rscheme, a randomized-target variant of \bscheme\ that lowers average latency further, especially on MLPerf Tiny.
 
-    \item We implement our proposed defenses in the Gem5~\cite{binkert2011gem5} architectural simulator and evaluate them using benchmarks from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites.
-    Our results indicate that, on average, with minimal NoC hardware modification,
-    \jscheme\ adds $17.04\%$ runtime overhead compared to a baseline vulnerable system while \bscheme\ does not cause any runtime degradation at all.
+    \item We implement our proposed defenses in the Gem5~\cite{binkert2011gem5} architectural simulator and evaluate them using benchmarks from the PARSEC~\cite{bienia2008parsec} and Rodinia~\cite{che2009rodinia} benchmark suites, and from MLPerf Tiny~\cite{banbury2021mlperf}.
+    On PARSEC and Rodinia, \jscheme\ adds $7.24\%$ runtime overhead on average compared to a baseline vulnerable system, while \bscheme\ shows no measurable overhead.
+    On MLPerf Tiny, overhead for \bscheme\ ranges from $-30.5\%$ to $+9.1\%$ depending on the benchmark; \rscheme\ lowers this to $-41.5\%$ on average.
+
+    \item We validate \bscheme\ against real applications, not only synthetic traffic.
+    Using a single-attacker probe on leukocyte, canneal, and Visual Wake Words, we show that near-tile and far-tile access latency remain difficult to distinguish, matching the synthetic-traffic result.
 \end{compactitem}
 
 The remainder of this paper is organized as follows.

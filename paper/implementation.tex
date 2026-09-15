@@ -36,7 +36,12 @@ Figure~\ref{fig:block-diagram} illustrates the bypass operation using the existi
 
 \subsection{Delay Implementation} \label{sub:jitter}
 To implement dynamic delay, each NI includes a Delay Queue (DQ) that buffers flits associated with Security Sensitive instructions until their target latency is met.
-Every flit carries a Target Latency (TL) field in its header, set to either $T_{worst}$ (\jscheme{}) or $T_{low}$ (\bscheme{}) based on the defense scheme in use.
+Every flit carries a Target Latency (TL) field in its header, set to $T_{worst}$ (\jscheme{}), $T_{low}$ (\bscheme{}), or a pseudorandomly drawn $T_{rand}$ (\rscheme{}) based on the defense scheme in use.
+
+For \rscheme{}, $T_{rand}$ is derived rather than stored.
+Both the destination NI and the source NI compute $T_{rand}$ independently, using a pseudorandom function of the timestamp already carried in the flit header (Section~\ref{sec-ni-changes}).
+Both NIs apply the same function with the same seed to the same timestamp, so they compute the identical value.
+No extra communication or storage is needed beyond the existing timestamp field.
 
 When the tail flit of a Security Sensitive response arrives at the source NI, the NI computes the Round-Trip Latency (RTL) of the request using the stored timestamp and compares it to TL using a comparator.
 There are two cases:

@@ -5,12 +5,13 @@ The attacker aims to infer secret-dependent memory access patterns of a victim p
 
 \textbf{Attacker Capabilities:}
 The attacker can identify a vulnerable access pattern either through binary profiling or directly from the source code if available.
-The attacker is capable of timing sensitive operations in the victim program through interaction with the victim, such as sending or receiving messages through the network or via inter-process communication (IPC), detecting modifications of shared variables, or using other side channels.
+The attacker can time sensitive operations in the victim program through interaction with the victim.
+Examples include sending or receiving messages through the network or IPC, detecting modifications of shared variables, or using other side channels.
 The attacker may or may not have access to an accurate timing source (e.g., \texttt{rdtsc}); if not, alternatives such as counting threads can be used instead.
 We also assume that the attacker does not have root privileges.
 
 \textbf{Attacker Knowledge:}
-The attacker knows the general microarchitectural properties of the target system, including the NoC topology and LLC bank mapping, but need not know the victim's source code.
+The attacker knows the general microarchitectural properties of the target system, including the NoC topology and LLC bank mapping, but need not know the source code of the victim.
 
 \textbf{Trust Assumptions:}
 The proposed defense techniques assume a trusted CPU and OS.
@@ -26,6 +27,6 @@ The following are considered out of scope:
 \end{compactitem}
 For these side channels, we assume the victim program is already protected using existing solutions, such as cache partitioning~\cite{kiriansky2018dawg} or oblivious execution~\cite{oram,phantom}.
 
-Finally, a transient execution attack could potentially exploit this side channel to leak secrets obtained during transient execution.
+Finally, a transient execution attack~\cite{spectre,meltdown} could potentially exploit this side channel to leak secrets obtained during transient execution.
 However, such an attack faces a fundamental challenge: the transient execution window is short and CPU microarchitectural noise makes timing unreliable.
 We therefore consider transient execution attacks out of scope and leave their interaction with NUCA timing channels as future work.

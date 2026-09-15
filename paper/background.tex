@@ -26,7 +26,7 @@ This non-uniformity is beneficial for scalability and performance, but it also c
 \label{sec:back_sidechannel}
 Hardware side-channel attacks exploit observable microarchitectural effects to infer secret-dependent behavior.
 Examples of such observable effects include cache hits and misses, access latency in TLBs, caches, and DRAM, and contention in shared hardware structures.
-In a typical side-channel attack, the victim performs secret-dependent operations that modify the state or timing behavior of a shared resource, and the attacker observes these changes to infer information about the victim's secret.
+In a typical side-channel attack, the victim performs secret-dependent operations that modify the state or timing behavior of a shared resource, and the attacker observes these changes to infer information about the secret of the victim.
 
 Cache side-channel attacks are among the most widely studied hardware side channels.
 They are commonly categorized based on how the attacker prepares the cache state and how the attacker measures the victim-induced change.
@@ -47,7 +47,8 @@ Because flushing a cached line can take a different amount of time than flushing
 This makes Flush+Flush stealthier than attacks that rely on measuring reload latency.
 
 Recent microarchitectural attacks further show that timing leakage extends beyond traditional cache-set contention; these works are complementary to \scheme{} and target different leakage sources.
-For example, HertzBleed~\cite{hertzbleed} demonstrates that dynamic voltage and frequency scaling can translate data-dependent power behavior into timing leakage, GoFetch~\cite{gofetch} shows that hardware prefetching can undermine constant-time cryptographic implementations, and
+For example, HertzBleed~\cite{hertzbleed} shows that dynamic voltage and frequency scaling can turn data-dependent power behavior into timing leakage.
+GoFetch~\cite{gofetch} shows that hardware prefetching can undermine constant-time cryptographic implementations.
 SQUIP~\cite{squip} exploits contention in shared microarchitectural queues.
 Recent defenses such as ClepsydraCache~\cite{clepsydra}, randomized caches, and Goldilocks~\cite{goldilocks} address specific leakage sources such as cache eviction behavior, randomized cache mapping, or frequency-induced timing variation.
 
@@ -137,7 +138,7 @@ We now compare the communication models of three representative cache side-chann
 Figure~\ref{fig:attack-comparison} illustrates the communication relationship between the transmitter (victim) and the receiver (attacker) in these attacks, while Table~\ref{tab:attack_differences} summarizes their key differences.
 
 Prime+Probe is an eviction-based contention channel.
-The victim transmits information implicitly by evicting the attacker's cache lines from shared cache sets, and the attacker decodes the information by measuring which of its lines were evicted.
+The victim transmits information implicitly by evicting cache lines of the attacker from shared cache sets, and the attacker decodes the information by measuring which of its lines were evicted.
 In contrast, the attack by Dai \textit{et al.} is a traffic-based contention channel.
 The transmitter generates NoC traffic on paths shared with the receiver, and the receiver detects the transmitted value by measuring the latency increase caused by network contention.
 
